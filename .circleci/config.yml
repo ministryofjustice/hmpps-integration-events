@@ -78,7 +78,7 @@ workflows:
 #          pipeline_number: <<pipeline.number>>
 #          context:
 #            - hmpps-common-vars
-#            - hmpps-template-kotlin-preprod
+#            - hmpps-integration-events-preprod
 #          requires:
 #            - request-preprod-approval
 #          helm_timeout: 5m
@@ -97,7 +97,7 @@ workflows:
 #          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
 #          context:
 #            - hmpps-common-vars
-#            - hmpps-template-kotlin-prod
+#            - hmpps-integration-events-prod
 #          requires:
 #            - request-prod-approval
 #          helm_timeout: 5m
