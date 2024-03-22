@@ -1,4 +1,5 @@
 version: "3"
+
 services:
   hmpps-integration-events:
     build:
@@ -12,6 +13,16 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
-
+  slocalstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+    environment:
+      - SERVICES=postgres,sqs,sns
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - "./tmp/localstack:/tmp/localstack"
 networks:
   hmpps:
