@@ -13,16 +13,25 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
-  slocalstack:
-    image: localstack/localstack:latest
+  postgres:
+    image: postgres:14-alpine
     ports:
-      - "4566:4566"
-      - "4571:4571"
-    environment:
-      - SERVICES=postgres,sqs,sns
-      - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
+      - 5432:5432
     volumes:
-      - "./tmp/localstack:/tmp/localstack"
+      - ~/apps/postgres:/var/lib/postgresql/data
+      - ./sql/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_PASSWORD=pa55word
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=event_store
+    networks:
+      - db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 networks:
+  db:
+    driver: bridge
   hmpps:
