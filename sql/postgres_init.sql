@@ -1,9 +1,9 @@
 CREATE SCHEMA event_store;
 
 CREATE TABLE event_store.event_notifications(
-    event_id SERIAL PRIMARY KEY,
-    hmpps_id varchar(15),
-    event_type varchar(20),
-    url varchar(200),
-    last_modified_date_time TIMESTAMP NOT NULL
+    EVENT_ID SERIAL PRIMARY KEY,
+    HMPPS_ID varchar(15),
+    EVENT_TYPE varchar(20),
+    URL varchar(200),
+    LAST_MODIFIED_DATETIME TIMESTAMP NOT NULL
 );
