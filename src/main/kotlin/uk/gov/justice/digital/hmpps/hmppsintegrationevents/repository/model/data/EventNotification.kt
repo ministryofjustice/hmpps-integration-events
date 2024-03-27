@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.enum
 import java.time.LocalDateTime
 
 @Entity
-class EventNotification (
+class EventNotification(
 
   @Id
   @Column(name = "EVENT_ID", nullable = false, unique = true)
@@ -23,6 +23,6 @@ class EventNotification (
   val url: String,
 
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
-  val lastModifiedDateTime: LocalDateTime
+  val lastModifiedDateTime: LocalDateTime,
 
 )
