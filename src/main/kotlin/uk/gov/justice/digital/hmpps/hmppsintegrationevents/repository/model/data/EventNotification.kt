@@ -11,18 +11,18 @@ class EventNotification (
 
   @Id
   @Column(name = "EVENT_ID", nullable = false, unique = true)
-  val event_id: Long,
+  val eventId: Long,
 
   @Column(name = "HMPPS_ID", nullable = false)
-  val hmpps_id: String,
+  val hmppsId: String,
 
   @Column(name = "EVENT_TYPE", nullable = false)
-  val event_type: EventType,
+  val eventType: EventType,
 
   @Column(name = "URL", nullable = false)
   val url: String,
 
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
-  val last_modified_date_time: LocalDateTime
+  val lastModifiedDateTime: LocalDateTime
 
 )
