@@ -10,7 +10,7 @@ configurations {
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("org.springframework.data:spring-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 }
 
 kotlin {
