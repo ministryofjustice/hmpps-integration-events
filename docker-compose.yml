@@ -1,4 +1,5 @@
-version: "3"
+version: "3.2"
+
 services:
   hmpps-integration-events:
     build:
@@ -13,5 +14,44 @@ services:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
 
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+      - ./sql/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_PASSWORD=pa55word
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=event_store
+    networks:
+      - db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:latest
+    networks:
+      - hmpps
+    ports:
+      - 4566:4566
+    volumes:
+      - './scripts/localstack-init.sh:/etc/localstack/init/ready.d/localstack-init.sh'
+    environment:
+      SERVICES: "sns, sqs, s3, sts"
+      AWS_DEFAULT_REGION: "eu-west-2"
+      LOCALSTACK_HOST: 127.0.0.1
+    healthcheck:
+      test: 'curl localhost:4566/_localstack/init'
+      interval: 60s
+      timeout: 2s
+      retries: 10
+
 networks:
+  db:
+    driver: bridge
   hmpps:

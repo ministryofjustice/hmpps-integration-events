@@ -1,0 +1,3 @@
+package uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository
+
+class EventNotificationRepositoryTest
