@@ -13,8 +13,3 @@ format:
 check:
 	./gradlew check
 
-deploy_local:
-	cd terraform
-	terraform init
-#    terraform plan
-#    terraform apply --auto-approve

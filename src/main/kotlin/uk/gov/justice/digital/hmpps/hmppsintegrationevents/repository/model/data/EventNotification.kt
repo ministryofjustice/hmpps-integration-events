@@ -14,11 +14,11 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.enum
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "EVENT_NOTIFICATION", schema = "EVENT_STORE")
+@Table(name = "EVENT_NOTIFICATIONS", schema = "EVENT_STORE")
 class EventNotification(
 
   @Id
-  @GeneratedValue(strategy= GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "EVENT_ID", nullable = false, unique = true)
   val eventId: Long,
 
