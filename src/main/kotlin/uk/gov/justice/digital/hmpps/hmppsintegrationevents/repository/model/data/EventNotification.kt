@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.enum
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "EVENT_NOTIFICATIONS", schema = "EVENT_STORE")
+@Table(name = "EVENT_NOTIFICATION")
 class EventNotification(
 
   @Id

@@ -18,7 +18,7 @@ spring:
     hibernate.ddl-auto: create-drop
     show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/
+    url: jdbc:postgresql://localhost:5432/event_store
     username: postgres
     password: pa55word
   sql:
