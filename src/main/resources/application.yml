@@ -13,6 +13,18 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
 
+  jpa:
+    database: POSTGRESQL
+    hibernate.ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/event_store
+    username: postgres
+    password: pa55word
+  sql:
+    init:
+      platform: postgres
+
 server:
   port: 8080
   servlet:

@@ -10,6 +10,8 @@ configurations {
 }
 
 dependencies {
+  runtimeOnly("org.postgresql:postgresql")
+
   annotationProcessor("org.projectlombok:lombok:1.18.32")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
 
