@@ -2,8 +2,6 @@
 
 echo "Creating and pushing message to sns..."
 
-sns_topic_arn=$(aws --endpoint-url=http://localhost:4566 sns create-topic --name probation-case-registration-added --output text)
-
 sample_message='
 {
   "Type" : "Notification",
@@ -23,7 +21,7 @@ sample_message='
 }'
 
 # Publish sample message to SNS topic
-if aws --endpoint-url=http://localhost:4566 sns publish --topic-arn "$sns_topic_arn" --message "$sample_message"; then
+if aws --endpoint-url=http://localhost:4566 sns publish --topic-arn "arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events" --message "$sample_message"; then
     echo "Pushed message to SNS topic!"
 else
     echo "Failed to publish message to SNS topic"

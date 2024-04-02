@@ -40,11 +40,10 @@ services:
     ports:
       - 4566:4566
     volumes:
-      - './scripts/localstack-init.sh:/etc/localstack/init/ready.d/localstack-init.sh'
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
     environment:
-      SERVICES: "sns, sqs, s3, sts"
-      AWS_DEFAULT_REGION: "eu-west-2"
-      LOCALSTACK_HOST: 127.0.0.1
+      - SERVICES=sqs,sns
+      - DEFAULT_REGION=eu-west-2
     healthcheck:
       test: 'curl localhost:4566/_localstack/init'
       interval: 60s
