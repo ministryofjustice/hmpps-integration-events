@@ -10,9 +10,11 @@ class EventNotifierService(
   val eventRepository: EventNotificationRepository,
 ) {
 
-  @Scheduled(fixedRate = 60000)
+  @Scheduled(fixedRate = 10000)
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
+
+    var x =""
   }
 }

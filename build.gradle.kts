@@ -11,12 +11,19 @@ configurations {
 
 dependencies {
   runtimeOnly("org.postgresql:postgresql")
+  runtimeOnly("org.flywaydb:flyway-core")
 
   annotationProcessor("org.projectlombok:lombok:1.18.32")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.0") {
+    exclude("org.springframework.security", "spring-security-config")
+    exclude("org.springframework.security", "spring-security-core")
+    exclude("org.springframework.security", "spring-security-crypto")
+    exclude("org.springframework.security", "spring-security-web")
+  }
 }
 
 kotlin {

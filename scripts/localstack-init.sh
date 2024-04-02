@@ -30,3 +30,7 @@ echo "SQS endpoint ARN: $sqs_endpoint_arn"
 echo "Subscribing SQS queue to SNS topic..."
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "$sns_topic_arn" --protocol sqs --notification-endpoint "$sqs_endpoint_arn"
 echo "SQS queue subscribed to SNS topic"
+
+echo "Creating Integration Event SNS topic..."
+sns_topic_arn=$(aws --endpoint-url=http://localhost:4566 sns create-topic --name integration-api-event-topic --output text)
+echo "SNS topic created: $sns_topic_arn"
