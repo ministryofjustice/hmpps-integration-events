@@ -22,7 +22,6 @@ services:
       - 5432:5432
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
-      - ./sql/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_PASSWORD=pa55word
       - POSTGRES_USER=postgres
@@ -38,7 +37,7 @@ services:
       retries: 5
 
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:3.0
     container_name: local-stack-aws
     networks:
       - hmpps
