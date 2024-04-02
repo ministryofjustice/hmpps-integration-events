@@ -32,5 +32,14 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "$sns_topic_a
 echo "SQS queue subscribed to SNS topic"
 
 echo "Creating Integration Event SNS topic..."
-sns_topic_arn=$(aws --endpoint-url=http://localhost:4566 sns create-topic --name integration-api-event-topic --output text)
-echo "SNS topic created: $sns_topic_arn"
+event_topic_arn=$(aws --endpoint-url=http://localhost:4566 sns create-topic --name integration-event-topic --output text)
+echo "SNS topic created: event_topic_arn"
+
+echo "Creating Test Event consumer SQS queue..."
+event_consumer_queue=$(aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name integration-event-consumer --output text)
+echo "SQS queue created: $event_consumer_queue"
+
+echo "Subscribing Event consumer SQS queue to Event SNS topic..."
+aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "$event_topic_arn" --protocol sqs --notification-endpoint "arn:aws:sqs:eu-west-2:${aws_account_id}:integration-event-consumer"
+echo "SQS queue subscribed to SNS topic"
+

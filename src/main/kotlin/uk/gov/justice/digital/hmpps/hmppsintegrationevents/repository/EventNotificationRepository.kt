@@ -13,5 +13,5 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   @Query("select a from EventNotification a where a.lastModifiedDateTime <= :dateTime")
   fun findAllWithLastModifiedDateTimeBefore(
     @Param("dateTime") dateTime: LocalDateTime?,
-  ): List<EventNotification?>?
+  ): List<EventNotification>
 }

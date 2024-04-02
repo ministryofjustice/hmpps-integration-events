@@ -1,6 +1,11 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/event_store
+    username: postgres
+    password: pa55word
   flyway:
     enabled: true
+    baselineOnMigrate: true
 
 aws:
   provider: localstack
@@ -10,4 +15,4 @@ hmpps.sqs:
   localstackUrl: http://localhost:4566
   topics:
     integrationeventtopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:integration-api-event-topic
+      arn: arn:aws:sns:eu-west-2:000000000000:integration-event-topic
