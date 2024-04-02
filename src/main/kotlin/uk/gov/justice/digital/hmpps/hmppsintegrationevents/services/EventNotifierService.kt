@@ -14,10 +14,10 @@ import java.time.LocalDateTime
 
 @Service
 class EventNotifierService(
-        private val hmppsQueueService: HmppsQueueService,
-        private val objectMapper: ObjectMapper,
-        val eventRepository: EventNotificationRepository,
-        ) {
+  private val hmppsQueueService: HmppsQueueService,
+  private val objectMapper: ObjectMapper,
+  val eventRepository: EventNotificationRepository,
+) {
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
   init {
@@ -25,26 +25,26 @@ class EventNotifierService(
     topicArn = hmppsEventTopic!!.arn
     hmppsEventsTopicSnsClient = hmppsEventTopic.snsClient
   }
+
   @Scheduled(fixedRate = 10000)
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
-    events.forEach{ event->sendEvent(event)}
+    events.forEach { event -> sendEvent(event) }
   }
-
 
   fun sendEvent(payload: EventNotification) {
     try {
       hmppsEventsTopicSnsClient.publish(
-              PublishRequest.builder()
-                      .topicArn(topicArn)
-                      .message(objectMapper.writeValueAsString(payload))
-                      .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build())).build(),
+        PublishRequest.builder()
+          .topicArn(topicArn)
+          .message(objectMapper.writeValueAsString(payload))
+          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build())).build(),
       )
     } catch (e: JsonProcessingException) {
-     //TODO put into dl queue
+      // TODO put into dl queue
     }
 
-    //TODO remove message from database
+    eventRepository.deleteById(payload.eventId)
   }
 }
