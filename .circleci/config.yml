@@ -31,9 +31,12 @@ jobs:
             chmod +x ~/docker-compose
             sudo mv ~/docker-compose /usr/local/bin/docker-compose
       - run:
-          name: run checks and tests
+          name: run docker-compose up
           command:
             docker-compose up
+      - run:
+          name: run gradlew check
+          command:
             ./gradlew check
       - save_cache:
           paths:
