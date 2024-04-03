@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.core.spec.style.DescribeSpec
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -57,6 +58,7 @@ class EventNotifierServiceTest() : DescribeSpec(
     describe("Event Notifier Tests") {
 
       beforeTest {
+        Mockito.reset(eventRepository)
         whenever(hmppsQueueService.findByTopicId("integrationeventtopic"))
           .thenReturn(HmppsTopic("integrationeventtopic", "sometopicarn", hmppsEventSnsClient))
         whenever(hmppsQueueService.findByQueueId("prisoner"))
