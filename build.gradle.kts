@@ -28,6 +28,10 @@ dependencies {
   }
   testImplementation("org.testcontainers:localstack:1.19.7")
   testImplementation("org.apache.commons:commons-compress:1.26.1")
+  testImplementation("io.kotest:kotest-assertions-json-jvm:5.8.0")
+  testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
+  testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
+  testImplementation("com.h2database:h2:2.2.224")
 }
 
 kotlin {
