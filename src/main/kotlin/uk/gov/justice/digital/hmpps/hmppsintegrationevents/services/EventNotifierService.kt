@@ -23,9 +23,9 @@ class EventNotifierService(
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
 
-  private val dlQueue by lazy { hmppsQueueService.findByQueueId("hmpps_integrations_events_queue_dlq") as HmppsQueue }
-  private val dlClient by lazy { dlQueue.sqsClient }
-  private val dlQueueUrl by lazy { dlQueue.queueUrl }
+  private val dlQueue by lazy { hmppsQueueService.findByQueueId("prisoner") as HmppsQueue }
+  private val dlClient by lazy { dlQueue.sqsDlqClient!! }
+  private val dlQueueUrl by lazy { dlQueue.dlqUrl }
   init {
     val hmppsEventTopic = hmppsQueueService.findByTopicId("integrationeventtopic")
     topicArn = hmppsEventTopic!!.arn

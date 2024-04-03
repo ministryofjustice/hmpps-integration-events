@@ -13,8 +13,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.flywaydb:flyway-core")
 
-  annotationProcessor("org.projectlombok:lombok:1.18.32")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
+  annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -32,6 +31,7 @@ dependencies {
   testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
   testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
   testImplementation("com.h2database:h2:2.2.224")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.7")
 }
 
 kotlin {
