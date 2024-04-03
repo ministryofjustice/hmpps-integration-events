@@ -19,8 +19,6 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.test.context.ContextConfiguration
 import software.amazon.awssdk.services.sns.SnsAsyncClient
-import software.amazon.awssdk.services.sns.model.MessageAttributeValue as snsMessageAttributeValue
-import software.amazon.awssdk.services.sqs.model.MessageAttributeValue as sqsMessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
@@ -31,6 +29,8 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue as snsMessageAttributeValue
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue as sqsMessageAttributeValue
 
 @ContextConfiguration(
   initializers = [ConfigDataApplicationContextInitializer::class],
@@ -99,26 +99,25 @@ class EventNotifierServiceTest() : DescribeSpec(
         verify(eventRepository, times(1)).deleteById(123)
       }
 
-        it("Put event into dlq if failed to publish message and remove entity from database") {
-            val event = EventNotification(123, "hmppsId", EventType.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
-            whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
-            whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
-            emitter.sentNotifications()
-            argumentCaptor<SendMessageRequest>().apply {
-                verify(hmppsEventDLSqsClient, times(1)).sendMessage(capture())
-                val messageAttributes = firstValue.messageAttributes()
-                val payload = firstValue.messageBody()
-                assertThatJson(payload).node("eventType").isEqualTo(event.eventType.name)
-                assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
-                assertThatJson(payload).node("url").isEqualTo(event.url)
-                Assertions.assertThat(messageAttributes["Error"])
-                        .isEqualTo(sqsMessageAttributeValue.builder().stringValue("MockError").dataType("String").build())
+      it("Put event into dlq if failed to publish message and remove entity from database") {
+        val event = EventNotification(123, "hmppsId", EventType.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+        whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
+        whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
+        emitter.sentNotifications()
+        argumentCaptor<SendMessageRequest>().apply {
+          verify(hmppsEventDLSqsClient, times(1)).sendMessage(capture())
+          val messageAttributes = firstValue.messageAttributes()
+          val payload = firstValue.messageBody()
+          assertThatJson(payload).node("eventType").isEqualTo(event.eventType.name)
+          assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
+          assertThatJson(payload).node("url").isEqualTo(event.url)
+          Assertions.assertThat(messageAttributes["Error"])
+            .isEqualTo(sqsMessageAttributeValue.builder().stringValue("MockError").dataType("String").build())
 
-                verify(eventRepository, times(1)).deleteById(123)
-            }
+          verify(eventRepository, times(1)).deleteById(123)
         }
+      }
     }
   },
 
 )
-
