@@ -20,7 +20,7 @@ class EventNotification(
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "EVENT_ID", nullable = false, unique = true)
-  val eventId: Long,
+  val eventId: Long? = null,
 
   @Column(name = "HMPPS_ID", nullable = false)
   val hmppsId: String,
