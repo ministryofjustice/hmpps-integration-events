@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration
 
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.IntegrationTestBase
 
 class NotFoundTest : IntegrationTestBase() {
 

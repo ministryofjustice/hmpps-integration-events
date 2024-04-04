@@ -27,6 +27,7 @@ dependencies {
     exclude("org.apache.common", "commons-compress")
   }
   testImplementation("org.testcontainers:localstack:1.19.7")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("org.apache.commons:commons-compress:1.26.1")
   testImplementation("io.kotest:kotest-assertions-json-jvm:5.8.0")
   testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")

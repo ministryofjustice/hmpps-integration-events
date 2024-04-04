@@ -10,7 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.enum.EventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import java.time.LocalDateTime
 
 @Entity
@@ -27,7 +27,7 @@ class EventNotification(
 
   @Enumerated(EnumType.STRING)
   @Column(name = "EVENT_TYPE", nullable = false)
-  val eventType: EventType,
+  val eventType: EventTypeValue,
 
   @Column(name = "URL", nullable = false)
   val url: String,
@@ -36,4 +36,4 @@ class EventNotification(
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
 
-)
+  )
