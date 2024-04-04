@@ -6,10 +6,10 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTyp
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SqsMessage(
-  @JsonProperty("Type") val Type: String,
-  @JsonProperty("Message") val Message: String,
-  @JsonProperty("MessageId") val MessageId: String,
-//  @JsonProperty("MessageAttributes") val MessageAttributes: MessageAttributes,
+  @JsonProperty("Type") val type: String,
+  @JsonProperty("Message") val message: String,
+  @JsonProperty("MessageId") val messageId: String,
+//  @JsonProperty("MessageAttributes") val messageAttributes: MessageAttributes,
 )
 
 //@JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,5 +19,5 @@ data class SqsMessage(
 //
 //@JsonIgnoreProperties(ignoreUnknown = true)
 //data class EventType(
-//  @JsonProperty("Value") val eventType: EventTypeValue
+//  @JsonProperty("Value") val value: EventTypeValue
 //)

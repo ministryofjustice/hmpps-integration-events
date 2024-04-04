@@ -35,9 +35,9 @@ class HmppsDomainEventsListenerTest {
      }
     `"""
     val sqsMessage = SqsMessage(
-      Type ="Notification",
-      Message = "{\"eventType\":\"probation-case.registration.added\",\"version\":1,\"occurredAt\":\"2023-03-25T10:35:38.285Z\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"Fri Mar 22 00:00:00 GMT 2024\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"Mon Mar 25 10:45:38 GMT 2024\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
-      MessageId = "1a2345bc-de67-890f-1g01-11h21314h151"
+      type ="Notification",
+      message = "{\"eventType\":\"probation-case.registration.added\",\"version\":1,\"occurredAt\":\"2023-03-25T10:35:38.285Z\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"Fri Mar 22 00:00:00 GMT 2024\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"Mon Mar 25 10:45:38 GMT 2024\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+      messageId = "1a2345bc-de67-890f-1g01-11h21314h151"
     )
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)

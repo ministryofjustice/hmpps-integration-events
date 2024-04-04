@@ -11,9 +11,9 @@ class DomainEventsService {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
   fun execute(sqsMessage: SqsMessage) {
-    log.info("Received sqsMessage with type {}", sqsMessage.Type)
-    log.info("Received sqsMessage with a message body of {}", sqsMessage.Message)
-    log.info("Received sqsMessage with a messageId {}", sqsMessage.MessageId)
-//    log.info("Received sqsMessage with atrributes {}", sqsMessage.MessageAttributes)
+    log.info("Received sqsMessage with type {}", sqsMessage.type)
+    log.info("Received sqsMessage with a message body of {}", sqsMessage.message)
+    log.info("Received sqsMessage with a messageId {}", sqsMessage.messageId)
+//    log.info("Received sqsMessage with atrributes {}", sqsMessage.messageAttributes)
   }
 }
