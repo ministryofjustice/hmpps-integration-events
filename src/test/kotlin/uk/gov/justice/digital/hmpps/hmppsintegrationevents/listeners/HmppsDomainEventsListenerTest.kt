@@ -8,6 +8,8 @@ import org.junit.jupiter.api.function.Executable
 import org.mockito.Mockito
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.utils.EventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.utils.MessageAttributes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.utils.SqsMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 
@@ -37,7 +39,10 @@ class HmppsDomainEventsListenerTest {
     val sqsMessage = SqsMessage(
       type ="Notification",
       message = "{\"eventType\":\"probation-case.registration.added\",\"version\":1,\"occurredAt\":\"2023-03-25T10:35:38.285Z\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"Fri Mar 22 00:00:00 GMT 2024\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"Mon Mar 25 10:45:38 GMT 2024\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
-      messageId = "1a2345bc-de67-890f-1g01-11h21314h151"
+      messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+      messageAttributes = MessageAttributes(
+        eventType = EventType("probation-case.registration.added")
+      )
     )
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
@@ -69,7 +74,7 @@ class HmppsDomainEventsListenerTest {
 
     val executable = Executable { hmppsDomainEventsListener.onDomainEvent(rawMessage)}
 
-    val e = assertThrows(
+    assertThrows(
       JsonParseException::class.java, executable
     )
   }

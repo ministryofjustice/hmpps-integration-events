@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 
@@ -16,9 +15,6 @@ abstract class SqsIntegrationTestBase {
 
   @Autowired
   protected lateinit var hmppsQueueService: HmppsQueueService
-
-  @Autowired
-  protected lateinit var hmppsDomainEventsListener: HmppsDomainEventsListener
 
   lateinit var webTestClient: WebTestClient
 
