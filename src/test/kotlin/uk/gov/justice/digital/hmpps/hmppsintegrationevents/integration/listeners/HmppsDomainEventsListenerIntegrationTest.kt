@@ -1,31 +1,28 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class HmppsDomainEventsListenerIntegrationTest: SqsIntegrationTestBase() {
 
-  @Mock
-  lateinit var repo: EventNotificationRepository
+  private val repo = mockk<EventNotificationRepository>()
 
-  val service = DomainEventsService(repo)
+  private final val service = DomainEventsService(repo)
 
   val hmppsDomainEventsListener = HmppsDomainEventsListener(ObjectMapper(), service)
 
-
   @Test
-  fun `will catch a mapps domain registration event message`() {
+  fun `will process and save a mapps domain registration event message`() {
     val rawMessage = """
     {
      "Type" : "Notification",
@@ -45,11 +42,10 @@ class HmppsDomainEventsListenerIntegrationTest: SqsIntegrationTestBase() {
    }
   `"""
 
+  every { repo.save(any()) } returnsArgument 0
 
+  hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(repo, times(1)).save(any())   //AKH TODO change any() to an actual object
-
+  verify(atLeast = 1, atMost = 1) {repo.save(any())}
   }
 }

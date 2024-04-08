@@ -33,6 +33,10 @@ dependencies {
   testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
   testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
   testImplementation("com.h2database:h2:2.2.224")
+
+  testImplementation("io.mockk:mockk:1.13.2")
+  testImplementation("io.mockk:mockk-agent-jvm:1.13.2")
+
 }
 
 kotlin {
