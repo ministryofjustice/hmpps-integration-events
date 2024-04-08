@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sns.SnsAsyncClient
@@ -15,10 +17,12 @@ import software.amazon.awssdk.services.sns.model.MessageAttributeValue as snsMes
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue as sqsMessageAttributeValue
 
 @Service
+@Configuration
 class EventNotifierService(
-  private val hmppsQueueService: HmppsQueueService,
-  private val objectMapper: ObjectMapper,
-  val eventRepository: EventNotificationRepository,
+        private val hmppsQueueService: HmppsQueueService,
+        private val objectMapper: ObjectMapper,
+        val eventRepository: EventNotificationRepository
+
 ) {
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
@@ -32,7 +36,7 @@ class EventNotifierService(
     hmppsEventsTopicSnsClient = hmppsEventTopic.snsClient
   }
 
-  @Scheduled(fixedRate = 10000)
+  @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
