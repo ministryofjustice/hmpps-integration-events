@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 class EventNotification(
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "EVENT_ID", nullable = false, unique = true)
   val eventId: Long? = null,
 

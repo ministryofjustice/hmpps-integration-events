@@ -7,12 +7,18 @@ management.endpoint:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:mydb
+    url: jdbc:h2:mem:mydb;MODE=PostgreSQL
     username: sa
     password: password
     driverClassName: org.h2.Driver
+  h2:
+    console:
+      enabled: true
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+  flyway:
+    enabled: true
+    baselineOnMigrate: true
 
 hmpps.sqs:
   provider: localstack
@@ -24,8 +30,16 @@ hmpps.sqs:
       queueArn: arn:aws:sns:eu-west-2:000000000000:hmpps_integrations_events_queue
       dlqName: hmpps_integrations_events_queue_dlq
       subscribeTopicId: domainevents
+    integrationeventtestqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
     integrationeventtopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:integration-event-topic
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+notifier:
+  schedule:
+    rate: 1000
