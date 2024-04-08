@@ -36,4 +36,4 @@ class EventNotification(
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
 
-  )
+)

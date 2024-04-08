@@ -13,6 +13,8 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.flywaydb:flyway-core")
 
+  annotationProcessor("org.projectlombok:lombok:1.18.32")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -36,7 +38,6 @@ dependencies {
 
   testImplementation("io.mockk:mockk:1.13.2")
   testImplementation("io.mockk:mockk-agent-jvm:1.13.2")
-
 }
 
 kotlin {

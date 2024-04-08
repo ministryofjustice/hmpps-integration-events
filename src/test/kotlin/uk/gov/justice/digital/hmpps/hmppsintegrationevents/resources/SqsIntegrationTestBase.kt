@@ -22,11 +22,8 @@ abstract class SqsIntegrationTestBase {
   protected val domainEventsQueueSqsUrl by lazy { domainEventsQueueConfig.queueUrl }
   protected val domainEventsQueueSqsClient by lazy { domainEventsQueueConfig.sqsClient }
 
-
   @BeforeEach
-  fun cleanQueue(){
+  fun cleanQueue() {
     domainEventsQueueSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(domainEventsQueueSqsUrl).build()).get()
   }
-
 }
-

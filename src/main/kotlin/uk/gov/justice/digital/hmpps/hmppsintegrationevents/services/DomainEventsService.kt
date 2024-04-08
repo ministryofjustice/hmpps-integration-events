@@ -11,8 +11,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import java.time.LocalDateTime
 
 @Service
-class DomainEventsService (
-  @Autowired val repo: EventNotificationRepository
+class DomainEventsService(
+  @Autowired val repo: EventNotificationRepository,
 ) {
   private companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -30,15 +30,16 @@ class DomainEventsService (
     if (eventType != null) {
       val event = EventNotification(
         eventType = eventType,
-        hmppsId = "",     //AKH TODO find the ID from the message
-        url = "",         //AKH TODO generate this so they can quickly access API
-        lastModifiedDateTime = LocalDateTime.now()
+        // AKH TODO find the ID from the message
+        hmppsId = "",
+        // AKH TODO generate this so they can quickly access API
+        url = "",
+        lastModifiedDateTime = LocalDateTime.now(),
       )
 
       repo.save(event)
     } else {
       // AKH TODO what do we do this this is not an event type we support?
     }
-
   }
 }
