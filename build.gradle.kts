@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.5"
   kotlin("plugin.spring") version "1.9.23"
   kotlin("plugin.jpa") version "1.9.23"
   kotlin("plugin.lombok") version "1.9.23"
@@ -26,12 +26,17 @@ dependencies {
     exclude("org.apache.common", "commons-compress")
   }
   testImplementation("org.testcontainers:localstack:1.19.7")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("org.apache.commons:commons-compress:1.26.1")
   testImplementation("io.kotest:kotest-assertions-json-jvm:5.8.0")
   testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
   testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
   testImplementation("com.h2database:h2:2.2.224")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.7")
+
+  testImplementation("io.mockk:mockk:1.13.2")
+  testImplementation("io.mockk:mockk-agent-jvm:1.13.2")
+
 }
 
 kotlin {
