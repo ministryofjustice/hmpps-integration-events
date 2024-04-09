@@ -44,3 +44,7 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+notifier:
+  schedule:
+    rate: 10000

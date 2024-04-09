@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 
 @ExtendWith(MockKExtension::class)
-class HmppsDomainEventsListenerIntegrationTest: SqsIntegrationTestBase() {
+class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   private val repo = mockk<EventNotificationRepository>()
 
@@ -30,11 +30,10 @@ class HmppsDomainEventsListenerIntegrationTest: SqsIntegrationTestBase() {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) {repo.save(any())}
-
+    verify(exactly = 1) { repo.save(any()) }
   }
-  @Test
 
+  @Test
   fun `will not process and save an unknown event message`() {
     val rawMessage = SqsNotificationGeneratingHelper().generate(eventTypeValue = "some.other-event")
 
@@ -42,8 +41,6 @@ class HmppsDomainEventsListenerIntegrationTest: SqsIntegrationTestBase() {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 0) {repo.save(any())}
-
+    verify(exactly = 0) { repo.save(any()) }
   }
-
 }
