@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.util
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SqsMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.util.SqsMessageReader
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -16,11 +16,11 @@ class SqsMessageReaderTest {
     val currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
     val rawMessage = SqsNotificationGeneratingHelper().generate(eventTypeValue = expectedEventType, timestamp = currentTime)
 
-    val sqsMessage: SqsMessage = SqsMessageReader().mapRawMessage(rawMessage)
+    val hmppsDomainEvent: HmppsDomainEvent = SqsMessageReader().mapRawMessage(rawMessage)
 
-    assert(sqsMessage.message.eventType == expectedEventType)
-    assert(sqsMessage.type == "Notification")
-    assert(sqsMessage.messageId == "1a2345bc-de67-890f-1g01-11h21314h151")
-    assert(sqsMessage.message.occurredAt == DateTimeFormatter.ISO_INSTANT.format(currentTime))
+    assert(hmppsDomainEvent.messageAttributes.eventType.value == expectedEventType)
+    assert(hmppsDomainEvent.type == "Notification")
+    assert(hmppsDomainEvent.messageId == "1a2345bc-de67-890f-1g01-11h21314h151")
+    assert(hmppsDomainEvent.message.occurredAt == DateTimeFormatter.ISO_INSTANT.format(currentTime))
   }
 }

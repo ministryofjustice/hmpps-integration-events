@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "Creating and pushing message to sns..."
+echo "Creating and pushing message to SQS..."
 
-sample_message='
+sample_event='
 {
   "Type" : "Notification",
   "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
@@ -20,9 +20,8 @@ sample_message='
   }
 }'
 
-# Publish sample message to SNS topic
-if aws --endpoint-url=http://localhost:4566 sns publish --topic-arn "arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events" --message "$sample_message"; then
-    echo "Pushed message to SNS topic!"
+if aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url "http://sqs.eu-west-2.localhost.localstack.cloud:4566/000000000000/hmpps_integrations_events_queue" --message-body "$sample_event"; then
+    echo "Pushed message to SQS queue!"
 else
-    echo "Failed to publish message to SNS topic"
+    echo "Failed to send message to SQS queue"
 fi
