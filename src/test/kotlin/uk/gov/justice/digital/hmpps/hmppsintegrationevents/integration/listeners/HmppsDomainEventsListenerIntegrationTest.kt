@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -20,7 +19,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   private final val service = DomainEventsService(repo)
 
-  val hmppsDomainEventsListener = HmppsDomainEventsListener(ObjectMapper(), service)
+  val hmppsDomainEventsListener = HmppsDomainEventsListener(service)
 
   @Test
   fun `will process and save a mapps domain registration event message`() {
