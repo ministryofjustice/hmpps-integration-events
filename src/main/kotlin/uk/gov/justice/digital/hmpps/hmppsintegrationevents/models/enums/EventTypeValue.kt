@@ -6,6 +6,6 @@ enum class EventTypeValue(val type: String) {
   ;
 
   companion object {
-    infix fun from(value: String): EventTypeValue? = EventTypeValue.values().firstOrNull { it.type == value }
+    infix fun from(value: String): EventTypeValue? = EventTypeValue.entries.firstOrNull { it.type == value }
   }
 }
