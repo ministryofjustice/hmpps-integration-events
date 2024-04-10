@@ -20,7 +20,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   private final val service = DomainEventsService(repo)
 
-  val hmppsDomainEventsListener = HmppsDomainEventsListener(ObjectMapper(), service)
+  val hmppsDomainEventsListener = HmppsDomainEventsListener(service)
 
   @Test
   fun `will process and save a mapps domain registration event message`() {

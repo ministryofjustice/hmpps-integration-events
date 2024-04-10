@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 class HmppsDomainEventsListenerTest {
 
   val mockDomainEventsService: DomainEventsService = Mockito.mock(DomainEventsService::class.java)
-  val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(domainEventsService = mockDomainEventsService, objectMapper = ObjectMapper())
+  val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(domainEventsService = mockDomainEventsService)
 
   @Test
   fun `when a sqs event is received it should call the domainEventService`() {
