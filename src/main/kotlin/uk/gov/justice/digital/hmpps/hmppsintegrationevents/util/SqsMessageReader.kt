@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.Message
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SqsMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 
 class SqsMessageReader() {
-  fun mapRawMessage(rawMessage: String): SqsMessage {
-    val objectMapper = ObjectMapper()
+  private val objectMapper = ObjectMapper()
+
+  fun mapRawMessage(rawMessage: String): HmppsDomainEvent {
     val incomingSqsMessage: IncomingSqsMessage = objectMapper.readValue(rawMessage)
-    val message: Message = objectMapper.readValue(incomingSqsMessage.message)
-    return SqsMessage(type = incomingSqsMessage.type, message = message, messageId = incomingSqsMessage.messageId)
+    val domainEventMessage: DomainEventMessage = objectMapper.readValue(incomingSqsMessage.message)
+    return HmppsDomainEvent(type = incomingSqsMessage.type, message = domainEventMessage, messageId = incomingSqsMessage.messageId, messageAttributes = incomingSqsMessage.messageAttributes)
   }
 
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,5 +22,6 @@ class SqsMessageReader() {
     @JsonProperty("Type") val type: String,
     @JsonProperty("Message") val message: String,
     @JsonProperty("MessageId") val messageId: String,
+    @JsonProperty("MessageAttributes") val messageAttributes: DomainEventMessageAttributes,
   )
 }

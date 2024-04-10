@@ -1,12 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SqsMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.util.SqsMessageReader
 
@@ -18,7 +17,7 @@ class HmppsDomainEventsListener(@Autowired val domainEventsService: DomainEvents
   @SqsListener("prisoner", factory = "hmppsQueueContainerFactoryProxy")
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
-    val sqsMessage: SqsMessage = SqsMessageReader().mapRawMessage(rawMessage)
-    domainEventsService.execute(sqsMessage)
+    val hmppsDomainEvent: HmppsDomainEvent = SqsMessageReader().mapRawMessage(rawMessage)
+    domainEventsService.execute(hmppsDomainEvent)
   }
 }

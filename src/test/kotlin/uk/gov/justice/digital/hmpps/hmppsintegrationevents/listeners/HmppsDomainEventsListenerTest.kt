@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.function.Executable
@@ -9,8 +8,10 @@ import org.mockito.Mockito
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.Message
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SqsMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -26,18 +27,18 @@ class HmppsDomainEventsListenerTest {
     val currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
     val rawMessage = SqsNotificationGeneratingHelper().generate(timestamp = currentTime)
 
-    val sqsMessage = SqsMessage(
+    val hmppsDomainEvent = HmppsDomainEvent(
       type = "Notification",
-      message = Message(
-        eventType = "probation-case.registration.added",
+      message = DomainEventMessage(
         occurredAt = DateTimeFormatter.ISO_INSTANT.format(currentTime),
       ),
       messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = "probation-case.registration.added")),
     )
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(mockDomainEventsService, times(1)).execute(sqsMessage)
+    verify(mockDomainEventsService, times(1)).execute(hmppsDomainEvent)
   }
 
   @Test

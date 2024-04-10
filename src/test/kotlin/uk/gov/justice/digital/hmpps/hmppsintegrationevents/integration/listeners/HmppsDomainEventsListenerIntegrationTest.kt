@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
