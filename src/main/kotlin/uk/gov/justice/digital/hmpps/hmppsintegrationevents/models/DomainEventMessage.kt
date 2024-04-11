@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class DomainEventMessage(
   @JsonProperty("occurredAt") val occurredAt: String,
   @JsonProperty("personReference") val personReference: PersonReference,
-  @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation
+  @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersonReference(
-  @JsonProperty("identifiers") val identifiers: List<Identifier>
+  @JsonProperty("identifiers") val identifiers: List<Identifier>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Identifier(
   @JsonProperty("type") val type: String,
-  @JsonProperty("value") val value: String
+  @JsonProperty("value") val value: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
