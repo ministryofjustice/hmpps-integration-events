@@ -13,7 +13,11 @@ data class DomainEventMessage(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersonReference(
   @JsonProperty("identifiers") val identifiers: List<Identifier>,
-)
+) {
+  fun findCrnIdentifier(): String? {
+    return this.identifiers.firstOrNull { it.type == "CRN" }?.value
+  }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Identifier(

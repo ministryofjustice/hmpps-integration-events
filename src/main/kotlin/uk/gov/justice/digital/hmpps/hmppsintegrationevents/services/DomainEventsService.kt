@@ -25,16 +25,21 @@ class DomainEventsService(
     log.info("Received hmppsDomainEvent with a messageAttributes {}", hmppsDomainEvent.messageAttributes)
 
     val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
+    val hmppsId = hmppsDomainEvent.message.personReference.findCrnIdentifier()
 
-    if (eventType != null) {
-      val event = EventNotification(
-        eventType = eventType,
-        hmppsId = hmppsDomainEvent.message.personReference.identifiers[0].value,
-        url = "test.registration.url",
-        lastModifiedDateTime = LocalDateTime.now(),
-      )
-
-      repo.save(event)
+    if (eventType != null && hmppsId != null) {
+      if (!repo.existsByHmppsIdAndEventType(hmppsId = hmppsId, eventType = eventType)) {
+        repo.save(
+          EventNotification(
+            eventType = eventType,
+            hmppsId = hmppsId,
+            url = "test.registration.url",
+            lastModifiedDateTime = LocalDateTime.now(),
+          ),
+        )
+      } else {
+        log.info("AN EVENT HAS ALREADY BEEN SAVED FOR THIS")
+      }
     }
   }
 }

@@ -25,6 +25,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   fun `will process and save a mapps domain registration event message`() {
     val rawMessage = SqsNotificationGeneratingHelper().generate()
 
+    every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { repo.save(any()) } returnsArgument 0
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
