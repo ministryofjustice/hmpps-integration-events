@@ -7,6 +7,9 @@ spring:
     name: hmpps-integration-events
   codec:
     max-in-memory-size: 10MB
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

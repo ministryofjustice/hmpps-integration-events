@@ -10,18 +10,3 @@ data class HmppsDomainEvent(
   @JsonProperty("MessageId") val messageId: String,
   @JsonProperty("MessageAttributes") val messageAttributes: DomainEventMessageAttributes,
 )
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class DomainEventMessage(
-  @JsonProperty("occurredAt") val occurredAt: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class DomainEventMessageAttributes(
-  @JsonProperty("eventType") val eventType: EventType,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class EventType(
-  @JsonProperty("Value") val value: String,
-)

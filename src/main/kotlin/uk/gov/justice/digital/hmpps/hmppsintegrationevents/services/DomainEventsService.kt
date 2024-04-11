@@ -24,17 +24,13 @@ class DomainEventsService(
     log.info("Received hmppsDomainEvent with a messageId {}", hmppsDomainEvent.messageId)
     log.info("Received hmppsDomainEvent with a messageAttributes {}", hmppsDomainEvent.messageAttributes)
 
-    // AKH TODO Check for an existing one first
-
     val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
 
     if (eventType != null) {
       val event = EventNotification(
         eventType = eventType,
-        // AKH TODO find the ID from the message
-        hmppsId = "",
-        // AKH TODO generate this so they can quickly access API
-        url = "",
+        hmppsId = hmppsDomainEvent.message.personReference.identifiers[0].value,
+        url = "test.registration.url",
         lastModifiedDateTime = LocalDateTime.now(),
       )
 
