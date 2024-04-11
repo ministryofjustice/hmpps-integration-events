@@ -8,10 +8,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessage
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.*
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -31,6 +28,8 @@ class HmppsDomainEventsListenerTest {
       type = "Notification",
       message = DomainEventMessage(
         occurredAt = DateTimeFormatter.ISO_INSTANT.format(currentTime),
+        personReference = PersonReference(identifiers = listOf(Identifier(type = "CRN", value = "X777776"))),
+        additionalInformation = AdditionalInformation(registerTypeDescription = "MAPPA", registerTypeCode = "MAPP")
       ),
       messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
       messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = "probation-case.registration.added")),

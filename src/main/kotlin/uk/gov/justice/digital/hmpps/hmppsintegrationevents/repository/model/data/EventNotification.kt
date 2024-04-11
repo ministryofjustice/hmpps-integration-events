@@ -35,5 +35,4 @@ class EventNotification(
   @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
-
 )
