@@ -40,7 +40,7 @@ class RegistrationEventsService(
           ),
         )
       } else {
-        log.info("AN EVENT HAS ALREADY BEEN SAVED FOR THIS")
+        log.info("A similar SQS Event for nominal $hmppsId of type $eventType has already been processed")
       }
     }
   }

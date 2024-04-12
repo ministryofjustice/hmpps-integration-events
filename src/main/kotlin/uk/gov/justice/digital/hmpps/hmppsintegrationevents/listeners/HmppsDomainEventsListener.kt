@@ -9,10 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DlqService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 
 @Service
-class HmppsDomainEventsListener(@Autowired val registrationEventsService: RegistrationEventsService) {
+class HmppsDomainEventsListener(@Autowired val registrationEventsService: RegistrationEventsService, @Autowired val dlqService: DlqService) {
 
   private companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -23,8 +24,13 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
   @SqsListener("prisoner", factory = "hmppsQueueContainerFactoryProxy")
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
-    val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-    determineEventProcess(hmppsDomainEvent)
+    try {
+      val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
+      determineEventProcess(hmppsDomainEvent)
+    } catch (e: Exception) {
+      log.error("Received bad domain event message :$rawMessage", e)
+      dlqService.sendEvent(rawMessage, e)
+    }
   }
 
   fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
@@ -32,7 +38,10 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
 
     when (hmppsDomainEventType) {
       EventTypeValue.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent)
-      else -> log.info("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
+      else -> {
+        log.warn("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
+        dlqService.sendEvent(hmppsDomainEvent, Exception("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}"))
+      }
     }
   }
 }

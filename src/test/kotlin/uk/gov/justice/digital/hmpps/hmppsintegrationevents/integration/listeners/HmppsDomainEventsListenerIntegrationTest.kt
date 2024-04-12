@@ -1,46 +1,55 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import io.mockk.every
-import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 
-@ExtendWith(MockKExtension::class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Transactional
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
-  private val repo = mockk<EventNotificationRepository>()
+  @Autowired
+  lateinit var repo: EventNotificationRepository
 
-  private final val registrationEventsService = RegistrationEventsService(repo)
-
-  val hmppsDomainEventsListener = HmppsDomainEventsListener(registrationEventsService)
+  @Autowired
+  lateinit var hmppsDomainEventsListener: HmppsDomainEventsListener
 
   @Test
-  fun `will process and save a mapps domain registration event message`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateRegistrationEvent()
-
-    every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { repo.save(any()) } returnsArgument 0
+  fun `will process and save a valid domain event SQS message`() {
+    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent()
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { repo.save(any()) }
+    val savedEvent = repo.findAll().firstOrNull()
+
+    Assertions.assertNotNull(savedEvent)
   }
 
   @Test
-  fun `will not process and save an unknown event message`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent(eventTypeValue = "some.other-event")
+  fun `will not process and save a malformed domain event SQS Message`() {
+    hmppsDomainEventsListener.onDomainEvent("BAD JSON")
 
-    every { repo.save(any()) } returnsArgument 0
+    val savedEvent = repo.findAll().firstOrNull()
+
+    Assertions.assertNull(savedEvent)
+  }
+
+  @Test
+  fun `will not process and save a domain event message with an unknown type`() {
+    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent(eventTypeValue = "some.other-event")
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 0) { repo.save(any()) }
+    val savedEvent = repo.findAll().firstOrNull()
+
+    Assertions.assertNull(savedEvent)
   }
 }
