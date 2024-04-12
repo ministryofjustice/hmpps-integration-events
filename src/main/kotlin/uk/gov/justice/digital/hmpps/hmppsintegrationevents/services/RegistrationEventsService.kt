@@ -19,11 +19,6 @@ class DomainEventsService(
   }
 
   fun execute(hmppsDomainEvent: HmppsDomainEvent) {
-    log.info("Received hmppsDomainEvent with type {}", hmppsDomainEvent.type)
-    log.info("Received hmppsDomainEvent with a message body of {}", hmppsDomainEvent.message)
-    log.info("Received hmppsDomainEvent with a messageId {}", hmppsDomainEvent.messageId)
-    log.info("Received hmppsDomainEvent with a messageAttributes {}", hmppsDomainEvent.messageAttributes)
-
     val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
     val hmppsId = hmppsDomainEvent.message.personReference.findCrnIdentifier()
 
