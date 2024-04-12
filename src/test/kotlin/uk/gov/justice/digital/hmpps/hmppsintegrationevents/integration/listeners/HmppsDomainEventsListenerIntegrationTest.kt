@@ -10,20 +10,20 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventsService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 
 @ExtendWith(MockKExtension::class)
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   private val repo = mockk<EventNotificationRepository>()
 
-  private final val service = DomainEventsService(repo)
+  private final val registrationEventsService = RegistrationEventsService(repo)
 
-  val hmppsDomainEventsListener = HmppsDomainEventsListener(service)
+  val hmppsDomainEventsListener = HmppsDomainEventsListener(registrationEventsService)
 
   @Test
   fun `will process and save a mapps domain registration event message`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generate()
+    val rawMessage = SqsNotificationGeneratingHelper().generateRegistrationEvent()
 
     every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { repo.save(any()) } returnsArgument 0
@@ -35,7 +35,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will not process and save an unknown event message`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generate(eventTypeValue = "some.other-event")
+    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent(eventTypeValue = "some.other-event")
 
     every { repo.save(any()) } returnsArgument 0
 
