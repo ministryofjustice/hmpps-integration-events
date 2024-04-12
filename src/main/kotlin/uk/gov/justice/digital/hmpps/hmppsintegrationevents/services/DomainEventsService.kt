@@ -18,6 +18,8 @@ class DomainEventsService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  private val baseUrl: String = "https://dev.integration-api.hmpps.service.justice.gov.uk"
+
   fun execute(hmppsDomainEvent: HmppsDomainEvent) {
     log.info("Received hmppsDomainEvent with type {}", hmppsDomainEvent.type)
     log.info("Received hmppsDomainEvent with a message body of {}", hmppsDomainEvent.message)
@@ -25,12 +27,18 @@ class DomainEventsService(
     log.info("Received hmppsDomainEvent with a messageAttributes {}", hmppsDomainEvent.messageAttributes)
 
     val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
+    val hmppsId = hmppsDomainEvent.message.personReference.identifiers[0].value
+
 
     if (eventType != null) {
+
+      val blah = eventType.url.replace("{hmppsId}", hmppsId)
+      val url = baseUrl + blah
+
       val event = EventNotification(
         eventType = eventType,
-        hmppsId = hmppsDomainEvent.message.personReference.identifiers[0].value,
-        url = "test.registration.url",
+        hmppsId = hmppsId,
+        url = url,
         lastModifiedDateTime = LocalDateTime.now(),
       )
 
