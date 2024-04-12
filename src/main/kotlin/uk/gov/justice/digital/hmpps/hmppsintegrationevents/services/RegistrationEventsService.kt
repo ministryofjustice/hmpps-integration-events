@@ -35,7 +35,7 @@ class RegistrationEventsService(
           EventNotification(
             eventType = eventType,
             hmppsId = hmppsId,
-            url = "/v1/persons/${hmppsId}/risks/mappadetail",
+            url = "/v1/persons/$hmppsId/risks/mappadetail",
             lastModifiedDateTime = LocalDateTime.now(),
           ),
         )
