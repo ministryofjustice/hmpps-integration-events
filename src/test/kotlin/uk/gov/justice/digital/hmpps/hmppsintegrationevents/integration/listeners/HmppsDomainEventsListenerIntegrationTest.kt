@@ -24,7 +24,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will process and save a valid domain event SQS message`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent()
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawGenericEvent()
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
@@ -44,7 +44,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will not process and save a domain event message with an unknown type`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateGenericEvent(eventTypeValue = "some.other-event")
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawGenericEvent(eventTypeValue = "some.other-event")
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 

@@ -28,6 +28,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
+      log.error(e.toString())
       deadLetterQueueService.sendEvent(rawMessage, e.message)
     }
   }

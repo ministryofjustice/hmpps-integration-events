@@ -1,44 +1,64 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.springframework.boot.test.autoconfigure.json.JsonTest
+import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
 
+@ActiveProfiles("test")
+@JsonTest
 class HmppsDomainEventsListenerTest {
-
-  val mockRegistrationEventsService: RegistrationEventsService = Mockito.mock(RegistrationEventsService::class.java)
-  val mockDlqService: DeadLetterQueueService = Mockito.mock(DeadLetterQueueService::class.java)
-  val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(mockRegistrationEventsService, mockDlqService)
+  private val mockRegistrationEventsService: RegistrationEventsService = mock()
+  private val mockDlqService: DeadLetterQueueService = mock()
+  private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(mockRegistrationEventsService, mockDlqService)
+  private val currentTime: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
   @Test
-  fun `when a registration added sqs event is received it should call the registrationEventService`() {
-    val currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
-
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRegistrationEvent()
-
-    val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(currentTime)
-    val readableTimestamp = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy").format(currentTime)
-
-    val hmppsDomainEvent = HmppsDomainEvent(
-      type = "Notification",
-      message = "{\"eventType\":\"probation-case.registration.added\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
-      messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = "probation-case.registration.added")),
-    )
+  fun `when a valid registration added sqs event is received it should call the registrationEventService`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent()
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedEvent()
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify(mockRegistrationEventsService, times(1)).execute(hmppsDomainEvent, EventTypeValue.REGISTRATION_ADDED)
+  }
+
+  @Test
+  fun `when an invalid message is received it should be sent to the dead letter queue`() {
+    val rawMessage = "Invalid JSON message"
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(mockDlqService, times(1)).sendEvent(eq(rawMessage), any())
+  }
+
+  @Test
+  fun `when an unexpected event type is received it should be sent to the dead letter queue`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawGenericEvent(eventTypeValue = "unexpected.event.type")
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createUnexpectedRegistrationEventTypeEvent()
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(mockDlqService, times(1)).sendEvent(eq(hmppsDomainEvent), any())
+  }
+
+  @Test
+  fun `when deserialization fails it should be sent to the dead letter queue`() {
+    val rawMessage = "{}"
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(mockDlqService, times(1)).sendEvent(eq(rawMessage), any())
   }
 }

@@ -1,5 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -12,7 +15,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   private val readableTimestamp = readableTimestampPatten.format(timestamp)
   private val millis: Long = timestamp.toInstant().toEpochMilli()
 
-  fun generateGenericEvent(
+  fun generateRawGenericEvent(
     eventTypeValue: String = "probation-case.registration.added",
   ): String = (
     """
@@ -30,7 +33,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
-  fun generateRegistrationEvent(): String = (
+  fun generateRawRegistrationEvent(): String = (
     """
     {
      "Type" : "Notification",
@@ -49,5 +52,23 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
      }
     }
     """
+    )
+
+  fun createRegistrationAddedEvent(): HmppsDomainEvent = (
+    HmppsDomainEvent(
+      type = "Notification",
+      message = "{\"eventType\":\"probation-case.registration.added\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+      messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = "probation-case.registration.added")),
+    )
+    )
+
+  fun createUnexpectedRegistrationEventTypeEvent(): HmppsDomainEvent = (
+    HmppsDomainEvent(
+      type = "Notification",
+      message = "{\"eventType\":\"unexpected.event.type\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+      messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = "unexpected.event.type")),
+    )
     )
 }
