@@ -46,5 +46,4 @@ class EventNotification(
     }
     return true
   }
-
 }
