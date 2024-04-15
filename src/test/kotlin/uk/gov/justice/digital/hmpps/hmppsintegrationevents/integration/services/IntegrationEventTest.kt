@@ -24,8 +24,6 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutionException
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -87,7 +85,7 @@ class IntegrationEventTest {
         eventType = EventTypeValue.REGISTRATION_ADDED,
         hmppsId = "MockId",
         url = "MockUrl",
-        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
       ),
     )
     eventRepository.flush()

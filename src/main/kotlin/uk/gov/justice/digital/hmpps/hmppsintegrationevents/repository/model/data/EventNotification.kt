@@ -8,7 +8,10 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.persistence.Temporal
+import jakarta.persistence.TemporalType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "EVENT_NOTIFICATION")
@@ -29,8 +32,9 @@ class EventNotification(
   @Column(name = "URL", nullable = false)
   val url: String,
 
+  @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
-  val lastModifiedDateTime: String,
+  val lastModifiedDateTime: LocalDateTime,
 ) {
   override fun equals(other: Any?): Boolean {
     if (other == null) return false

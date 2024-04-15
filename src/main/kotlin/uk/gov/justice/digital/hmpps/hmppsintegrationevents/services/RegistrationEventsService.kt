@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTyp
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.RegistrationAddedEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import java.time.LocalDateTime
 
 @Service
 class RegistrationEventsService(
@@ -37,7 +38,7 @@ class RegistrationEventsService(
           eventType = eventType,
           hmppsId = hmppsId,
           url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
-          lastModifiedDateTime = registrationEventMessage.occurredAt,
+          lastModifiedDateTime = LocalDateTime.now(),
         )
         repo.save(event)
       } else {
