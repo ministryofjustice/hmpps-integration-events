@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 import java.time.LocalDateTime
@@ -38,6 +39,6 @@ class HmppsDomainEventsListenerTest {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(mockRegistrationEventsService, times(1)).execute(hmppsDomainEvent)
+    verify(mockRegistrationEventsService, times(1)).execute(hmppsDomainEvent, EventTypeValue.REGISTRATION_ADDED)
   }
 }

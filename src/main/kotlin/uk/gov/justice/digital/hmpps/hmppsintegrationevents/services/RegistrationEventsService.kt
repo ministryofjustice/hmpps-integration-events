@@ -2,10 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.RegistrationAddedEventMessage
@@ -14,35 +13,47 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import java.time.LocalDateTime
 
 @Service
+@Transactional
 class RegistrationEventsService(
   @Autowired val repo: EventNotificationRepository,
+  @Autowired val deadLetterQueueService: DeadLetterQueueService,
 ) {
   private val objectMapper = ObjectMapper()
 
-  private companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-
-  fun execute(hmppsDomainEvent: HmppsDomainEvent) {
+  fun execute(hmppsDomainEvent: HmppsDomainEvent, eventType: EventTypeValue) {
     val registrationEventMessage: RegistrationAddedEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
 
-    val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
-    val hmppsId = registrationEventMessage.personReference.findCrnIdentifier()
+    if (registrationEventMessage.additionalInformation.isMappRegistrationType()) {
+      val hmppsId: String? = registrationEventMessage.personReference.findCrnIdentifier()
 
-    if (eventType != null && hmppsId != null) {
-      if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
-        repo.save(
-          EventNotification(
-            eventType = eventType,
-            hmppsId = hmppsId,
-            url = "/v1/persons/$hmppsId/risks/mappadetail",
-            lastModifiedDateTime = LocalDateTime.now(),
-          ),
-        )
+      if (hmppsId != null) {
+        handleMessage(hmppsId, eventType)
       } else {
-        // TODO update date time of existing record
-        log.info("A similar SQS Event for nominal $hmppsId of type $eventType has already been processed")
+        deadLetterQueueService.sendEvent(hmppsDomainEvent, Exception("CRN could not be found in registration event message"))
       }
     }
   }
+
+  private fun handleMessage(hmppsId: String, eventType: EventTypeValue) {
+    if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
+      saveEventNotification(eventType, hmppsId)
+    } else {
+      updateEventNotification(eventType, hmppsId)
+    }
+  }
+
+  private fun saveEventNotification(eventType: EventTypeValue, hmppsId: String): EventNotification = (
+    repo.save(
+      EventNotification(
+        eventType = eventType,
+        hmppsId = hmppsId,
+        url = "/v1/persons/$hmppsId/risks/mappadetail",
+        lastModifiedDateTime = LocalDateTime.now(),
+      ),
+    )
+    )
+
+  private fun updateEventNotification(eventType: EventTypeValue, hmppsId: String): Int = (
+    repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), hmppsId, eventType)
+    )
 }
