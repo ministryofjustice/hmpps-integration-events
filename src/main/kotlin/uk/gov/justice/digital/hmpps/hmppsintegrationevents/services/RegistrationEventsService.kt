@@ -29,7 +29,7 @@ class RegistrationEventsService(
       if (hmppsId != null) {
         handleMessage(hmppsId, eventType)
       } else {
-        deadLetterQueueService.sendEvent(hmppsDomainEvent, Exception("CRN could not be found in registration event message"))
+        deadLetterQueueService.sendEvent(hmppsDomainEvent, "CRN could not be found in registration event message")
       }
     }
   }

@@ -28,7 +28,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
-      deadLetterQueueService.sendEvent(rawMessage, e)
+      deadLetterQueueService.sendEvent(rawMessage, e.message)
     }
   }
 
@@ -36,7 +36,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
     when (val hmppsDomainEventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
       EventTypeValue.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
       else -> {
-        deadLetterQueueService.sendEvent(hmppsDomainEvent, Exception("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}"))
+        deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
       }
     }
   }
