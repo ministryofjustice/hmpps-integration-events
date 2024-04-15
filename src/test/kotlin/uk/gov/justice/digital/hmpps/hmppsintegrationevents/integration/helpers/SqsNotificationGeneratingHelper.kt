@@ -5,19 +5,17 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class SqsNotificationGeneratingHelper {
+class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())) {
 
   private val readableTimestampPatten: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy")
+  private val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(timestamp)
+  private val readableTimestamp = readableTimestampPatten.format(timestamp)
+  private val millis: Long = timestamp.toInstant().toEpochMilli()
 
   fun generateGenericEvent(
     eventTypeValue: String = "probation-case.registration.added",
-    timestamp: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault()),
-  ): String {
-    val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(timestamp)
-    val readableTimestamp = readableTimestampPatten.format(timestamp)
-    val millis: Long = timestamp.toInstant().toEpochMilli()
-
-    return """
+  ): String = (
+    """
     {
      "Type" : "Notification",
      "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
@@ -29,17 +27,11 @@ class SqsNotificationGeneratingHelper {
        "timestamp" : {"Type":"Number.java.lang.Long","Value":"$millis"}
      }
     }
-    `"""
-  }
+    """
+    )
 
-  fun generateRegistrationEvent(
-    timestamp: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault()),
-  ): String {
-    val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(timestamp)
-    val readableTimestamp = readableTimestampPatten.format(timestamp)
-    val millis: Long = timestamp.toInstant().toEpochMilli()
-
-    return """
+  fun generateRegistrationEvent(): String = (
+    """
     {
      "Type" : "Notification",
      "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
@@ -56,6 +48,6 @@ class SqsNotificationGeneratingHelper {
        "timestamp" : {"Type":"Number.java.lang.Long","Value":"$millis"}
      }
     }
-    `"""
-  }
+    """
+    )
 }

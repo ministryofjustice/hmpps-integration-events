@@ -30,7 +30,7 @@ class RegistrationEventsService(
     val hmppsId = registrationEventMessage.personReference.findCrnIdentifier()
 
     if (eventType != null && hmppsId != null) {
-      if (!repo.existsByHmppsIdAndEventType(hmppsId = hmppsId, eventType = eventType)) {
+      if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
         repo.save(
           EventNotification(
             eventType = eventType,
@@ -40,6 +40,7 @@ class RegistrationEventsService(
           ),
         )
       } else {
+        // TODO update date time of existing record
         log.info("A similar SQS Event for nominal $hmppsId of type $eventType has already been processed")
       }
     }

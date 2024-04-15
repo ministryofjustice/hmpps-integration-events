@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DlqService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -17,14 +17,14 @@ import java.time.format.DateTimeFormatter
 class HmppsDomainEventsListenerTest {
 
   val mockRegistrationEventsService: RegistrationEventsService = Mockito.mock(RegistrationEventsService::class.java)
-  val mockDlqService: DlqService = Mockito.mock(DlqService::class.java)
+  val mockDlqService: DeadLetterQueueService = Mockito.mock(DeadLetterQueueService::class.java)
   val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(mockRegistrationEventsService, mockDlqService)
 
   @Test
   fun `when a registration added sqs event is received it should call the registrationEventService`() {
     val currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
-    val rawMessage = SqsNotificationGeneratingHelper().generateRegistrationEvent(timestamp = currentTime)
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRegistrationEvent()
 
     val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(currentTime)
     val readableTimestamp = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy").format(currentTime)

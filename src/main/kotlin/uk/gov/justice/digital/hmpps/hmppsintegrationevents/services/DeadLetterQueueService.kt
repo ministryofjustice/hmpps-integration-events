@@ -7,7 +7,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Service
-class DlqService(
+class DeadLetterQueueService(
   private val hmppsQueueService: HmppsQueueService,
 ) {
   private val dlQueue by lazy { hmppsQueueService.findByQueueId("prisoner") as HmppsQueue }

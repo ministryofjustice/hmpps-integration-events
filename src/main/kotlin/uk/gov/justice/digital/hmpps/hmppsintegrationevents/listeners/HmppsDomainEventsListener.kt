@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DlqService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 
 @Service
-class HmppsDomainEventsListener(@Autowired val registrationEventsService: RegistrationEventsService, @Autowired val dlqService: DlqService) {
+class HmppsDomainEventsListener(@Autowired val registrationEventsService: RegistrationEventsService, @Autowired val deadLetterQueueService: DeadLetterQueueService) {
 
   private companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -29,7 +29,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
       log.error("Received bad domain event message :$rawMessage", e)
-      dlqService.sendEvent(rawMessage, e)
+      deadLetterQueueService.sendEvent(rawMessage, e)
     }
   }
 
@@ -40,7 +40,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
       EventTypeValue.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent)
       else -> {
         log.warn("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
-        dlqService.sendEvent(hmppsDomainEvent, Exception("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}"))
+        deadLetterQueueService.sendEvent(hmppsDomainEvent, Exception("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}"))
       }
     }
   }
