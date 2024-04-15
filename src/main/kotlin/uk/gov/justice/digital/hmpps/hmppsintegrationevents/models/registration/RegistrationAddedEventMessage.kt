@@ -1,10 +1,10 @@
-package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models
+package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DomainEventMessage(
+data class RegistrationAddedEventMessage(
   @JsonProperty("occurredAt") val occurredAt: String,
   @JsonProperty("personReference") val personReference: PersonReference,
   @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation,
@@ -13,7 +13,11 @@ data class DomainEventMessage(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersonReference(
   @JsonProperty("identifiers") val identifiers: List<Identifier>,
-)
+) {
+  fun findCrnIdentifier(): String? {
+    return this.identifiers.firstOrNull { it.type == "CRN" }?.value
+  }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Identifier(
