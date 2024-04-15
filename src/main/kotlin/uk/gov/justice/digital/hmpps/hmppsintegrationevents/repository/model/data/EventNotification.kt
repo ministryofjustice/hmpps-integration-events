@@ -8,10 +8,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "EVENT_NOTIFICATION")
@@ -32,7 +29,22 @@ class EventNotification(
   @Column(name = "URL", nullable = false)
   val url: String,
 
-  @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
-  val lastModifiedDateTime: LocalDateTime,
-)
+  val lastModifiedDateTime: String,
+) {
+  override fun equals(other: Any?): Boolean {
+    if (other == null) return false
+    if (this === other) return true
+    if (other !is EventNotification) return false
+    if (eventId != other.eventId ||
+      hmppsId != other.hmppsId ||
+      eventType != other.eventType ||
+      url != other.url ||
+      lastModifiedDateTime != other.lastModifiedDateTime
+    ) {
+      return false
+    }
+    return true
+  }
+
+}

@@ -24,6 +24,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutionException
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -85,11 +86,10 @@ class IntegrationEventTest {
         eventType = EventTypeValue.REGISTRATION_ADDED,
         hmppsId = "MockId",
         url = "MockUrl",
-        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
+        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6).format(DateTimeFormatter.ISO_INSTANT),
       ),
     )
     eventRepository.flush()
-    var x = "abv"
     Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
     val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
     Assertions.assertThat(prisonEventMessages)

@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTyp
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.RegistrationAddedEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
-import java.time.LocalDateTime
 
 @Service
 class RegistrationEventsService(
@@ -26,19 +25,21 @@ class RegistrationEventsService(
   fun execute(hmppsDomainEvent: HmppsDomainEvent) {
     val registrationEventMessage: RegistrationAddedEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
 
+    // TODO Autowire this in from application.yml
+    val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
+
     val eventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
     val hmppsId = registrationEventMessage.personReference.findCrnIdentifier()
 
     if (eventType != null && hmppsId != null) {
       if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
-        repo.save(
-          EventNotification(
-            eventType = eventType,
-            hmppsId = hmppsId,
-            url = "/v1/persons/$hmppsId/risks/mappadetail",
-            lastModifiedDateTime = LocalDateTime.now(),
-          ),
+        val event = EventNotification(
+          eventType = eventType,
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
+          lastModifiedDateTime = registrationEventMessage.occurredAt,
         )
+        repo.save(event)
       } else {
         // TODO update date time of existing record
         log.info("A similar SQS Event for nominal $hmppsId of type $eventType has already been processed")

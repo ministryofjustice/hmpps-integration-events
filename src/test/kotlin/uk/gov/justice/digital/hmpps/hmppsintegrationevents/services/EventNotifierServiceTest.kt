@@ -27,6 +27,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue as snsMessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue as sqsMessageAttributeValue
 
@@ -41,6 +42,8 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
   val hmppsEventSqsClient: SqsAsyncClient = mock()
   val hmppsEventDLSqsClient: SqsAsyncClient = mock()
   val eventRepository: EventNotificationRepository = mock()
+
+  val currentTimeString = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
   @BeforeEach
   fun setUp() {
@@ -64,7 +67,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Event published for event notification in database`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTimeString)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -83,7 +86,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Remove event notification after event processed`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTimeString)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -92,7 +95,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Put event into dlq if failed to publish message and remove entity from database`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTimeString)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
     whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
     emitter.sentNotifications()
