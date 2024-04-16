@@ -7,6 +7,8 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
@@ -16,11 +18,14 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+@Configuration
 @ActiveProfiles("test")
-class RegistrationEventsServiceTest {
+class RegistrationEventsServiceTest(
+  @Value("\${services.integrations-api.base-url}") val baseUrl: String
+) {
 
   private val repo = mockk<EventNotificationRepository>()
-  private val service: RegistrationEventsService = RegistrationEventsService(repo)
+  private val service: RegistrationEventsService = RegistrationEventsService(repo = repo, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
@@ -28,6 +33,8 @@ class RegistrationEventsServiceTest {
   fun `will process and save a mapps domain registration event message`() {
     val objectMapper = ObjectMapper()
     val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRegistrationEvent())
+
+    val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
@@ -39,7 +46,7 @@ class RegistrationEventsServiceTest {
     val expectedEventSave = EventNotification(
       eventType = EventTypeValue.REGISTRATION_ADDED,
       hmppsId = "X777776",
-      url = "https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/X777776/risks/mappadetail",
+      url = "$baseUrl/v1/persons/X777776/risks/mappadetail",
       lastModifiedDateTime = currentTime,
     )
 

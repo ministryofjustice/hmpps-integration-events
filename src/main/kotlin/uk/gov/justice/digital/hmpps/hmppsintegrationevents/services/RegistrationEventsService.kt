@@ -6,6 +6,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
@@ -15,9 +16,10 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import java.time.LocalDateTime
 
 @Service
+@Configuration
 class RegistrationEventsService(
   @Autowired val repo: EventNotificationRepository,
-  @Value("\${services.integrations-api.base-url}") val baseUrl: String,
+  @Value("\${services.integrations-api.base-url}") val baseUrl: String
 ) {
   private val objectMapper = ObjectMapper()
 

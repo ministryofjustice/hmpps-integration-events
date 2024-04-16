@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "EVENT_NOTIFICATION")
-class EventNotification(
+data class EventNotification(
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,18 +36,18 @@ class EventNotification(
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
 ) {
-  override fun equals(other: Any?): Boolean {
-    if (other == null) return false
-    if (this === other) return true
-    if (other !is EventNotification) return false
-    if (eventId != other.eventId ||
-      hmppsId != other.hmppsId ||
-      eventType != other.eventType ||
-      url != other.url ||
-      lastModifiedDateTime != other.lastModifiedDateTime
-    ) {
-      return false
-    }
-    return true
-  }
+//  override fun equals(other: Any?): Boolean {
+//    if (other == null) return false
+//    if (this === other) return true
+//    if (other !is EventNotification) return false
+//    if (eventId != other.eventId ||
+//      hmppsId != other.hmppsId ||
+//      eventType != other.eventType ||
+//      url != other.url ||
+//      lastModifiedDateTime != other.lastModifiedDateTime
+//    ) {
+//      return false
+//    }
+//    return true
+//  }
 }
