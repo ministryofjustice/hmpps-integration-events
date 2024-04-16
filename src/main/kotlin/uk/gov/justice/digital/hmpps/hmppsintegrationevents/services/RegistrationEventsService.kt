@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @Configuration
 class RegistrationEventsService(
   @Autowired val repo: EventNotificationRepository,
-  @Value("\${services.integrations-api.base-url}") val baseUrl: String
+  @Value("\${services.integrations-api.base-url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
 

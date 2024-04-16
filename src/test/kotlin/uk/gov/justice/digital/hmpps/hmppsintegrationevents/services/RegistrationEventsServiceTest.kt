@@ -33,7 +33,6 @@ class RegistrationEventsServiceTest {
     val objectMapper = ObjectMapper()
     val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRegistrationEvent())
 
-
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
     every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
