@@ -17,10 +17,9 @@ import java.time.LocalDateTime
 @Service
 class RegistrationEventsService(
   @Autowired val repo: EventNotificationRepository,
-  @Value("\${services.integrations-api.base-url}") val baseUrl: String
+  @Value("\${services.integrations-api.base-url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
-
 
   private companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
