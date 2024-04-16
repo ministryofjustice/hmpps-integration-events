@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
@@ -20,9 +19,9 @@ import java.time.ZoneId
 
 @Configuration
 @ActiveProfiles("test")
-class RegistrationEventsServiceTest(
-  @Value("\${services.integrations-api.base-url}") val baseUrl: String
-) {
+class RegistrationEventsServiceTest {
+
+  private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
   private val repo = mockk<EventNotificationRepository>()
   private val service: RegistrationEventsService = RegistrationEventsService(repo = repo, baseUrl)
@@ -34,7 +33,6 @@ class RegistrationEventsServiceTest(
     val objectMapper = ObjectMapper()
     val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRegistrationEvent())
 
-    val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
