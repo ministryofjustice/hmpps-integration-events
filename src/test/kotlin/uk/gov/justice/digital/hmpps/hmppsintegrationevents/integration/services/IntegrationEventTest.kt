@@ -89,7 +89,6 @@ class IntegrationEventTest {
       ),
     )
     eventRepository.flush()
-    var x = "abv"
     Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
     val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
     Assertions.assertThat(prisonEventMessages)

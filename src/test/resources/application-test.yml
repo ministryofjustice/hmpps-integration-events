@@ -20,6 +20,10 @@ spring:
     enabled: true
     baselineOnMigrate: true
 
+services:
+  integrations-api:
+    base-url: https://dev.integration-api.hmpps.service.justice.gov.uk
+
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4566

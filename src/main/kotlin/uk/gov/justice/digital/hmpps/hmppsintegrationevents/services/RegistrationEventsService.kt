@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
@@ -13,10 +15,11 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import java.time.LocalDateTime
 
 @Service
-@Transactional
+@Configuration
 class RegistrationEventsService(
   @Autowired val repo: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
+  @Value("\${services.integrations-api.base-url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
 
@@ -47,7 +50,7 @@ class RegistrationEventsService(
       EventNotification(
         eventType = eventType,
         hmppsId = hmppsId,
-        url = "/v1/persons/$hmppsId/risks/mappadetail",
+        url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
         lastModifiedDateTime = LocalDateTime.now(),
       ),
     )

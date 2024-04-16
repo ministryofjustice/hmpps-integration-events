@@ -42,6 +42,8 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
   val hmppsEventDLSqsClient: SqsAsyncClient = mock()
   val eventRepository: EventNotificationRepository = mock()
 
+  val currentTime = LocalDateTime.now()
+
   @BeforeEach
   fun setUp() {
     Mockito.reset(eventRepository)
@@ -64,7 +66,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Event published for event notification in database`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -83,7 +85,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Remove event notification after event processed`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -92,7 +94,7 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
 
   @Test
   fun `Put event into dlq if failed to publish message and remove entity from database`() {
-    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", LocalDateTime.now())
+    val event = EventNotification(123, "hmppsId", EventTypeValue.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
     whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
     emitter.sentNotifications()
