@@ -24,21 +24,22 @@ class RegistrationEventsServiceTest {
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
   private val repo = mockk<EventNotificationRepository>()
-  private val service: RegistrationEventsService = RegistrationEventsService(repo = repo, baseUrl)
+  private val deadLetterQueueService = mockk<DeadLetterQueueService>()
+  private val registrationEventsService: RegistrationEventsService = RegistrationEventsService(repo = repo, deadLetterQueueService, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
   @Test
   fun `will process and save a mapps domain registration event message`() {
     val objectMapper = ObjectMapper()
-    val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRegistrationEvent())
+    val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRawRegistrationEvent())
 
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
     every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { repo.save(any()) } returnsArgument 0
 
-    service.execute(event)
+    registrationEventsService.execute(event, EventTypeValue.REGISTRATION_ADDED)
 
     val expectedEventSave = EventNotification(
       eventType = EventTypeValue.REGISTRATION_ADDED,
