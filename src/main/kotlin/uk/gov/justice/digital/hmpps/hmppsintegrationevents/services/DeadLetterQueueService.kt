@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
@@ -11,7 +10,6 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 class DeadLetterQueueService(
   private val hmppsQueueService: HmppsQueueService,
 ) {
-  private val objectMapper: ObjectMapper = ObjectMapper()
 
   private val dlQueue by lazy { hmppsQueueService.findByQueueId("prisoner") as HmppsQueue }
   private val dlClient by lazy { dlQueue.sqsDlqClient!! }

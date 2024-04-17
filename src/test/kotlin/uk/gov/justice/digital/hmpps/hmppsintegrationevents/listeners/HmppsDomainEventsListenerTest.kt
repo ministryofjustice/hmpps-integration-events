@@ -45,8 +45,9 @@ class HmppsDomainEventsListenerTest {
 
   @Test
   fun `when an unexpected event type is received it should be sent to the dead letter queue`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawGenericEvent(eventTypeValue = "unexpected.event.type")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createUnexpectedRegistrationEventTypeEvent()
+    val unexpectedEventType = "unexpected.event.type"
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent(eventType = unexpectedEventType)
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedEvent(eventType = unexpectedEventType)
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 

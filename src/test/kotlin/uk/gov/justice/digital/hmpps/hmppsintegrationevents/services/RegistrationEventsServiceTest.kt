@@ -50,4 +50,26 @@ class RegistrationEventsServiceTest {
 
     verify(exactly = 1) { repo.save(expectedEventSave) }
   }
+
+//  @Test
+//  fun `will not process and save a domain registration event message which isn't type MAPP`() {
+//    val objectMapper = ObjectMapper()
+//    val event: HmppsDomainEvent = objectMapper.readValue(SqsNotificationGeneratingHelper(zonedCurrentDateTime).generateRawRegistrationEvent())
+//
+//    mockkStatic(LocalDateTime::class)
+//    every { LocalDateTime.now() } returns currentTime
+//    every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
+//    every { repo.save(any()) } returnsArgument 0
+//
+//    registrationEventsService.execute(event, EventTypeValue.REGISTRATION_ADDED)
+//
+//    val expectedEventSave = EventNotification(
+//      eventType = EventTypeValue.REGISTRATION_ADDED,
+//      hmppsId = "X777776",
+//      url = "$baseUrl/v1/persons/X777776/risks/mappadetail",
+//      lastModifiedDateTime = currentTime,
+//    )
+//
+//    verify(exactly = 1) { repo.save(expectedEventSave) }
+//  }
 }
