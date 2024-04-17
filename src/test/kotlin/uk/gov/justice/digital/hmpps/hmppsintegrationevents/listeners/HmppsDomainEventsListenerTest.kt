@@ -1,11 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
+import io.kotest.matchers.ints.exactly
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
@@ -19,19 +22,24 @@ import java.time.ZonedDateTime
 @ActiveProfiles("test")
 @JsonTest
 class HmppsDomainEventsListenerTest {
-  private val mockRegistrationEventsService: RegistrationEventsService = mock()
-  private val mockDlqService: DeadLetterQueueService = mock()
-  private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(mockRegistrationEventsService, mockDlqService)
+  private val registrationEventsService = mockk<RegistrationEventsService>()
+  private val deadLetterQueueService = mockk<DeadLetterQueueService>()
+  private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(registrationEventsService, deadLetterQueueService)
   private val currentTime: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
+
+  @BeforeEach
+  fun setup() {
+    every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+  }
 
   @Test
   fun `when a valid registration added sqs event is received it should call the registrationEventService`() {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent()
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedEvent()
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedDomainEvent()
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(mockRegistrationEventsService, times(1)).execute(hmppsDomainEvent, EventTypeValue.REGISTRATION_ADDED)
+    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, EventTypeValue.REGISTRATION_ADDED) }
   }
 
   @Test
@@ -40,26 +48,19 @@ class HmppsDomainEventsListenerTest {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(mockDlqService, times(1)).sendEvent(eq(rawMessage), any())
+    verify { registrationEventsService wasNot Called }
+    verify(exactly = 1) { deadLetterQueueService.sendEvent(rawMessage, "Malformed event received. Could not parse JSON") }
   }
 
   @Test
   fun `when an unexpected event type is received it should be sent to the dead letter queue`() {
     val unexpectedEventType = "unexpected.event.type"
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent(eventType = unexpectedEventType)
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedEvent(eventType = unexpectedEventType)
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedDomainEvent(eventType = unexpectedEventType)
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(mockDlqService, times(1)).sendEvent(eq(hmppsDomainEvent), any())
-  }
-
-  @Test
-  fun `when deserialization fails it should be sent to the dead letter queue`() {
-    val rawMessage = "{}"
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(mockDlqService, times(1)).sendEvent(eq(rawMessage), any())
+    verify { registrationEventsService wasNot Called }
+    verify(exactly = 1) { deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}") }
   }
 }

@@ -28,8 +28,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
-      log.error(e.toString())
-      deadLetterQueueService.sendEvent(rawMessage, e.message)
+      deadLetterQueueService.sendEvent(rawMessage, "Malformed event received. Could not parse JSON")
     }
   }
 

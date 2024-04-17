@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -37,7 +36,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   fun generateRawRegistrationEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
-    identifiers: String = "[{\\\"type\\\":\\\"CRN\\\",\\\"value\\\":\\\"X777776\\\"}]"
+    identifiers: String = "[{\\\"type\\\":\\\"CRN\\\",\\\"value\\\":\\\"X777776\\\"}]",
   ): String = (
     """
     {
@@ -59,10 +58,10 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
-  fun createRegistrationAddedEvent(
+  fun createRegistrationAddedDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
-    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]"
+    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
   ): HmppsDomainEvent = (
     HmppsDomainEvent(
       type = "Notification",
