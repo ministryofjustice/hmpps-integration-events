@@ -21,7 +21,7 @@ hmpps.sqs:
   localstackUrl: http://localhost:4566
   useWebToken: false
   queues:
-    prisoner:
+    hmppsdomainqueue:
       queueName: hmpps_integrations_events_queue
       queueArn: arn:aws:sns:eu-west-2:000000000000:hmpps_integrations_events_queue
       dlqName: hmpps_integrations_events_queue_dlq

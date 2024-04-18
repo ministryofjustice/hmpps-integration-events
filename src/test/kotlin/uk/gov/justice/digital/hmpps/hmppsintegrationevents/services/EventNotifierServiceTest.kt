@@ -49,8 +49,8 @@ class EventNotifierServiceTest(@Autowired private val objectMapper: ObjectMapper
     Mockito.reset(eventRepository)
     whenever(hmppsQueueService.findByTopicId("integrationeventtopic"))
       .thenReturn(HmppsTopic("integrationeventtopic", "sometopicarn", hmppsEventSnsClient))
-    whenever(hmppsQueueService.findByQueueId("prisoner"))
-      .thenReturn(HmppsQueue("prisoner", hmppsEventSqsClient, "hmpps_integrations_events_queue", hmppsEventDLSqsClient, "hmpps_integrations_events_queue_dlq"))
+    whenever(hmppsQueueService.findByQueueId("hmppsdomainqueue"))
+      .thenReturn(HmppsQueue("hmppsdomainqueue", hmppsEventSqsClient, "hmpps_integrations_events_queue", hmppsEventDLSqsClient, "hmpps_integrations_events_queue_dlq"))
 
     emitter = EventNotifierService(hmppsQueueService, objectMapper, eventRepository)
   }

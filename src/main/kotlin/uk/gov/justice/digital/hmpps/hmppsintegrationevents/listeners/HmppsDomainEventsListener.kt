@@ -21,7 +21,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
 
   private val objectMapper = ObjectMapper()
 
-  @SqsListener("prisoner", factory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("hmppsdomainqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
     try {

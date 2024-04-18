@@ -11,7 +11,7 @@ class DeadLetterQueueService(
   private val hmppsQueueService: HmppsQueueService,
 ) {
 
-  private val dlQueue by lazy { hmppsQueueService.findByQueueId("prisoner") as HmppsQueue }
+  private val dlQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") as HmppsQueue }
   private val dlClient by lazy { dlQueue.sqsDlqClient!! }
   private val dlQueueUrl by lazy { dlQueue.dlqUrl }
 
