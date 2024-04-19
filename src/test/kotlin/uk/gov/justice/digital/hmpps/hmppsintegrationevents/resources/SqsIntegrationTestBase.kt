@@ -79,7 +79,7 @@ abstract class SqsIntegrationTestBase {
     }
   }
 
-  protected fun sendDomainSqsMessage(rawMessage:String){
+  protected fun sendDomainSqsMessage(rawMessage: String) {
     domainEventsQueueSqsClient.sendMessage(SendMessageRequest.builder().queueUrl(domainEventsQueueSqsUrl).messageBody(rawMessage).build()).get()
   }
 }
