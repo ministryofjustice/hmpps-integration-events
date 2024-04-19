@@ -7,10 +7,16 @@ spring:
     name: hmpps-integration-events
   codec:
     max-in-memory-size: 10MB
+  datasource:
+    url: jdbc:postgresql://localhost:5432/event_store
+    username: postgres
+    password: pa55word
   jpa:
     hibernate:
       ddl-auto: create-drop
-
+  flyway:
+    enabled: true
+    baselineOnMigrate: true
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:

@@ -1,8 +1,5 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/event_store
-    username: postgres
-    password: pa55word
+
   jpa:
     show-sql: true
   flyway:

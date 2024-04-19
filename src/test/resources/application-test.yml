@@ -12,10 +12,7 @@ spring:
     password: pa55word
   jpa:
     show-sql: true
-  flyway:
-    enabled: true
-    baselineOnMigrate: true
-    locations: "filesystem:../../resources/db.migration"
+
 
 services:
   integrations-api:
