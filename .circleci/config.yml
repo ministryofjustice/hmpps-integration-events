@@ -17,6 +17,10 @@ jobs:
       name: hmpps/java_localstack_postgres
       jdk_tag: "21.0"
       localstack_tag: "3"
+      services: "opensearch,sns,sqs"
+      postgres_tag: "15"
+      postgres_username: "postgres"
+      postgres_password: "pa55word"
     steps:
       - checkout
       - restore_cache:
