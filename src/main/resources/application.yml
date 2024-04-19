@@ -20,6 +20,9 @@ spring:
     password: ${spring.datasource.password}
     enabled: true
     baselineOnMigrate: true
+  sql:
+    init:
+      continue-on-error: true
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
