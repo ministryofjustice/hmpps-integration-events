@@ -21,6 +21,7 @@ jobs:
       postgres_tag: "15"
       postgres_username: "postgres"
       postgres_password: "pa55word"
+      resource_class: medium+
     steps:
       - checkout
       - restore_cache:
