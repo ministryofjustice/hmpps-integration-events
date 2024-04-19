@@ -15,6 +15,9 @@ spring:
     hibernate:
       ddl-auto: create-drop
   flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
     enabled: true
     baselineOnMigrate: true
   jackson:
