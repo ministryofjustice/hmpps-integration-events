@@ -12,7 +12,11 @@ spring:
     password: pa55word
   jpa:
     show-sql: true
-
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    enabled: true
 
 services:
   integrations-api:
