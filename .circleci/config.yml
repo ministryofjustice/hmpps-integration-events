@@ -19,6 +19,7 @@ jobs:
       localstack_tag: "3"
       services: "sns,sqs"
       postgres_tag: "15"
+      postgres_db: "event_store"
       postgres_username: "postgres"
       postgres_password: "pa55word"
       resource_class: medium+

@@ -8,7 +8,7 @@ spring:
   codec:
     max-in-memory-size: 10MB
   datasource:
-    url: jdbc:postgresql://localhost:5432/event_store
+    url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
     username: postgres
     password: pa55word
   jpa:

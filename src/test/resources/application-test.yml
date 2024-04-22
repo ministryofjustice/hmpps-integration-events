@@ -7,15 +7,12 @@ management.endpoint:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/event_store
+    url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
     username: postgres
     password: pa55word
   jpa:
     show-sql: true
   flyway:
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
     enabled: true
 
 services:
