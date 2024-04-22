@@ -20,8 +20,7 @@ import software.amazon.awssdk.services.sqs.model.MessageAttributeValue as sqsMes
 class EventNotifierService(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
-  val eventRepository: EventNotificationRepository,
-  // @Value("\${notifier.schedule.lastModifiedPeriod}") val lastModifiedPeriod: Number=0
+  val eventRepository: EventNotificationRepository 
 ) {
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
