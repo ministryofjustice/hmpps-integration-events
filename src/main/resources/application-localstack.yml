@@ -1,23 +1,17 @@
-server:
-  shutdown: immediate
-
-management.endpoint:
-  health.cache.time-to-live: 0
-  info.cache.time-to-live: 0
-
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
-    username: postgres
-    password: pa55word
+
   jpa:
     show-sql: true
   flyway:
     enabled: true
+    baselineOnMigrate: true
 
 services:
   integrations-api:
     base-url: https://dev.integration-api.hmpps.service.justice.gov.uk
+
+aws:
+  provider: localstack
 
 hmpps.sqs:
   provider: localstack
@@ -29,16 +23,8 @@ hmpps.sqs:
       queueArn: arn:aws:sns:eu-west-2:000000000000:hmpps_integrations_events_queue
       dlqName: hmpps_integrations_events_queue_dlq
       subscribeTopicId: domainevents
-    integrationeventtestqueue:
-      queueName: ${random.uuid}
-      dlqName: ${random.uuid}
-      subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
     integrationeventtopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
-
-notifier:
-  schedule:
-    rate: 1000
+      arn: arn:aws:sns:eu-west-2:000000000000:integration-event-topic
