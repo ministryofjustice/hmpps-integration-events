@@ -10,18 +10,19 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 class DeadLetterQueueService(
   private val hmppsQueueService: HmppsQueueService,
 ) {
-  private val dlQueue by lazy { hmppsQueueService.findByQueueId("prisoner") as HmppsQueue }
+
+  private val dlQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") as HmppsQueue }
   private val dlClient by lazy { dlQueue.sqsDlqClient!! }
   private val dlQueueUrl by lazy { dlQueue.dlqUrl }
 
-  fun sendEvent(payload: Any, e: Exception) {
+  fun sendEvent(payload: Any, errorMessage: String?) {
     dlClient.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(dlQueueUrl)
         .messageBody(
           payload.toString(),
         )
-        .messageAttributes(mapOf("Error" to MessageAttributeValue.builder().dataType("String").stringValue(e.message).build()))
+        .messageAttributes(mapOf("Error" to MessageAttributeValue.builder().dataType("String").stringValue(errorMessage).build()))
         .build(),
     )
   }

@@ -29,4 +29,8 @@ data class Identifier(
 data class AdditionalInformation(
   @JsonProperty("registerTypeDescription") val registerTypeDescription: String,
   @JsonProperty("registerTypeCode") val registerTypeCode: String,
-)
+) {
+  fun isMappRegistrationType(): Boolean = (
+    this.registerTypeCode == "MAPP"
+    )
+}

@@ -21,26 +21,22 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
 
   private val objectMapper = ObjectMapper()
 
-  @SqsListener("prisoner", factory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("hmppsdomainqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
     try {
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
-      log.error("Received bad domain event message :$rawMessage", e)
-      deadLetterQueueService.sendEvent(rawMessage, e)
+      deadLetterQueueService.sendEvent(rawMessage, "Malformed event received. Could not parse JSON")
     }
   }
 
-  fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
-    val hmppsDomainEventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)
-
-    when (hmppsDomainEventType) {
-      EventTypeValue.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent)
+  private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
+    when (val hmppsDomainEventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
+      EventTypeValue.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
       else -> {
-        log.warn("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
-        deadLetterQueueService.sendEvent(hmppsDomainEvent, Exception("Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}"))
+        deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
       }
     }
   }
