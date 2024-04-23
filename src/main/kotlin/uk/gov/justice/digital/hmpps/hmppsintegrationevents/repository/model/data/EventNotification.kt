@@ -35,19 +35,4 @@ data class EventNotification(
   @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
-) {
-//  override fun equals(other: Any?): Boolean {
-//    if (other == null) return false
-//    if (this === other) return true
-//    if (other !is EventNotification) return false
-//    if (eventId != other.eventId ||
-//      hmppsId != other.hmppsId ||
-//      eventType != other.eventType ||
-//      url != other.url ||
-//      lastModifiedDateTime != other.lastModifiedDateTime
-//    ) {
-//      return false
-//    }
-//    return true
-//  }
-}
+)
