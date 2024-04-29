@@ -38,7 +38,7 @@ class EventNotifierService(
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
-    events.forEach { event -> sendEvent(event) }
+    events.forEach { sendEvent(it) }
   }
 
   fun sendEvent(payload: EventNotification) {

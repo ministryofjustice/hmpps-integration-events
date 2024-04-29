@@ -8,10 +8,22 @@ spring:
 
 services:
   integrations-api:
-    base-url: https://dev.integration-api.hmpps.service.justice.gov.uk
+    url: https://dev.integration-api.hmpps.service.justice.gov.uk
+    apikey: ""
+    certificatebucketname: ""
+    certificatepassword: ""
+    certificatepath: ""
 
 aws:
   provider: localstack
+  region: eu-west-2
+
+hmpps.s3:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  buckets:
+    certificate-backup:
+      bucketName: certificate-backup
 
 hmpps.sqs:
   provider: localstack
@@ -28,3 +40,14 @@ hmpps.sqs:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
     integrationeventtopic:
       arn: arn:aws:sns:eu-west-2:000000000000:integration-event-topic
+
+hmpps.secret:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  secrets:
+    mapps-client-org:
+      secretName: testSecret
+      subscriberArn: "arn:aws:sns:eu-west-2:000000000000:integration-event-topic:717e006e-ab56-49d8-89f8-fc43568e242a"
+
+
+
