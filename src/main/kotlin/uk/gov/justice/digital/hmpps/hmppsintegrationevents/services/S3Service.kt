@@ -8,11 +8,11 @@ import java.io.InputStream
 @Service
 class S3Service(private val s3Client: S3Client) {
 
-    fun getDocumentFile(bucketName:String, fileName: String): InputStream {
-        val request = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build()
-        return s3Client.getObject(request)
-    }
+  fun getDocumentFile(bucketName: String, fileName: String): InputStream {
+    val request = GetObjectRequest.builder()
+      .bucket(bucketName)
+      .key(fileName)
+      .build()
+    return s3Client.getObject(request)
+  }
 }

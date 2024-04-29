@@ -17,44 +17,44 @@ import javax.net.ssl.KeyManagerFactory
 @Service
 @SuppressWarnings("unchecked")
 @EnableConfigurationProperties(
-        HmppsS3Properties::class,
-        IntegrationApiProperties::class
+  HmppsS3Properties::class,
+  IntegrationApiProperties::class,
 )
-class IntegrationApiGateway (integrationApiConfig: IntegrationApiProperties,
-                             final val s3Service: S3Service) {
+class IntegrationApiGateway(
+  integrationApiConfig: IntegrationApiProperties,
+  final val s3Service: S3Service,
+) {
 
+  private lateinit var webClient: WebClient
 
-    private lateinit var webClient: WebClient
+  init {
+    val certificateInputStream = s3Service.getDocumentFile(integrationApiConfig.certificateBucketName, integrationApiConfig.certificatePath)
 
-    init {
-        val certificateInputStream = s3Service.getDocumentFile(integrationApiConfig.certificateBucketName, integrationApiConfig.certificatePath)
+    val keyStore = KeyStore.getInstance("PKCS12")
+    keyStore.load(certificateInputStream, integrationApiConfig.certificatePassword.toCharArray())
 
-        val keyStore = KeyStore.getInstance("PKCS12")
-        keyStore.load(certificateInputStream, integrationApiConfig.certificatePassword.toCharArray())
+    val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+    keyManagerFactory.init(keyStore, integrationApiConfig.certificatePassword.toCharArray())
 
-        val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-        keyManagerFactory.init(keyStore, integrationApiConfig.certificatePassword.toCharArray())
+    val sslContext = SslContextBuilder.forClient()
+      .keyManager(keyManagerFactory)
+      .build()
 
-        val sslContext = SslContextBuilder.forClient()
-                .keyManager(keyManagerFactory)
-                .build()
+    val httpClient: HttpClient = HttpClient.create().secure { sslSpec -> sslSpec.sslContext(sslContext) }
 
-        val httpClient: HttpClient = HttpClient.create().secure { sslSpec -> sslSpec.sslContext(sslContext) }
+    webClient = WebClient.builder()
+      .clientConnector(ReactorClientHttpConnector(httpClient))
+      .baseUrl(integrationApiConfig.url)
+      .defaultHeaders { header -> header.set("x-api-key", integrationApiConfig.apiKey) }
+      .build()
+  }
 
-        webClient = WebClient.builder()
-                .clientConnector(ReactorClientHttpConnector(httpClient))
-                .baseUrl(integrationApiConfig.url)
-                .defaultHeaders { header -> header.set("x-api-key", integrationApiConfig.apiKey) }
-                .build()
-    }
-
-    fun getApiAuthorizationConfig(): Map<String, List<String>> {
-        return webClient.method(HttpMethod.GET)
-                .uri("v1/config/authorisation")
-                .retrieve()
-                .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
-                .block()!!
-                .mapKeys { (key, _) -> key.replace(".", "-") }
-    }
-
+  fun getApiAuthorizationConfig(): Map<String, List<String>> {
+    return webClient.method(HttpMethod.GET)
+      .uri("v1/config/authorisation")
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
+      .block()!!
+      .mapKeys { (key, _) -> key.replace(".", "-") }
+  }
 }

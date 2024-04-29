@@ -9,24 +9,24 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
 
 @Service
 @EnableConfigurationProperties(
-        HmppsSecretManagerProperties::class
+  HmppsSecretManagerProperties::class,
 )
 class SecretsManagerService(private val secretsManagerClient: SecretsManagerClient) {
 
-    fun getSecretValue(secretName:String):String{
-        val getSecretValueRequest = GetSecretValueRequest.builder()
-                .secretId(secretName)
-                .build()
+  fun getSecretValue(secretName: String): String {
+    val getSecretValueRequest = GetSecretValueRequest.builder()
+      .secretId(secretName)
+      .build()
 
-        return secretsManagerClient.getSecretValue(getSecretValueRequest).secretString()
-    }
+    return secretsManagerClient.getSecretValue(getSecretValueRequest).secretString()
+  }
 
-    fun setSecretValue(secretName:String,secretValue:String){
-        val putSecretValueRequest = PutSecretValueRequest.builder()
-                .secretId(secretName)
-                .secretString(secretValue)
-                .build()
+  fun setSecretValue(secretName: String, secretValue: String) {
+    val putSecretValueRequest = PutSecretValueRequest.builder()
+      .secretId(secretName)
+      .secretString(secretValue)
+      .build()
 
-        secretsManagerClient.putSecretValue(putSecretValueRequest)
-    }
+    secretsManagerClient.putSecretValue(putSecretValueRequest)
+  }
 }
