@@ -18,12 +18,7 @@ aws:
   provider: localstack
   region: eu-west-2
 
-hmpps.s3:
-  provider: localstack
-  localstackUrl: http://localhost:4566
-  buckets:
-    certificate-backup:
-      bucketName: certificate-backup
+
 
 hmpps.sqs:
   provider: localstack

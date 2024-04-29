@@ -43,6 +43,13 @@ hmpps.sqs:
     integrationeventtopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
+hmpps.s3:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  buckets:
+    certificate-backup:
+      bucketName: certificate-backup
+
 hmpps.secret:
   provider: localstack
   localstackUrl: http://localhost:4566
