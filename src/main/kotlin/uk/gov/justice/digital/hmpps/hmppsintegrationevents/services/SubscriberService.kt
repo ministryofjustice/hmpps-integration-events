@@ -25,18 +25,19 @@ class SubscriberService(
       .forEach { refreshClientFilter(it, subscriberProperties.secrets[it.key]!!) }
   }
 
-  fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
+  private fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     val events = clientConfig.value
       .flatMap { url ->
         listOfNotNull(
           url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { EventTypeValue.REGISTRATION_ADDED.name },
         )
       }
+      .ifEmpty { listOf("DEFAULT") }
 
     val secretValue = secretsManagerService.getSecretValue(subscriber.secretName)
     val filterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
 
-    if (filterList.eventType != events) {
+    if (filterList.eventType != events && filterList.eventType.isNotEmpty()) {
       val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(events))
       secretsManagerService.setSecretValue(subscriber.secretName, filterPolicy)
       integrationEventTopicService.updateSubscriptionAttributes(subscriber.subscriberArn, "FilterPolicy", filterPolicy)

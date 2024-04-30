@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -11,13 +10,15 @@ import java.time.LocalDateTime
 @Configuration
 class EventNotifierService(
   private val integrationEventTopicService: IntegrationEventTopicService,
-  private val objectMapper: ObjectMapper,
   val eventRepository: EventNotificationRepository,
 ) {
   @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
-    events.forEach { integrationEventTopicService.sendEvent(it) }
+    events.forEach {
+      integrationEventTopicService.sendEvent(it)
+      eventRepository.deleteById(it.eventId!!)
+    }
   }
 }
