@@ -12,3 +12,6 @@ format:
 
 check:
 	./gradlew check
+
+setup-local-stack:
+	./scripts/localstack/setup.sh

@@ -33,7 +33,7 @@ jobs:
       - run:
           name: setup local stack
           command:
-            ./scripts/localstack/setup.sh
+            make setup-local-stack
       - run:
           name: run gradlew check
           command:
