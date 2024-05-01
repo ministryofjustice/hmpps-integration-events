@@ -6,7 +6,7 @@ BACK_UP_BUCKET="certificate-backup"
 TEST_CLIENT_SECRET="testSecret"
 TEST_CLIENT_SECRET_VALUE="{\"eventType\":[\"default\"]}"
 ls
-aws configure set aws_region $AWS_REGION
+aws configure set aws_default_region $AWS_REGION
 aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
 aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
 #Create certficate backup bucket
