@@ -31,8 +31,6 @@ jobs:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
       - hmpps/wait_till_ready_postgres
-      - aws-cli/setup:
-          profile_name: default
       - run:
           name: setup aws cli
           command:
