@@ -36,7 +36,7 @@ class SubscriberServiceTests {
     )
     `when`(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
 
-    hmppsSecretManagerProperties = HmppsSecretManagerProperties(provider = "localstack", secrets = mapOf("client1" to SecretConfig("secret1", "Arn1"), "client2" to SecretConfig("secret2", "Arn2")))
+    hmppsSecretManagerProperties = HmppsSecretManagerProperties(provider = "localstack", secrets = mapOf("client1" to SecretConfig("secret1", "queue1"), "client2" to SecretConfig("secret2", "queue2")))
     subscriberService = SubscriberService(integrationApiGateway, hmppsSecretManagerProperties, secretsManagerService, integrationEventTopicService, objectMapper)
   }
 
@@ -79,7 +79,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"REGISTRATION_ADDED\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("Arn1", "FilterPolicy", "{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"REGISTRATION_ADDED\"]}")
   }
 
   @Test
@@ -93,6 +93,6 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"DEFAULT\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("Arn1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
   }
 }

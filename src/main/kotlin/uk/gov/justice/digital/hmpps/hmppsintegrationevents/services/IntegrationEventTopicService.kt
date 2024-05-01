@@ -3,10 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Service
@@ -37,12 +39,23 @@ class IntegrationEventTopicService(
     }
   }
 
-  fun updateSubscriptionAttributes(subscriberArn: String, attributeName: String, attributeValueJson: String) {
+  fun updateSubscriptionAttributes(queueName: String, attributeName: String, attributeValueJson: String) {
+    val subscriberArn = getSubscriptionArnByQueueName(queueName)
     val request = SetSubscriptionAttributesRequest.builder()
       .subscriptionArn(subscriberArn)
       .attributeName(attributeName)
       .attributeValue(attributeValueJson)
       .build()
     hmppsEventsTopicSnsClient.setSubscriptionAttributes(request)
+  }
+
+  fun getSubscriptionArnByQueueName(queueName: String): String? {
+    val queue = hmppsQueueService.findByQueueId(queueName) as HmppsQueue
+    val listSubscriptionsByTopicRequest = ListSubscriptionsByTopicRequest.builder().topicArn(topicArn).build()
+    val listSubscriptionsResponse = hmppsEventsTopicSnsClient.listSubscriptionsByTopic(listSubscriptionsByTopicRequest).get()
+
+    return listSubscriptionsResponse.subscriptions().first {
+      it.protocol() == "sqs" && it.endpoint() == queue.queueArn
+    }.subscriptionArn()
   }
 }

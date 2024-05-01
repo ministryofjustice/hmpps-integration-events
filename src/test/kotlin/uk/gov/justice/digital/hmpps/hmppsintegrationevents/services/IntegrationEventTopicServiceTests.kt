@@ -15,14 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicResponse
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
+import software.amazon.awssdk.services.sns.model.Subscription
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 @ActiveProfiles("test")
 @JsonTest
@@ -31,6 +36,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
   val hmppsQueueService: HmppsQueueService = mock()
   val hmppsEventSnsClient: SnsAsyncClient = mock()
   val deadLetterQueueService: DeadLetterQueueService = mock()
+  val mockQueue: HmppsQueue = mock()
   private lateinit var service: IntegrationEventTopicService
   val currentTime = LocalDateTime.now()
 
@@ -38,7 +44,8 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
   fun setUp() {
     whenever(hmppsQueueService.findByTopicId("integrationeventtopic"))
       .thenReturn(HmppsTopic("integrationeventtopic", "sometopicarn", hmppsEventSnsClient))
-
+    whenever(hmppsQueueService.findByQueueId("mockQueue")).thenReturn(mockQueue)
+    whenever(mockQueue.queueArn).thenReturn("mockARN")
     service = IntegrationEventTopicService(hmppsQueueService, deadLetterQueueService, objectMapper)
   }
 
@@ -79,11 +86,23 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Update Subscription Attributes`() {
-    service.updateSubscriptionAttributes("MockArn", "AttriName", "mockValue")
+    // arrange
+    var mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
+    whenever(hmppsEventSnsClient.listSubscriptionsByTopic(any<ListSubscriptionsByTopicRequest>()))
+      .thenReturn(
+        CompletableFuture.completedFuture(
+          ListSubscriptionsByTopicResponse
+            .builder()
+            .subscriptions(mockSubs)
+            .build(),
+        ),
+      )
+
+    service.updateSubscriptionAttributes("mockQueue", "AttriName", "mockValue")
 
     argumentCaptor<SetSubscriptionAttributesRequest>().apply {
       verify(hmppsEventSnsClient, times(1)).setSubscriptionAttributes(capture())
-      Assertions.assertThat("MockArn").isEqualTo(firstValue.subscriptionArn())
+      Assertions.assertThat("mockSubscriptionArn").isEqualTo(firstValue.subscriptionArn())
       Assertions.assertThat("AttriName").isEqualTo(firstValue.attributeName())
       Assertions.assertThat("mockValue").isEqualTo(firstValue.attributeValue())
     }

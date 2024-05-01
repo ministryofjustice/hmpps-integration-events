@@ -21,81 +21,59 @@ import org.springframework.boot.test.mock.mockito.MockReset
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.GetSubscriptionAttributesRequest
-import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SecretsManagerService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
-import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(WireMockExtension::class, SpringExtension::class)
 @SpringBootTest
 @ActiveProfiles("test")
-class EventSubscriberTests {
+class EventSubscriberTests() {
+
+  @Autowired
+  lateinit var hmppsQueueService: HmppsQueueService
 
   @SpyBean(reset = MockReset.BEFORE)
   private lateinit var subscriberService: SubscriberService
 
   @Autowired
-  private lateinit var s3Client: S3Client
-
-  @Autowired
   private lateinit var secretService: SecretsManagerService
-
-  @Autowired
-  private lateinit var hmppsQueueService: HmppsQueueService
 
   @Autowired
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
 
-  private final val hmppsEventsTopicSnsClient: SnsAsyncClient
-  private final val topicArn: String
-  private final val subscriberArn: String
-
-  private val testQueue by lazy { hmppsQueueService.findByQueueId("integrationeventtestqueue") as HmppsQueue }
-  private val testQueueArn by lazy { testQueue.queueArn }
-  init {
-    val hmppsEventTopic = hmppsQueueService.findByTopicId("integrationeventtopic")
-    topicArn = hmppsEventTopic!!.arn
-    hmppsEventsTopicSnsClient = hmppsEventTopic.snsClient
-    val listSubscriptionsByTopicRequest = ListSubscriptionsByTopicRequest.builder().topicArn(topicArn).build()
-
-    val listSubscriptionsResponse = hmppsEventsTopicSnsClient.listSubscriptionsByTopic(listSubscriptionsByTopicRequest).get()
-
-    subscriberArn = listSubscriptionsResponse.subscriptions().first {
-      it.protocol() == "sqs" && it.endpoint() == testQueueArn
-    }.subscriptionArn()
-  }
+  private final val eventTopic by lazy { hmppsQueueService.findByTopicId("integrationeventtopic") as HmppsTopic }
+  private final val hmppsEventsTopicSnsClient by lazy { eventTopic.snsClient }
+  private final val subscriberArn by lazy { integrationEventTopicService.getSubscriptionArnByQueueName("integrationeventtestqueue") }
 
   fun getSubscriberFilterList(): String? {
     val getSubscriptionAttributesRequest = GetSubscriptionAttributesRequest.builder().subscriptionArn(subscriberArn).build()
 
     val getSubscriptionAttributesResponse = hmppsEventsTopicSnsClient.getSubscriptionAttributes(getSubscriptionAttributesRequest).get()
 
-    return getSubscriptionAttributesResponse.attributes().get("FilterPolicy")
+    return getSubscriptionAttributesResponse.attributes()["FilterPolicy"]
   }
 
   @Test
-  fun `Test Run once`() {
+  fun `Subscriber Service should update client filter list in secret and subscription`() {
     stubApiResponse()
-    var originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
+    val originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
     secretService.setSecretValue("testSecret", originalFilterPolicy)
-    integrationEventTopicService.updateSubscriptionAttributes(subscriberArn, "FilterPolicy", originalFilterPolicy)
+    integrationEventTopicService.updateSubscriptionAttributes("integrationeventtestqueue", "FilterPolicy", originalFilterPolicy)
     await.atMost(10000, TimeUnit.SECONDS).untilAsserted {
       verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
       wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v1/config/authorisation")))
+      // secret value updated
+      val updatedSecretValue = secretService.getSecretValue("testSecret")
+      updatedSecretValue.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+      // subscriber filter update
+      val updatedFilterPolicy = getSubscriberFilterList()
+      updatedFilterPolicy.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
     }
-
-    // secret value updated
-    val updatedSecretValue = secretService.getSecretValue("testSecret")
-    updatedSecretValue.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
-    // subscriber filter update
-    var updatedFilterPolicy = getSubscriberFilterList()
-    updatedFilterPolicy.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
   }
   companion object {
     @JvmStatic

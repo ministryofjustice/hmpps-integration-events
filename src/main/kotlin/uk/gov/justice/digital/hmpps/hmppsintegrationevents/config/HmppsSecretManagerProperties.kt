@@ -11,6 +11,6 @@ data class HmppsSecretManagerProperties(
 ) {
   data class SecretConfig(
     val secretName: String,
-    val subscriberArn: String,
+    val queueName: String,
   )
 }
