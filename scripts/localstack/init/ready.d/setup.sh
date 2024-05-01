@@ -5,7 +5,7 @@ AWS_SECRET_ACCESS_KEY="test"
 BACK_UP_BUCKET="certificate-backup"
 TEST_CLIENT_SECRET="testSecret"
 TEST_CLIENT_SECRET_VALUE="{\"eventType\":[\"default\"]}"
-
+echo "Hello World"
 #Create certficate backup bucket
 aws --endpoint-url=http://localhost:4566 s3 mb s3://$BACK_UP_BUCKET
 #Copy client certificate to bucket
