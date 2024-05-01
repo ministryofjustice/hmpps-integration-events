@@ -17,82 +17,79 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.IntegrationApi
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.S3Service
 
 @Service
-class IntegrationApiGatewayTests{
+class IntegrationApiGatewayTests {
 
-	private lateinit var integrationApiProperties: IntegrationApiProperties
+  private lateinit var integrationApiProperties: IntegrationApiProperties
 	
-	private val s3Service:S3Service = mock()
+  private val s3Service: S3Service = mock()
 	
-	lateinit var integrationApiGateway:IntegrationApiGateway
+  lateinit var integrationApiGateway: IntegrationApiGateway
 	
-	@BeforeEach
-	fun setUp() {
-	
+  @BeforeEach
+  fun setUp() {
+    integrationApiProperties = IntegrationApiProperties(
+      url = "https://localhost:8443/",
+      apiKey = "test-api-key",
+      certificateBucketName = "test-bucket",
+      certificatePath = "client.p12",
+      certificatePassword = "client",
+    )
+
+    val certificateStream = this::class.java.getResourceAsStream("/certificates/client.p12")
+    requireNotNull(certificateStream) { "certificate/client.p12 not found on classpath" }
+    whenever(s3Service.getDocumentFile(integrationApiProperties.certificateBucketName, integrationApiProperties.certificatePath))
+      .thenReturn(certificateStream)
 		
-		 integrationApiProperties = IntegrationApiProperties(
-						url = "https://localhost:8443/",
-						apiKey = "test-api-key",
-						certificateBucketName = "test-bucket",
-						certificatePath = "client.p12",
-						certificatePassword = "client"
-		)
-		
-		
-		val certificateStream = this::class.java.getResourceAsStream("/certificates/client.p12")
-		requireNotNull(certificateStream) { "certificate/client.p12 not found on classpath" }
-		whenever(s3Service.getDocumentFile(integrationApiProperties.certificateBucketName, integrationApiProperties.certificatePath))
-						.thenReturn(certificateStream)
-		
-		integrationApiGateway = IntegrationApiGateway(integrationApiProperties, s3Service)
-	}
+    integrationApiGateway = IntegrationApiGateway(integrationApiProperties, s3Service)
+  }
 	
-	@Test
-	fun `getApiAuthorizationConfig should include x-api-key header`() {
-		stubApiResponse()
-		// Act
-		integrationApiGateway.getApiAuthorizationConfig()
+  @Test
+  fun `getApiAuthorizationConfig should include x-api-key header`() {
+    stubApiResponse()
+    // Act
+    integrationApiGateway.getApiAuthorizationConfig()
 		
-		// Assert
-		wireMockServer.allServeEvents.forEach {
-			it.request.headers.getHeader("x-api-key").firstValue().shouldBe("test-api-key")
-		}
-	}
+    // Assert
+    wireMockServer.allServeEvents.forEach {
+      it.request.headers.getHeader("x-api-key").firstValue().shouldBe("test-api-key")
+    }
+  }
 	
-	@Test
-	fun `return client configs`() {
-		stubApiResponse()
-		// Act
-		var result = integrationApiGateway.getApiAuthorizationConfig()
+  @Test
+  fun `return client configs`() {
+    stubApiResponse()
+    // Act
+    var result = integrationApiGateway.getApiAuthorizationConfig()
 		
-		// Assert
-		result.keys.contains("mockservice1").shouldBeTrue()
-		result["mockservice1"]!!.contains("/v1/persons/.*/risks/mappadetail").shouldBeTrue()
-		result["mockservice1"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
-		result.keys.contains("mockservice2").shouldBeTrue()
-		result["mockservice2"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
-	}
+    // Assert
+    result.keys.contains("mockservice1").shouldBeTrue()
+    result["mockservice1"]!!.contains("/v1/persons/.*/risks/mappadetail").shouldBeTrue()
+    result["mockservice1"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
+    result.keys.contains("mockservice2").shouldBeTrue()
+    result["mockservice2"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
+  }
 	
-	companion object {
-		@JvmStatic
-		@RegisterExtension
-		private val wireMockServer = WireMockExtension.newInstance()
-						.options(
-										WireMockConfiguration.wireMockConfig()
-														.dynamicPort()
-														.httpsPort(8443)
-										)
-						.build()
-	}
+  companion object {
+    @JvmStatic
+    @RegisterExtension
+    private val wireMockServer = WireMockExtension.newInstance()
+      .options(
+        WireMockConfiguration.wireMockConfig()
+          .dynamicPort()
+          .httpsPort(8443),
+      )
+      .build()
+  }
 	
-	fun stubApiResponse() {
-		wireMockServer.stubFor(
-						WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
-										.withHeader("x-api-key", WireMock.matching("test-api-key"))
-										.willReturn(
-														WireMock.aResponse()
-																		.withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-																		.withBody(
-																						"""{
+  fun stubApiResponse() {
+    wireMockServer.stubFor(
+      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+        .withHeader("x-api-key", WireMock.matching("test-api-key"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+            .withBody(
+              """{
                     "mockservice1": [
                         "/v1/persons/.*/risks/mappadetail",
                          "/v1/persons/.*/risks"
@@ -102,17 +99,17 @@ class IntegrationApiGatewayTests{
                     ]
                 }
               """.trimIndent(),
-																		),
-										),
-		)
-		wireMockServer.stubFor(
-						WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
-										.withHeader("x-api-key", WireMock.notMatching("test-api-key"))
-										.willReturn(
-														WireMock.aResponse()
-																		.withStatus(401)
-																		.withBody("Unauthorized"),
-										),
-		)
-	}
+            ),
+        ),
+    )
+    wireMockServer.stubFor(
+      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+        .withHeader("x-api-key", WireMock.notMatching("test-api-key"))
+        .willReturn(
+          WireMock.aResponse()
+            .withStatus(401)
+            .withBody("Unauthorized"),
+        ),
+    )
+  }
 }
