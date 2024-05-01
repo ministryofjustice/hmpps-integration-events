@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
 import io.netty.handler.ssl.SslContextBuilder
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
@@ -36,7 +37,10 @@ class IntegrationApiGateway(
     val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
     keyManagerFactory.init(keyStore, integrationApiConfig.certificatePassword.toCharArray())
 
+    val trustAllCerts = InsecureTrustManagerFactory.INSTANCE
+
     val sslContext = SslContextBuilder.forClient()
+      .trustManager(trustAllCerts)
       .keyManager(keyManagerFactory)
       .build()
 
@@ -50,11 +54,15 @@ class IntegrationApiGateway(
   }
 
   fun getApiAuthorizationConfig(): Map<String, List<String>> {
-    return webClient.method(HttpMethod.GET)
-      .uri("v1/config/authorisation")
-      .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
-      .block()!!
-      .mapKeys { (key, _) -> key.replace(".", "-") }
+    try {
+      return webClient.method(HttpMethod.GET)
+        .uri("v1/config/authorisation")
+        .retrieve()
+        .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
+        .block()!!
+        .mapKeys { (key, _) -> key.replace(".", "-") }
+    } catch (e: Exception) {
+      return mapOf()
+    }
   }
 }

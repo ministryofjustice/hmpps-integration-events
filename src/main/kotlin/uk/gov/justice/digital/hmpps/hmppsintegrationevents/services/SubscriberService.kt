@@ -17,7 +17,7 @@ class SubscriberService(
   private val integrationEventTopicService: IntegrationEventTopicService,
   private val objectMapper: ObjectMapper,
 ) {
-  @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
+  @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
     val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
 

@@ -63,3 +63,7 @@ management:
 notifier:
   schedule:
     rate: 10000
+
+subscriber-checker:
+  schedule:
+    rate: 3600000
