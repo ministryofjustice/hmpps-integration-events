@@ -107,28 +107,27 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       Assertions.assertThat("mockValue").isEqualTo(firstValue.attributeValue())
     }
   }
-  
+
   @Test
-  fun`Get subscription arn for given queue name`(){
+  fun`Get subscription arn for given queue name`() {
     val mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
-    
+
     whenever(hmppsEventSnsClient.listSubscriptionsByTopic(any<ListSubscriptionsByTopicRequest>()))
-            .thenReturn(
-                    CompletableFuture.completedFuture(
-                            ListSubscriptionsByTopicResponse
-                                    .builder()
-                                    .subscriptions(mockSubs)
-                                    .build(),
-                    ),
-            )
-    
+      .thenReturn(
+        CompletableFuture.completedFuture(
+          ListSubscriptionsByTopicResponse
+            .builder()
+            .subscriptions(mockSubs)
+            .build(),
+        ),
+      )
+
     val result = service.getSubscriptionArnByQueueName("mockQueue")
-    
+
     argumentCaptor<ListSubscriptionsByTopicRequest>().apply {
       verify(hmppsEventSnsClient, times(1)).listSubscriptionsByTopic(capture())
       Assertions.assertThat("sometopicarn").isEqualTo(firstValue.topicArn())
     }
     result.shouldBe("mockSubscriptionArn")
-    
   }
 }

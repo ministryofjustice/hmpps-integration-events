@@ -22,13 +22,13 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.2-beta"){
-		exclude("org.springframework.security", "spring-security-config")
-		exclude("org.springframework.security", "spring-security-core")
-		exclude("org.springframework.security", "spring-security-crypto")
-		exclude("org.springframework.security", "spring-security-web")
-		exclude("org.apache.common", "commons-compress")
-	}
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.2-beta") {
+    exclude("org.springframework.security", "spring-security-config")
+    exclude("org.springframework.security", "spring-security-core")
+    exclude("org.springframework.security", "spring-security-crypto")
+    exclude("org.springframework.security", "spring-security-web")
+    exclude("org.apache.common", "commons-compress")
+  }
   testImplementation("org.testcontainers:localstack:1.19.7")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("org.apache.commons:commons-compress:1.26.1")
