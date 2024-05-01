@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.shouldBe
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -86,8 +87,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Update Subscription Attributes`() {
-    // arrange
-    var mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
+    val mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
     whenever(hmppsEventSnsClient.listSubscriptionsByTopic(any<ListSubscriptionsByTopicRequest>()))
       .thenReturn(
         CompletableFuture.completedFuture(
@@ -106,5 +106,29 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       Assertions.assertThat("AttriName").isEqualTo(firstValue.attributeName())
       Assertions.assertThat("mockValue").isEqualTo(firstValue.attributeValue())
     }
+  }
+  
+  @Test
+  fun`Get subscription arn for given queue name`(){
+    val mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
+    
+    whenever(hmppsEventSnsClient.listSubscriptionsByTopic(any<ListSubscriptionsByTopicRequest>()))
+            .thenReturn(
+                    CompletableFuture.completedFuture(
+                            ListSubscriptionsByTopicResponse
+                                    .builder()
+                                    .subscriptions(mockSubs)
+                                    .build(),
+                    ),
+            )
+    
+    val result = service.getSubscriptionArnByQueueName("mockQueue")
+    
+    argumentCaptor<ListSubscriptionsByTopicRequest>().apply {
+      verify(hmppsEventSnsClient, times(1)).listSubscriptionsByTopic(capture())
+      Assertions.assertThat("sometopicarn").isEqualTo(firstValue.topicArn())
+    }
+    result.shouldBe("mockSubscriptionArn")
+    
   }
 }
