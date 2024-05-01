@@ -1,15 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.stereotype.Service
@@ -24,11 +24,14 @@ class IntegrationApiGatewayTests {
   private val s3Service: S3Service = mock()
 	
   lateinit var integrationApiGateway: IntegrationApiGateway
-	
+  private lateinit var wireMockServer: WireMockServer
+
   @BeforeEach
   fun setUp() {
+    wireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort().httpsPort(8550))
+    wireMockServer.start()
     integrationApiProperties = IntegrationApiProperties(
-      url = "https://localhost:8443/",
+      url = "https://localhost:8550/",
       apiKey = "test-api-key",
       certificateBucketName = "test-bucket",
       certificatePath = "client.p12",
@@ -42,7 +45,12 @@ class IntegrationApiGatewayTests {
 		
     integrationApiGateway = IntegrationApiGateway(integrationApiProperties, s3Service)
   }
-	
+
+  @AfterEach
+  fun tearDown() {
+    wireMockServer.stop()
+  }
+
   @Test
   fun `getApiAuthorizationConfig should include x-api-key header`() {
     stubApiResponse()
@@ -68,19 +76,6 @@ class IntegrationApiGatewayTests {
     result.keys.contains("mockservice2").shouldBeTrue()
     result["mockservice2"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
   }
-	
-  companion object {
-    @JvmStatic
-    @RegisterExtension
-    private val wireMockServer = WireMockExtension.newInstance()
-      .options(
-        WireMockConfiguration.wireMockConfig()
-          .dynamicPort()
-          .httpsPort(8443),
-      )
-      .build()
-  }
-	
   fun stubApiResponse() {
     wireMockServer.stubFor(
       WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
