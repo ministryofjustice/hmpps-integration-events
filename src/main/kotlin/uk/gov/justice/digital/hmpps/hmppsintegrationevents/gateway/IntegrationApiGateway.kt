@@ -54,15 +54,11 @@ class IntegrationApiGateway(
   }
 
   fun getApiAuthorizationConfig(): Map<String, List<String>> {
-    try {
-      return webClient.method(HttpMethod.GET)
-        .uri("v1/config/authorisation")
-        .retrieve()
-        .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
-        .block()!!
-        .mapKeys { (key, _) -> key.replace(".", "-") }
-    } catch (e: Exception) {
-      return mapOf()
-    }
+    return webClient.method(HttpMethod.GET)
+      .uri("v1/config/authorisation")
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
+      .block()!!
+      .mapKeys { (key, _) -> key.replace(".", "-") }
   }
 }
