@@ -31,6 +31,10 @@ jobs:
             - gradle-
       - hmpps/wait_till_ready_postgres
       - run:
+          name: setup local stack
+          command:
+            ./scripts/localstack/setup.sh
+      - run:
           name: run gradlew check
           command:
             ./gradlew check
