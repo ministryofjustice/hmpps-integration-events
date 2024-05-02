@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 @ExtendWith(WireMockExtension::class, SpringExtension::class)
 @SpringBootTest
 @ActiveProfiles("test")
-class EventSubscriberTests() {
+class EventSubscriberTest() {
 
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
