@@ -17,7 +17,11 @@ spring:
 
 services:
   integrations-api:
-    base-url: https://dev.integration-api.hmpps.service.justice.gov.uk
+    url: https://localhost:8443
+    apikey: "mockApiKey"
+    certificatebucketname: "certificate-backup"
+    certificatepassword: "client"
+    certificatepath: "testclient/client.p12"
 
 hmpps.sqs:
   provider: localstack
@@ -30,15 +34,34 @@ hmpps.sqs:
       dlqName: hmpps_integrations_events_queue_dlq
       subscribeTopicId: domainevents
     integrationeventtestqueue:
-      queueName: ${random.uuid}
-      dlqName: ${random.uuid}
+      queueName: integration_event_test_queue
+      dlqName: integration_event_test_queue_dlq
       subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
     integrationeventtopic:
-      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+      arn: arn:aws:sns:eu-west-2:000000000000:integration_event_topic
+
+hmpps.s3:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  buckets:
+    certificate-backup:
+      bucketName: certificate-backup
+
+hmpps.secret:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  secrets:
+    mockservice1:
+      secretName: testSecret
+      queueName: integrationeventtestqueue
 
 notifier:
+  schedule:
+    rate: 1000
+
+subscriber-checker:
   schedule:
     rate: 1000

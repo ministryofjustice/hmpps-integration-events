@@ -1,6 +1,7 @@
 version: "3.2"
 
 services:
+
   hmpps-integration-events:
     build:
       context: .
@@ -9,7 +10,7 @@ services:
     ports:
       - "8081:8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ping" ]
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=localstack
@@ -40,12 +41,13 @@ services:
     ports:
       - 4566:4566
     volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./scripts/localstack}:/etc/localstack"
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
     environment:
-      - SERVICES=sqs,sns
+      - SERVICES=sqs,sns,s3,secretsmanager
       - DEFAULT_REGION=eu-west-2
     healthcheck:
-      test: 'curl localhost:4566/_localstack/init'
+      test: 'curl localhost:4566/_localstack/init | grep -q ''"READY": true'''
       interval: 60s
       timeout: 2s
       retries: 10

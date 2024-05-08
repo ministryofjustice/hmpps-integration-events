@@ -19,8 +19,10 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.2") {
+  implementation("com.google.code.gson:gson:2.10.1")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+  implementation("software.amazon.awssdk:secretsmanager")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.2-beta") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
@@ -35,7 +37,7 @@ dependencies {
   testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
   testImplementation("com.h2database:h2:2.2.224")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.7")
-
+  testImplementation("org.wiremock:wiremock-standalone:3.5.4")
   testImplementation("io.mockk:mockk:1.13.2")
   testImplementation("io.mockk:mockk-agent-jvm:1.13.2")
 }

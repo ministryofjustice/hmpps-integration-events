@@ -12,3 +12,4 @@ format:
 
 check:
 	./gradlew check
+
