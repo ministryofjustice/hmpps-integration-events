@@ -41,8 +41,13 @@ hmpps.secret:
   localstackUrl: http://localhost:4566
   secrets:
     mapps-client-org:
-      secretName: testSecret
+      secretId: testSecret
       queueName: arn:aws:sns:eu-west-2:000000000000:integration-event-topic:717e006e-ab56-49d8-89f8-fc43568e242a
 
 
-
+hmpps.s3:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  buckets:
+    certificate-backup:
+      bucketName: certificate-backup

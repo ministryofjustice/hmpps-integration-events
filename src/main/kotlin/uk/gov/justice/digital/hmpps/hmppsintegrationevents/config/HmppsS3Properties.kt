@@ -10,7 +10,6 @@ data class HmppsS3Properties(
   val buckets: Map<String, BucketConfig> = mapOf(),
 ) {
   data class BucketConfig(
-    val bucketName: String,
-    val bucketArn: String = "",
+    val bucketName: String
   )
 }

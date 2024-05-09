@@ -10,7 +10,7 @@ data class HmppsSecretManagerProperties(
   val secrets: Map<String, SecretConfig> = mapOf(),
 ) {
   data class SecretConfig(
-    val secretName: String,
-    val queueName: String,
+          val secretId: String,
+          val queueName: String,
   )
 }

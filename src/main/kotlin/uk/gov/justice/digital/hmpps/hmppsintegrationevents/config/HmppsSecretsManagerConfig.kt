@@ -55,18 +55,18 @@ class HmppsSecretsManagerConfig(
 
       secrets.values.onEach {
         try {
-          log.info("Checking for Secret '${it.secretName}'")
+          log.info("Checking for Secret '${it.secretId}'")
 
           val describeSecretRequest = DescribeSecretRequest.builder()
-            .secretId(it.secretName)
+            .secretId(it.secretId)
             .build()
           client.describeSecret(describeSecretRequest)
-          log.info("Secret  '${it.secretName}' found")
+          log.info("Secret  '${it.secretId}' found")
         } catch (e: ResourceNotFoundException) {
-          log.info("Creating Secret '${it.secretName}' as it was not found")
+          log.info("Creating Secret '${it.secretId}' as it was not found")
 
           val bucketRequest = CreateSecretRequest.builder()
-            .name(it.secretName)
+            .name(it.secretId)
             .build()
 
           client.createSecret(bucketRequest)
