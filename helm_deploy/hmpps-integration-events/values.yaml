@@ -34,10 +34,10 @@ generic-service:
     hmpps-integration-events:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
     certificate-store:
-      SERVICES_INTEGRATIONS-API_CERTIFICATE-BUCKET-NAME: "bucket_name"
-      SERVICES_INTEGRATIONS-API_CERTIFICATE-PASSWORD: "event_service_certificate_password"
-      SERVICES_INTEGRATIONS-API_CERTIFICATE-PATH: "event_service_certificate_path"
-      HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKET-NAME: "bucket_name"
+      SERVICES_INTEGRATIONS-API_CERTIFICATEBUCKETNAME: "bucket_name"
+      SERVICES_INTEGRATIONS-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
+      SERVICES_INTEGRATIONS-API_CERTIFICATEPATH: "event_service_certificate_path"
+      HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKETNAME: "bucket_name"
     consumer-api-keys:
       SERVICES_INTEGRATION-API_APIKEY: "event-service"
     hmpps-integration-events-topic:
@@ -51,7 +51,7 @@ generic-service:
     event-mapps-queue:
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
-      HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRET-ID: "mapps_filter_policy_secret_id"
+      HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRETID: "mapps_filter_policy_secret_id"
     rds-postgresql-instance-output:
       DB_SERVER: "rds_instance_address"
       DB_NAME: "database_name"
