@@ -48,7 +48,7 @@ generic-service:
       HMPPS_SQS_TOPIC_DOMAINEVENTS_ARN: "hmpps-domain-events-topic-arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
-    event_mapps_queue:
+    event-mapps-queue:
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
       HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRET-ID: "mapps_filter_policy_secret_id"
