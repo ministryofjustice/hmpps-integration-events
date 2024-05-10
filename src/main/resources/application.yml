@@ -19,6 +19,7 @@ spring:
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
     enabled: true
+    baselineOnMigrate: true
   sql:
     init:
       continue-on-error: true

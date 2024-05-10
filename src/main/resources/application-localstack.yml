@@ -2,17 +2,14 @@ spring:
 
   jpa:
     show-sql: true
-  flyway:
-    enabled: true
-    baselineOnMigrate: true
 
 services:
   integrations-api:
     url: https://dev.integration-api.hmpps.service.justice.gov.uk
-    apikey: ""
-    certificatebucketname: ""
-    certificatepassword: ""
-    certificatepath: ""
+    apikey: "LIJGe1vhuo7FefAcG8Aii1Pi9QcOibE3Hy7MVsab"
+    certificate-bucket-name: "certificate-backup"
+    certificate-password: "client"
+    certificate-path: "testclient/client.p12"
 
 aws:
   provider: localstack
