@@ -46,7 +46,7 @@ generic-service:
     hmpps-integration-api-domain-events-sqs-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUEARN: "sqs_arn"
-      HMPPS_SQS_TOPIC_DOMAINEVENTS_ARN: "hmpps-domain-events-topic-arn"
+      HMPPS_SQS_TOPIC_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
     event-mapps-queue:
