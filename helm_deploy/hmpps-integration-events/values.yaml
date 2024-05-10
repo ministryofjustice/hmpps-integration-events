@@ -39,7 +39,7 @@ generic-service:
       SERVICES_INTEGRATIONS-API_CERTIFICATE-PATH: "event_service_certificate_path"
       HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKET-NAME: "bucket_name"
     consumer-api-keys:
-      SERVICE_INTEGRATION-API_APIKEY: "event-service"
+      SERVICES_INTEGRATION-API_APIKEY: "event-service"
     hmpps-integration-events-topic:
       HMPPS_SQS_TOPICS_INTEGRATIONEVENTTOPIC_ARN: "sns_arn"
     hmpps-integration-api-domain-events-sqs-instance-output:
