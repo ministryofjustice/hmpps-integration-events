@@ -34,9 +34,9 @@ generic-service:
     hmpps-integration-events:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
     certificate-store:
-      SERVICES_INTEGRATIONS-API_CERTIFICATEBUCKETNAME: "bucket_name"
-      SERVICES_INTEGRATIONS-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
-      SERVICES_INTEGRATIONS-API_CERTIFICATEPATH: "event_service_certificate_path"
+      SERVICES_INTEGRATION-API_CERTIFICATEBUCKETNAME: "bucket_name"
+      SERVICES_INTEGRATION-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
+      SERVICES_INTEGRATION-API_CERTIFICATEPATH: "event_service_certificate_path"
       HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKETNAME: "bucket_name"
     consumer-api-keys:
       SERVICES_INTEGRATION-API_APIKEY: "event-service"
