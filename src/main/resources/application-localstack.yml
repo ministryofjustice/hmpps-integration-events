@@ -1,10 +1,16 @@
 spring:
-
   jpa:
     show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
+    username: postgres
+    password: pa55word
+  flyway:
+    enabled: true
+    baselineOnMigrate: true
 
 services:
-  integrations-api:
+  integration-api:
     url: https://dev.integration-api.hmpps.service.justice.gov.uk
     apikey: "LIJGe1vhuo7FefAcG8Aii1Pi9QcOibE3Hy7MVsab"
     certificate-bucket-name: "certificate-backup"
@@ -14,8 +20,6 @@ services:
 aws:
   provider: localstack
   region: eu-west-2
-
-
 
 hmpps.sqs:
   provider: localstack
