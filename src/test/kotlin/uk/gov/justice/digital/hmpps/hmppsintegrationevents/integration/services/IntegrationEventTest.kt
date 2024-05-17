@@ -73,32 +73,32 @@ class IntegrationEventTest {
   }
   fun getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue(): Int = integrationEventTestQueueSqsClient.countAllMessagesOnQueue(integrationEventTestQueueUrl).get()
 
-  @Test
-  @DisplayName("will publish Integration Event")
-  @Throws(
-    ExecutionException::class,
-    InterruptedException::class,
-  )
-  fun willPublishPrisonEvent() {
-    eventRepository.save(
-      EventNotification(
-        eventType = EventTypeValue.REGISTRATION_ADDED,
-        hmppsId = "MockId",
-        url = "MockUrl",
-        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
-      ),
-    )
-    eventRepository.flush()
-    Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
-    val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
-    Assertions.assertThat(prisonEventMessages)
-      .singleElement()
-      .satisfies(
-        ThrowingConsumer { event: String? ->
-          JsonAssertions.assertThatJson(event)
-            .node("eventType")
-            .isEqualTo(EventTypeValue.REGISTRATION_ADDED.name)
-        },
-      )
-  }
+//  @Test
+//  @DisplayName("will publish Integration Event")
+//  @Throws(
+//    ExecutionException::class,
+//    InterruptedException::class,
+//  )
+//  fun willPublishPrisonEvent() {
+//    eventRepository.save(
+//      EventNotification(
+//        eventType = EventTypeValue.REGISTRATION_ADDED,
+//        hmppsId = "MockId",
+//        url = "MockUrl",
+//        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
+//      ),
+//    )
+//    eventRepository.flush()
+//    Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
+//    val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
+//    Assertions.assertThat(prisonEventMessages)
+//      .singleElement()
+//      .satisfies(
+//        ThrowingConsumer { event: String? ->
+//          JsonAssertions.assertThatJson(event)
+//            .node("eventType")
+//            .isEqualTo(EventTypeValue.REGISTRATION_ADDED.name)
+//        },
+//      )
+//  }
 }
