@@ -82,7 +82,7 @@ workflows:
             - validate
             - build_docker
             - helm_lint
-          helm_timeout: 50m
+          helm_timeout: 5m
 #      - request-preprod-approval:
 #          type: approval
 #          requires:
