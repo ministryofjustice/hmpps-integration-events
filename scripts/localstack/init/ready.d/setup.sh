@@ -1,5 +1,5 @@
 #!/bin/bash
-AWS_REGION=eu-west-2
+AWS_REGION="eu-west-2"
 BACK_UP_BUCKET="certificate-backup"
 TEST_CLIENT_SECRET="testSecret"
 TEST_CLIENT_SECRET_VALUE="{\"eventType\":[\"default\"]}"
