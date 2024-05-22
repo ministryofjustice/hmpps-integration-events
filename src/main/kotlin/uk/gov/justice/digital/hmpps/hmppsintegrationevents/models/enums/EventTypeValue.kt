@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 enum class EventTypeValue(val value: String) {
   ADDRESS_CHANGE("Address Change"),
-  REGISTRATION_ADDED("probation-case.registration.added"),
+  MAPPA_DETAIL_CHANGED("MappaDetail.Changed"),
   ;
 
   companion object {

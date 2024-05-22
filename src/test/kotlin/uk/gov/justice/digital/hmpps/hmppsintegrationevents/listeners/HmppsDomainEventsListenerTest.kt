@@ -1,14 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
-import io.kotest.matchers.ints.exactly
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.times
-import org.mockito.kotlin.any
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
@@ -39,7 +36,7 @@ class HmppsDomainEventsListenerTest {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, EventTypeValue.REGISTRATION_ADDED) }
+    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, EventTypeValue.MAPPA_DETAIL_CHANGED) }
   }
 
   @Test

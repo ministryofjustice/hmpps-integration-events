@@ -82,7 +82,7 @@ class IntegrationEventTest {
   fun willPublishPrisonEvent() {
     eventRepository.save(
       EventNotification(
-        eventType = EventTypeValue.REGISTRATION_ADDED,
+        eventType = EventTypeValue.MAPPA_DETAIL_CHANGED,
         hmppsId = "MockId",
         url = "MockUrl",
         lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
@@ -97,7 +97,7 @@ class IntegrationEventTest {
         ThrowingConsumer { event: String? ->
           JsonAssertions.assertThatJson(event)
             .node("eventType")
-            .isEqualTo(EventTypeValue.REGISTRATION_ADDED.name)
+            .isEqualTo(EventTypeValue.MAPPA_DETAIL_CHANGED.name)
         },
       )
   }

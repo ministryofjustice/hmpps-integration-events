@@ -29,7 +29,7 @@ class SubscriberService(
     val events = clientConfig.value
       .flatMap { url ->
         listOfNotNull(
-          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { EventTypeValue.REGISTRATION_ADDED.name },
+          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { EventTypeValue.MAPPA_DETAIL_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
