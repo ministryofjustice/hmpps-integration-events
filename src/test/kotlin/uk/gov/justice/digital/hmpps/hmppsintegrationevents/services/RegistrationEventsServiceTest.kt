@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -43,12 +43,12 @@ class RegistrationEventsServiceTest {
   fun `will process and save a mapps domain registration event message`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createRegistrationAddedDomainEvent()
 
-    registrationEventsService.execute(event, EventTypeValue.MAPPA_DETAIL_CHANGED)
+    registrationEventsService.execute(event, IncomingEventType.REGISTRATION_ADDED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = EventTypeValue.MAPPA_DETAIL_CHANGED,
+          eventType = IncomingEventType.REGISTRATION_ADDED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/persons/X777776/risks/mappadetail",
           lastModifiedDateTime = currentTime,
@@ -61,7 +61,7 @@ class RegistrationEventsServiceTest {
   fun `will not process and save a domain registration event message of none MAPP type`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createRegistrationAddedDomainEvent(registerTypeCode = "NOTMAPP")
 
-    registrationEventsService.execute(event, EventTypeValue.MAPPA_DETAIL_CHANGED)
+    registrationEventsService.execute(event, IncomingEventType.REGISTRATION_ADDED)
 
     verify { repo wasNot Called }
   }
@@ -70,7 +70,7 @@ class RegistrationEventsServiceTest {
   fun `will not process and save a domain registration event message with no CRN`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createRegistrationAddedDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
-    registrationEventsService.execute(event, EventTypeValue.MAPPA_DETAIL_CHANGED)
+    registrationEventsService.execute(event, IncomingEventType.REGISTRATION_ADDED)
 
     verify { repo wasNot Called }
     verify(exactly = 1) { deadLetterQueueService.sendEvent(event, "CRN could not be found in registration event message") }
@@ -78,12 +78,12 @@ class RegistrationEventsServiceTest {
 
   @Test
   fun `will update an events lastModifiedDate if a relevant event is already stored`() {
-    every { repo.existsByHmppsIdAndEventType("X777776", EventTypeValue.MAPPA_DETAIL_CHANGED) } returns true
+    every { repo.existsByHmppsIdAndEventType("X777776", IncomingEventType.REGISTRATION_ADDED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createRegistrationAddedDomainEvent()
 
-    registrationEventsService.execute(event, EventTypeValue.MAPPA_DETAIL_CHANGED)
+    registrationEventsService.execute(event, IncomingEventType.REGISTRATION_ADDED)
 
-    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", EventTypeValue.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IncomingEventType.REGISTRATION_ADDED) }
   }
 }

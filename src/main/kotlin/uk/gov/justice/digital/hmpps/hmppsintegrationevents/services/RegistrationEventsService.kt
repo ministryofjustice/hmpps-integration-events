@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.RegistrationAddedEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -22,7 +22,7 @@ class RegistrationEventsService(
 ) {
   private val objectMapper = ObjectMapper()
 
-  fun execute(hmppsDomainEvent: HmppsDomainEvent, eventType: EventTypeValue) {
+  fun execute(hmppsDomainEvent: HmppsDomainEvent, eventType: IncomingEventType) {
     val registrationEventMessage: RegistrationAddedEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
 
     if (registrationEventMessage.additionalInformation.isMappRegistrationType()) {
@@ -36,7 +36,7 @@ class RegistrationEventsService(
     }
   }
 
-  private fun handleMessage(hmppsId: String, eventType: EventTypeValue) {
+  private fun handleMessage(hmppsId: String, eventType: IncomingEventType) {
     if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
       saveEventNotification(eventType, hmppsId)
     } else {
@@ -44,7 +44,7 @@ class RegistrationEventsService(
     }
   }
 
-  private fun saveEventNotification(eventType: EventTypeValue, hmppsId: String): EventNotification = (
+  private fun saveEventNotification(eventType: IncomingEventType, hmppsId: String): EventNotification = (
     repo.save(
       EventNotification(
         eventType = eventType,
@@ -55,7 +55,7 @@ class RegistrationEventsService(
     )
     )
 
-  private fun updateEventNotification(eventType: EventTypeValue, hmppsId: String): Int = (
+  private fun updateEventNotification(eventType: IncomingEventType, hmppsId: String): Int = (
     repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), hmppsId, eventType)
     )
 }

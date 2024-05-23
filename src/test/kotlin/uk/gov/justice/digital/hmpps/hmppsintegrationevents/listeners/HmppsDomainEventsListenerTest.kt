@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 import java.time.LocalDateTime
@@ -36,7 +36,7 @@ class HmppsDomainEventsListenerTest {
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, EventTypeValue.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, IncomingEventType.REGISTRATION_ADDED) }
   }
 
   @Test

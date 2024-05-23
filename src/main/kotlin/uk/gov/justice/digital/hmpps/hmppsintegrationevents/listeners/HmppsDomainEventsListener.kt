@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
 
@@ -33,8 +33,8 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
   }
 
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
-    when (val hmppsDomainEventType = EventTypeValue.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
-      EventTypeValue.MAPPA_DETAIL_CHANGED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
+    when (val hmppsDomainEventType = IncomingEventType.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
+      IncomingEventType.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
       else -> {
         deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
       }
