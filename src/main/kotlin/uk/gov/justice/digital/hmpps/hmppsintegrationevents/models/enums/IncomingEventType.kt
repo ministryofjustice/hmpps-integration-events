@@ -6,6 +6,5 @@ enum class IncomingEventType(val value: String, val outgoingEvent: OutgoingEvent
 
   companion object {
     infix fun from(value: String): IncomingEventType? = IncomingEventType.entries.firstOrNull { it.value == value }
-
   }
 }

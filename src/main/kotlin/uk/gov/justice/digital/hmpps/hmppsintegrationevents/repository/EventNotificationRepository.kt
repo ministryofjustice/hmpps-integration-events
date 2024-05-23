@@ -22,8 +22,8 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   @Modifying
   @Query("update EventNotification e set e.lastModifiedDateTime = :dateTime where e.hmppsId = :hmppsId and e.eventType = :eventType")
   fun updateLastModifiedDateTimeByHmppsIdAndEventType(
-      @Param("dateTime") dateTime: LocalDateTime,
-      @Param("hmppsId") hmppsId: String,
-      @Param("eventType") eventType: IncomingEventType,
+    @Param("dateTime") dateTime: LocalDateTime,
+    @Param("hmppsId") hmppsId: String,
+    @Param("eventType") eventType: IncomingEventType,
   ): Int
 }

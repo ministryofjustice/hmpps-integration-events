@@ -17,22 +17,22 @@ import java.time.LocalDateTime
 @Table(name = "EVENT_NOTIFICATION")
 data class EventNotification(
 
-    @Id
+  @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "EVENT_ID", nullable = false, unique = true)
   val eventId: Long? = null,
 
-    @Column(name = "HMPPS_ID", nullable = false)
+  @Column(name = "HMPPS_ID", nullable = false)
   val hmppsId: String,
 
-    @Enumerated(EnumType.STRING)
+  @Enumerated(EnumType.STRING)
   @Column(name = "EVENT_TYPE", nullable = false)
   val eventType: IncomingEventType,
 
-    @Column(name = "URL", nullable = false)
+  @Column(name = "URL", nullable = false)
   val url: String,
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+  @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
   val lastModifiedDateTime: LocalDateTime,
 )
