@@ -6,6 +6,7 @@ spring:
     username: postgres
     password: pa55word
   flyway:
+    locations: classpath:db/migration
     enabled: true
     baselineOnMigrate: true
 
