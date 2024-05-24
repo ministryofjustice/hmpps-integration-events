@@ -13,21 +13,20 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @JsonTest
-class EventNotifierServiceTest() {
+class EventNotifierServiceTest {
 
-  lateinit var emitter: EventNotifierService
-  val integrationEventTopicService: IntegrationEventTopicService = mock()
+  private lateinit var emitter: EventNotifierService
 
-  val eventRepository: EventNotificationRepository = mock()
-
-  val currentTime = LocalDateTime.now()
+  private val integrationEventTopicService: IntegrationEventTopicService = mock()
+  private val eventRepository: EventNotificationRepository = mock()
+  private val currentTime: LocalDateTime = LocalDateTime.now()
 
   @BeforeEach
   fun setUp() {
@@ -45,7 +44,7 @@ class EventNotifierServiceTest() {
 
   @Test
   fun `Event published for event notification in database`() {
-    val event = EventNotification(123, "hmppsId", IncomingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
+    val event = EventNotification(123, "hmppsId", OutgoingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -60,7 +59,7 @@ class EventNotifierServiceTest() {
 
   @Test
   fun `Remove event notification after event processed`() {
-    val event = EventNotification(123, "hmppsId", IncomingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
+    val event = EventNotification(123, "hmppsId", OutgoingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()

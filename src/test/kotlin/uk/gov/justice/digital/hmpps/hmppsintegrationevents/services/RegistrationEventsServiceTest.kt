@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -48,7 +49,7 @@ class RegistrationEventsServiceTest {
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IncomingEventType.REGISTRATION_ADDED,
+          eventType = OutgoingEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/persons/X777776/risks/mappadetail",
           lastModifiedDateTime = currentTime,

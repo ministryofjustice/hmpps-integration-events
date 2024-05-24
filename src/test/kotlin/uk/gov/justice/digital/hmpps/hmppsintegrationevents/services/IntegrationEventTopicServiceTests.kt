@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
 import software.amazon.awssdk.services.sns.model.Subscription
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -52,7 +52,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Publish Event `() {
-    val event = EventNotification(123, "hmppsId", IncomingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
+    val event = EventNotification(123, "hmppsId", OutgoingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
 
     service.sendEvent(event)
 
@@ -70,7 +70,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Put event into dlq if failed to publish message`() {
-    val event = EventNotification(123, "hmppsId", IncomingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
+    val event = EventNotification(123, "hmppsId", OutgoingEventType.ADDRESS_CHANGE, "mockUrl", currentTime)
     whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
 
     service.sendEvent(event)

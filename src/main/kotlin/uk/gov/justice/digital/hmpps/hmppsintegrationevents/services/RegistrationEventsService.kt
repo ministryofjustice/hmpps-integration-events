@@ -47,7 +47,7 @@ class RegistrationEventsService(
   private fun saveEventNotification(eventType: IncomingEventType, hmppsId: String): EventNotification = (
     repo.save(
       EventNotification(
-        eventType = eventType,
+        eventType = eventType.outgoingEvent,
         hmppsId = hmppsId,
         url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
         lastModifiedDateTime = LocalDateTime.now(),

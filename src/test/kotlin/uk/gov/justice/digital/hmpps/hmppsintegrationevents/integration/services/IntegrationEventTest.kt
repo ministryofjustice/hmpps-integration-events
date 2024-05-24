@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
@@ -82,7 +82,7 @@ class IntegrationEventTest {
   fun willPublishPrisonEvent() {
     eventRepository.save(
       EventNotification(
-        eventType = IncomingEventType.REGISTRATION_ADDED,
+        eventType = OutgoingEventType.MAPPA_DETAIL_CHANGED,
         hmppsId = "MockId",
         url = "MockUrl",
         lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
@@ -97,7 +97,7 @@ class IntegrationEventTest {
         ThrowingConsumer { event: String? ->
           JsonAssertions.assertThatJson(event)
             .node("eventType")
-            .isEqualTo(IncomingEventType.REGISTRATION_ADDED.name)
+            .isEqualTo(OutgoingEventType.MAPPA_DETAIL_CHANGED.name)
         },
       )
   }

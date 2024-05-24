@@ -28,7 +28,7 @@ class SecretsmanagerServiceTests {
   fun `getSecretValue call secretsMangerClient and return secretString`() {
     whenever(secretsManagerClient.getSecretValue(any<GetSecretValueRequest>())).thenReturn(GetSecretValueResponse.builder().secretString("MockValue").build())
 
-    var response = service.getSecretValue("MockSecret")
+    val response = service.getSecretValue("MockSecret")
 
     argumentCaptor<GetSecretValueRequest>().apply {
       verify(secretsManagerClient, times(1)).getSecretValue(capture())
@@ -39,7 +39,7 @@ class SecretsmanagerServiceTests {
 
   @Test
   fun `setSecretValue call secretsMangerClient `() {
-    var response = service.setSecretValue("MockSecret", "MockValue")
+    service.setSecretValue("MockSecret", "MockValue")
 
     argumentCaptor<PutSecretValueRequest>().apply {
       verify(secretsManagerClient, times(1)).putSecretValue(capture())
