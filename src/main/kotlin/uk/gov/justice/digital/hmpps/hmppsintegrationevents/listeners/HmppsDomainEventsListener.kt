@@ -35,6 +35,7 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
     when (val hmppsDomainEventType = IncomingEventType.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
       IncomingEventType.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
+      IncomingEventType.REGISTRATION_UPDATED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
       else -> {
         deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
       }

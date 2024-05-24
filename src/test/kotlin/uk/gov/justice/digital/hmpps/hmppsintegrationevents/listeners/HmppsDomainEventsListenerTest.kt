@@ -40,6 +40,16 @@ class HmppsDomainEventsListenerTest {
   }
 
   @Test
+  fun `when a valid registration updated sqs event is received it should call the registrationEventService`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent(IncomingEventType.REGISTRATION_UPDATED.value)
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedDomainEvent()
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { registrationEventsService.execute(hmppsDomainEvent, IncomingEventType.REGISTRATION_UPDATED) }
+  }
+
+  @Test
   fun `when an invalid message is received it should be sent to the dead letter queue`() {
     val rawMessage = "Invalid JSON message"
 

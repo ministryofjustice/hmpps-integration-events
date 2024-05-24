@@ -1,7 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
-enum class IncomingEventType(val value: String, val outgoingEvent: OutgoingEventType) {
-  REGISTRATION_ADDED("probation-case.registration.added", OutgoingEventType.MAPPA_DETAIL_CHANGED),
+enum class IncomingEventType(val value: String) {
+  ADDRESS_CHANGE("Address Change"),
+  REGISTRATION_ADDED("probation-case.registration.added"),
+  REGISTRATION_UPDATED("probation-case.registration.updated"),
   ;
 
   companion object {
