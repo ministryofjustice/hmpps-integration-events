@@ -35,7 +35,7 @@ services:
 
   localstack:
     image: localstack/localstack:3.0
-    container_name: local-stack-aws
+    container_name: local-stack-aws-events
     networks:
       - hmpps
     ports:
