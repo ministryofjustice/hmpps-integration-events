@@ -2,10 +2,6 @@ info.app:
   name: Hmpps Integration Events
   version: 1.0
 
-logging:
-  level:
-    org.flywaydb: DEBUG
-
 spring:
   application:
     name: hmpps-integration-events
@@ -17,7 +13,7 @@ spring:
     password: ${DB_PASS}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
   flyway:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
