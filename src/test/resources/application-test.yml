@@ -16,12 +16,12 @@ spring:
     enabled: true
 
 services:
-  integrations-api:
+  integration-api:
     url: https://localhost:8443
     apikey: "mockApiKey"
-    certificatebucketname: "certificate-backup"
-    certificatepassword: "client"
-    certificatepath: "testclient/client.p12"
+    certificate-bucket-name: "certificate-backup"
+    certificate-password: "client"
+    certificate-path: "testclient/client.p12"
 
 hmpps.sqs:
   provider: localstack
@@ -48,15 +48,15 @@ hmpps.s3:
   localstackUrl: http://localhost:4566
   buckets:
     certificate-backup:
-      bucketName: certificate-backup
+      bucket-Name: certificate-backup
 
 hmpps.secret:
   provider: localstack
   localstackUrl: http://localhost:4566
   secrets:
-    mockservice1:
-      secretName: testSecret
-      queueName: integrationeventtestqueue
+    MOCKSERVICE1:
+      secret-id: testSecret
+      queue-name: integrationeventtestqueue
 
 notifier:
   schedule:

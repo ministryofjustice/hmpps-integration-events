@@ -1,5 +1,6 @@
 generic-service:
   nameOverride: hmpps-integration-events
+  serviceAccountName: hmpps-integration-event
   productId: "DPS071" # productId for the product that this belongs too, i.e. DPS001, see README.md for details
 
   replicaCount: 4
@@ -21,6 +22,9 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "logstash"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
+    HMPPS_SQS_USE_WEB_TOKEN: "true"
+    HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_QUEUE-NAME: "MAPPSQUEUE"
+    HMPPS_SQS_QUEUES_MAPPSQUEUE_SUBSCRIBETOPICID: "INTEGRATIONEVENTTOPIC"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -30,6 +34,30 @@ generic-service:
   namespace_secrets:
     hmpps-integration-events:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
+    certificate-store:
+      SERVICES_INTEGRATION-API_CERTIFICATEBUCKETNAME: "bucket_name"
+      SERVICES_INTEGRATION-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
+      SERVICES_INTEGRATION-API_CERTIFICATEPATH: "event_service_certificate_path"
+      HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKETNAME: "bucket_name"
+    consumer-api-keys:
+      SERVICES_INTEGRATION-API_APIKEY: "event-service"
+    hmpps-integration-events-topic:
+      HMPPS_SQS_TOPICS_INTEGRATIONEVENTTOPIC_ARN: "sns_arn"
+    hmpps-integration-api-domain-events-sqs-instance-output:
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUENAME: "sqs_name"
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUEARN: "sqs_arn"
+      HMPPS_SQS_TOPIC_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
+    hmpps-integration-api-domain-events-sqs-dl-instance-output:
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
+    event-mapps-queue:
+      HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUENAME: "sqs_name"
+      HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
+      HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRETID: "mapps_filter_policy_secret_id"
+    rds-postgresql-instance-output:
+      DB_SERVER: "rds_instance_address"
+      DB_NAME: "database_name"
+      DB_USER: "database_username"
+      DB_PASS: "database_password"
 
   allowlist:
     groups:

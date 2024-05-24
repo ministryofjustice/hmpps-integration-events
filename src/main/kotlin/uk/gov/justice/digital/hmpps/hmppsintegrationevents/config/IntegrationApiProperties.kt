@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "services.integrations-api")
+@ConfigurationProperties(prefix = "services.integration-api")
 data class IntegrationApiProperties(
   val url: String,
   val apiKey: String,

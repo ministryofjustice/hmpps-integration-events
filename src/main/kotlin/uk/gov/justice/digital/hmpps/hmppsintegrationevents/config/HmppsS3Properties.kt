@@ -11,6 +11,5 @@ data class HmppsS3Properties(
 ) {
   data class BucketConfig(
     val bucketName: String,
-    val bucketArn: String = "",
   )
 }
