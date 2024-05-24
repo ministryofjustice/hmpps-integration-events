@@ -1,12 +1,13 @@
 spring:
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop
   datasource:
     url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
     username: postgres
     password: pa55word
   flyway:
-    locations: classpath:db/migration
     enabled: true
     baselineOnMigrate: true
 

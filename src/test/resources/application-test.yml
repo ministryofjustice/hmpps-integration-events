@@ -12,6 +12,8 @@ spring:
     password: pa55word
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop
   flyway:
     enabled: true
 
