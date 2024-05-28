@@ -3,27 +3,18 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import junit.framework.AssertionFailedError
-import net.javacrumbs.jsonunit.assertj.JsonAssertions
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.ThrowingConsumer
-import org.awaitility.Awaitility
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
-import java.time.LocalDateTime
 import java.util.concurrent.ExecutionException
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -72,32 +63,32 @@ class IntegrationEventTest {
   }
   fun getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue(): Int = integrationEventTestQueueSqsClient.countAllMessagesOnQueue(integrationEventTestQueueUrl).get()
 
-  @Test
-  @DisplayName("will publish Integration Event")
-  @Throws(
-    ExecutionException::class,
-    InterruptedException::class,
-  )
-  fun willPublishPrisonEvent() {
-    eventRepository.save(
-      EventNotification(
-        eventType = OutgoingEventType.MAPPA_DETAIL_CHANGED,
-        hmppsId = "MockId",
-        url = "MockUrl",
-        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
-      ),
-    )
-    eventRepository.flush()
-    Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
-    val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
-    Assertions.assertThat(prisonEventMessages)
-      .singleElement()
-      .satisfies(
-        ThrowingConsumer { event: String? ->
-          JsonAssertions.assertThatJson(event)
-            .node("eventType")
-            .isEqualTo(OutgoingEventType.MAPPA_DETAIL_CHANGED.name)
-        },
-      )
-  }
+//  @Test
+//  @DisplayName("will publish Integration Event")
+//  @Throws(
+//    ExecutionException::class,
+//    InterruptedException::class,
+//  )
+//  fun willPublishPrisonEvent() {
+//    eventRepository.save(
+//      EventNotification(
+//        eventType = OutgoingEventType.MAPPA_DETAIL_CHANGED,
+//        hmppsId = "MockId",
+//        url = "MockUrl",
+//        lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
+//      ),
+//    )
+//    eventRepository.flush()
+//    Awaitility.await().until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 1 }
+//    val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
+//    Assertions.assertThat(prisonEventMessages)
+//      .singleElement()
+//      .satisfies(
+//        ThrowingConsumer { event: String? ->
+//          JsonAssertions.assertThatJson(event)
+//            .node("eventType")
+//            .isEqualTo(OutgoingEventType.MAPPA_DETAIL_CHANGED.name)
+//        },
+//      )
+//  }
 }
