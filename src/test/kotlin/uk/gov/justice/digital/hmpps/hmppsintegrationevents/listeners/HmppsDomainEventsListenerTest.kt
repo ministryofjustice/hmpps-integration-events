@@ -42,7 +42,7 @@ class HmppsDomainEventsListenerTest {
   @Test
   fun `when a valid registration updated sqs event is received it should call the registrationEventService`() {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawRegistrationEvent(IncomingEventType.REGISTRATION_UPDATED.value)
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedDomainEvent()
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createRegistrationAddedDomainEvent(eventType = IncomingEventType.REGISTRATION_UPDATED.value)
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
