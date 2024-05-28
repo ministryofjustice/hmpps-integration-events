@@ -37,7 +37,7 @@ class RegistrationEventsService(
   }
 
   private fun handleMessage(hmppsId: String, eventType: IncomingEventType) {
-    if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType)) {
+    if (!repo.existsByHmppsIdAndEventType(hmppsId, eventType.outgoingEvent)) {
       saveEventNotification(eventType, hmppsId)
     } else {
       updateEventNotification(eventType, hmppsId)
@@ -56,6 +56,6 @@ class RegistrationEventsService(
     )
 
   private fun updateEventNotification(eventType: IncomingEventType, hmppsId: String): Int = (
-    repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), hmppsId, eventType)
+    repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), hmppsId, eventType.outgoingEvent)
     )
 }

@@ -79,12 +79,12 @@ class RegistrationEventsServiceTest {
 
   @Test
   fun `will update an events lastModifiedDate if a relevant event is already stored`() {
-    every { repo.existsByHmppsIdAndEventType("X777776", IncomingEventType.REGISTRATION_ADDED) } returns true
+    every { repo.existsByHmppsIdAndEventType("X777776", OutgoingEventType.MAPPA_DETAIL_CHANGED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createRegistrationAddedDomainEvent()
 
     registrationEventsService.execute(event, IncomingEventType.REGISTRATION_ADDED)
 
-    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IncomingEventType.REGISTRATION_ADDED) }
+    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", OutgoingEventType.MAPPA_DETAIL_CHANGED) }
   }
 }
