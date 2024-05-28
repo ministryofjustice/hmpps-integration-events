@@ -80,10 +80,6 @@ workflows:
           pipeline_id: <<pipeline.id>>
           pipeline_number: <<pipeline.number>>
           context: hmpps-common-vars
-          filters:
-            branches:
-              only:
-                - main
           requires:
             - validate
             - build_docker
@@ -130,6 +126,10 @@ workflows:
     triggers:
       - schedule:
           cron: "15 7 * * 1-5"
+          filters:
+            branches:
+              only:
+                - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
           cache_key: "v2_0"
@@ -150,6 +150,10 @@ workflows:
     triggers:
       - schedule:
           cron: "0 5 * * 1"
+          filters:
+            branches:
+              only:
+                - main
     jobs:
       - hmpps/veracode_policy_scan:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
