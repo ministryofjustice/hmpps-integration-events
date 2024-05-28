@@ -14,8 +14,12 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -44,12 +48,25 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @Test
+  fun `will process a registration added and registration updated event, but only emit one outgoing event`() {
+    val timestampOne: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
+    val timestampTwo = timestampOne.plusMinutes(3)
+    val rawMessageAdded = SqsNotificationGeneratingHelper(timestampOne).generateRawGenericEvent(IncomingEventType.REGISTRATION_ADDED.value)
+    val rawMessageUpdated = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
+    sendDomainSqsMessage(rawMessageAdded)
+    sendDomainSqsMessage(rawMessageUpdated)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    repo.findAll().size.shouldBe(1)
+  }
+
+  @Test
   fun `will not process a malformed domain event SQS Message and log to dead letter queue`() {
     sendDomainSqsMessage("BAD JSON")
 
     Awaitility.await().until { getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue() == 1 }
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
-    var message = deadLetterQueueMessage.messages().first()
+    val message = deadLetterQueueMessage.messages().first()
     message.body().shouldBe("BAD JSON")
     message.messageAttributes()["Error"]!!.stringValue().shouldBe("Malformed event received. Could not parse JSON")
     val savedEvent = repo.findAll().firstOrNull()
@@ -64,8 +81,8 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue() == 1 }
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
-    var message = deadLetterQueueMessage.messages().first()
-    var payload = message.body()
+    val message = deadLetterQueueMessage.messages().first()
+    val payload = message.body()
     val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
     payload.shouldBe(hmppsDomainEvent.toString())
     message.messageAttributes()["Error"]!!.stringValue().shouldBe("Unexpected event type some.other-event")
@@ -91,8 +108,8 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue() == 1 }
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
-    var message = deadLetterQueueMessage.messages().first()
-    var payload = message.body()
+    val message = deadLetterQueueMessage.messages().first()
+    val payload = message.body()
     val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
     payload.shouldBe(hmppsDomainEvent.toString())
     message.messageAttributes()["Error"]!!.stringValue().shouldBe("CRN could not be found in registration event message")
