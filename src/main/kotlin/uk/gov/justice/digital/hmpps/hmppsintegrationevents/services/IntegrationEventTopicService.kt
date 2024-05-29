@@ -32,13 +32,14 @@ class IntegrationEventTopicService(
 
   fun sendEvent(payload: EventNotification) {
     try {
-      log.info("Public event: ${objectMapper.writeValueAsString(payload)}")
       hmppsEventsTopicSnsClient.publish(
         PublishRequest.builder()
           .topicArn(topicArn)
           .message(objectMapper.writeValueAsString(payload))
-          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build())).build(),
-      )
+          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
+          .build(),
+      ).get()
+        .also { log.info("Public event: ${objectMapper.writeValueAsString(payload)}") }
     } catch (e: Exception) {
       log.error("Error publish event: ${e.message}")
       log.error("Stack Trace: ${e.stackTraceToString()}")
