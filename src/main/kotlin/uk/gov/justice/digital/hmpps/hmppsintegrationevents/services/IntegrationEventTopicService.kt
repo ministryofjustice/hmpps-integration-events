@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
@@ -19,7 +21,9 @@ class IntegrationEventTopicService(
 ) {
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
-
+  private companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
   init {
     val hmppsEventTopic = hmppsQueueService.findByTopicId("integrationeventtopic")
     topicArn = hmppsEventTopic!!.arn
@@ -28,6 +32,7 @@ class IntegrationEventTopicService(
 
   fun sendEvent(payload: EventNotification) {
     try {
+      log.info("Public event: ${objectMapper.writeValueAsString(payload)}")
       hmppsEventsTopicSnsClient.publish(
         PublishRequest.builder()
           .topicArn(topicArn)
@@ -35,6 +40,8 @@ class IntegrationEventTopicService(
           .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build())).build(),
       )
     } catch (e: Exception) {
+      log.error("Error publish event: ${e.message}")
+      log.error("Stack Trace: ${e.stackTraceToString()}")
       deadLetterQueueService.sendEvent(payload, e.message)
     }
   }
