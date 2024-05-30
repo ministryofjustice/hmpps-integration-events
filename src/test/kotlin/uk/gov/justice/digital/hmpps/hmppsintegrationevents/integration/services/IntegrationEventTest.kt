@@ -88,15 +88,14 @@ class IntegrationEventTest {
     InterruptedException::class,
   )
   fun willPublishPrisonEvent() {
-   
     await.atMost(10, TimeUnit.SECONDS).untilAsserted {
       eventRepository.save(
-              EventNotification(
-                      eventType = EventTypeValue.REGISTRATION_ADDED,
-                      hmppsId = "MockId",
-                      url = "MockUrl",
-                      lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
-              ),
+        EventNotification(
+          eventType = EventTypeValue.REGISTRATION_ADDED,
+          hmppsId = "MockId",
+          url = "MockUrl",
+          lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
+        ),
       )
       Mockito.verify(integrationEventTopicService, Mockito.atLeast(1)).sendEvent(any())
       val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
