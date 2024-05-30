@@ -96,7 +96,7 @@ class IntegrationEventTest {
         lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
       ),
     )
-    await.atMost(10000, TimeUnit.SECONDS).untilAsserted {
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted {
       Mockito.verify(integrationEventTopicService, Mockito.atLeast(1)).sendEvent(any())
       val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
       Assertions.assertThat(prisonEventMessages)
