@@ -46,7 +46,7 @@ hmpps.secret:
   secrets:
     mapps-client-org:
       secretId: testSecret
-      queueName: arn:aws:sns:eu-west-2:000000000000:integration-event-topic:717e006e-ab56-49d8-89f8-fc43568e242a
+      queueName: integrationeventtestqueue
 
 
 hmpps.s3:
