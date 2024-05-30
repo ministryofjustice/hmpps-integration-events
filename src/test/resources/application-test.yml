@@ -62,7 +62,7 @@ hmpps.secret:
 
 notifier:
   schedule:
-    rate: 1000
+    rate: 1500
 
 subscriber-checker:
   schedule:
