@@ -69,10 +69,10 @@ class EventSubscriberTest() {
       wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v1/config/authorisation")))
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue("testSecret")
-      updatedSecretValue.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+      updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
       // subscriber filter update
       val updatedFilterPolicy = getSubscriberFilterList()
-      updatedFilterPolicy.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+      updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
     }
   }
   companion object {

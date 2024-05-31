@@ -34,7 +34,7 @@ class SubscriberServiceTests {
         "client2" to listOf("url3"),
       ),
     )
-    `when`(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+    `when`(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
 
     hmppsSecretManagerProperties = HmppsSecretManagerProperties(provider = "localstack", secrets = mapOf("client1" to SecretConfig("secret1", "queue1"), "client2" to SecretConfig("secret2", "queue2")))
     subscriberService = SubscriberService(integrationApiGateway, hmppsSecretManagerProperties, secretsManagerService, integrationEventTopicService, objectMapper)
@@ -59,7 +59,7 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/persons/.*/risks/mappadetail"))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -78,8 +78,8 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"REGISTRATION_ADDED\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
   }
 
   @Test
@@ -87,7 +87,7 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/otherendpoints"))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
     // Act
     subscriberService.checkSubscriberFilterList()
 

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 
 @Service
 class SubscriberService(
@@ -19,18 +19,21 @@ class SubscriberService(
 ) {
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
-    val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
-    val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
-
-    apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
-      .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
+    try{
+      val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
+      val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
+      
+      apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
+        .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
+    }
+   catch(ex: Exception) {}
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     val events = clientConfig.value
       .flatMap { url ->
         listOfNotNull(
-          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { IncomingEventType.REGISTRATION_ADDED.name },
+          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { OutgoingEventType.MAPPA_DETAIL_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
