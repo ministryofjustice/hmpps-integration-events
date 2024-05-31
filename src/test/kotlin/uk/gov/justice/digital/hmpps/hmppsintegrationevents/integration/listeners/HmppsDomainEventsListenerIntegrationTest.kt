@@ -5,28 +5,36 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockReset
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
-
-  @Autowired
+  
+  @SpyBean(reset = MockReset.BEFORE)
   lateinit var repo: EventNotificationRepository
 
   @Autowired
@@ -53,11 +61,14 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val timestampTwo = timestampOne.plusMinutes(3)
     val rawMessageAdded = SqsNotificationGeneratingHelper(timestampOne).generateRawGenericEvent(IncomingEventType.REGISTRATION_ADDED.value)
     val rawMessageUpdated = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
+    // verify event created for first event
     sendDomainSqsMessage(rawMessageAdded)
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted{  Mockito.verify(repo, Mockito.atLeast(1)).save(any()) }
+    // verify event modified for second event
     sendDomainSqsMessage(rawMessageUpdated)
-
-    Awaitility.await().until { repo.findAll().isNotEmpty() }
-    repo.findAll().size.shouldBe(1)
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted{  Mockito.verify(repo, Mockito.atLeast(1)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(),any(), eq( OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
+    // verify only one event create
+    Mockito.verify(repo, Mockito.atMost(1)).save(any())
   }
 
   @Test
