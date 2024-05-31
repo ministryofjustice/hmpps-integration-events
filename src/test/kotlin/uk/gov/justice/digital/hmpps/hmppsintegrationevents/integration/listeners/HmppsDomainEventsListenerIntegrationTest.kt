@@ -30,7 +30,6 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
