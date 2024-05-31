@@ -32,8 +32,9 @@ class IntegrationEventTopicService(
         PublishRequest.builder()
           .topicArn(topicArn)
           .message(objectMapper.writeValueAsString(payload))
-          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build())).build(),
-      )
+          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
+          .build(),
+      ).get()
     } catch (e: Exception) {
       deadLetterQueueService.sendEvent(payload, e.message)
     }

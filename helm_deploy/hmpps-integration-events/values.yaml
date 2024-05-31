@@ -46,7 +46,7 @@ generic-service:
     hmpps-integration-api-domain-events-sqs-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUEARN: "sqs_arn"
-      HMPPS_SQS_TOPIC_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
+      HMPPS_SQS_TOPICS_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
     event-mapps-queue:
@@ -54,7 +54,7 @@ generic-service:
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
       HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRETID: "mapps_filter_policy_secret_id"
     rds-postgresql-instance-output:
-      DB_SERVER: "rds_instance_address"
+      DB_SERVER: "rds_instance_endpoint"
       DB_NAME: "database_name"
       DB_USER: "database_username"
       DB_PASS: "database_password"
