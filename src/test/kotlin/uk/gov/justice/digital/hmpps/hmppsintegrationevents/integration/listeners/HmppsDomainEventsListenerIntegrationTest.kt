@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
 @ActiveProfiles("test")
 @Transactional
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
-  
+
   @SpyBean(reset = MockReset.BEFORE)
   lateinit var repo: EventNotificationRepository
 
@@ -63,10 +63,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val rawMessageUpdated = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
     // verify event created for first event
     sendDomainSqsMessage(rawMessageAdded)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted{  Mockito.verify(repo, Mockito.atLeast(1)).save(any()) }
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(1)).save(any()) }
     // verify event modified for second event
     sendDomainSqsMessage(rawMessageUpdated)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted{  Mockito.verify(repo, Mockito.atLeast(1)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(),any(), eq( OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(1)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), eq(OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
     // verify only one event create
     Mockito.verify(repo, Mockito.atMost(1)).save(any())
   }
