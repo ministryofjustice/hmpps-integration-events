@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockReset
@@ -28,6 +29,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -56,19 +58,24 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `will process a registration added and registration updated event, but only emit one outgoing event`() {
+  fun `when processing an event which already exists in DB, will update instead of saving another`() {
     val timestampOne: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
     val timestampTwo = timestampOne.plusMinutes(3)
+
+    // Create test events
     val rawMessageAdded = SqsNotificationGeneratingHelper(timestampOne).generateRawGenericEvent(IncomingEventType.REGISTRATION_ADDED.value)
     val rawMessageUpdated = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
-    // verify event created for first event
+    val rawMessageUpdatedTwo = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
+
+    // Create event
     sendDomainSqsMessage(rawMessageAdded)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(1)).save(any()) }
-    // verify event modified for second event
+    // Update it twice
     sendDomainSqsMessage(rawMessageUpdated)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(1)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), eq(OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
-    // verify only one event create
-    Mockito.verify(repo, Mockito.atMost(1)).save(any())
+    sendDomainSqsMessage(rawMessageUpdatedTwo)
+    // Ensure that it's been updated twice instead of being saved
+    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(2)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(), eq("X777776"), eq(OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
+    // Verify we've checked whether an event of this type has been checked for the initial event and the two subsequent updates
+    Mockito.verify(repo, times(3)).existsByHmppsIdAndEventType("X777776", OutgoingEventType.MAPPA_DETAIL_CHANGED)
   }
 
   @Test
