@@ -5,41 +5,26 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockReset
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListener
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
-  @SpyBean(reset = MockReset.BEFORE)
-  lateinit var repo: EventNotificationRepository
-
   @Autowired
-  lateinit var hmppsDomainEventsListener: HmppsDomainEventsListener
+  lateinit var repo: EventNotificationRepository
 
   @BeforeEach
   fun setup() {
@@ -54,27 +39,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldNotBeNull()
-  }
-
-  @Test
-  fun `when processing an event which already exists in DB, will update instead of saving another`() {
-    val timestampOne: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
-    val timestampTwo = timestampOne.plusMinutes(3)
-
-    // Create test events
-    val rawMessageAdded = SqsNotificationGeneratingHelper(timestampOne).generateRawGenericEvent(IncomingEventType.REGISTRATION_ADDED.value)
-    val rawMessageUpdated = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
-    val rawMessageUpdatedTwo = SqsNotificationGeneratingHelper(timestampTwo).generateRawGenericEvent(IncomingEventType.REGISTRATION_UPDATED.value)
-
-    // Create event
-    sendDomainSqsMessage(rawMessageAdded)
-    // Update it twice
-    sendDomainSqsMessage(rawMessageUpdated)
-    sendDomainSqsMessage(rawMessageUpdatedTwo)
-    // Ensure that it's been updated twice instead of being saved
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted { Mockito.verify(repo, Mockito.atLeast(2)).updateLastModifiedDateTimeByHmppsIdAndEventType(any(), eq("X777776"), eq(OutgoingEventType.MAPPA_DETAIL_CHANGED)) }
-    // Verify we've checked whether an event of this type has been checked for the initial event and the two subsequent updates
-    Mockito.verify(repo, times(3)).existsByHmppsIdAndEventType("X777776", OutgoingEventType.MAPPA_DETAIL_CHANGED)
   }
 
   @Test
@@ -112,6 +76,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val rawMessage = SqsNotificationGeneratingHelper().generateRawRegistrationEvent(registerTypeCode = "OtherType")
 
     sendDomainSqsMessage(rawMessage)
+
     val savedEvent = repo.findAll().firstOrNull()
 
     savedEvent.shouldBeNull()

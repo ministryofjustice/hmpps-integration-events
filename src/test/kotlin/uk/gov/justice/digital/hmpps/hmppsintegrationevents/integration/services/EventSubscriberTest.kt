@@ -64,7 +64,7 @@ class EventSubscriberTest() {
     val originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
     secretService.setSecretValue("testSecret", originalFilterPolicy)
     integrationEventTopicService.updateSubscriptionAttributes("subscribertestqueue", "FilterPolicy", originalFilterPolicy)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted {
+    await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
       wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v1/config/authorisation")))
       // secret value updated

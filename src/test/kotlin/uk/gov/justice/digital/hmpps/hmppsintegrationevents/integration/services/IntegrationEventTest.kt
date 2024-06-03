@@ -88,7 +88,7 @@ class IntegrationEventTest {
     InterruptedException::class,
   )
   fun willPublishPrisonEvent() {
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted {
+    await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       eventRepository.save(
         EventNotification(
           eventType = OutgoingEventType.MAPPA_DETAIL_CHANGED,
