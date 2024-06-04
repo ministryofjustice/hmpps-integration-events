@@ -13,7 +13,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
   flyway:
     enabled: true
 
@@ -39,6 +39,10 @@ hmpps.sqs:
       queueName: integration_event_test_queue
       dlqName: integration_event_test_queue_dlq
       subscribeTopicId: integrationeventtopic
+    subscribertestqueue:
+      queueName: subcriber_test_queue
+      dlqName: subcriber_test_queue_dlq
+      subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
@@ -58,7 +62,7 @@ hmpps.secret:
   secrets:
     MOCKSERVICE1:
       secret-id: testSecret
-      queue-name: integrationeventtestqueue
+      queue-name: subscribertestqueue
 
 notifier:
   schedule:

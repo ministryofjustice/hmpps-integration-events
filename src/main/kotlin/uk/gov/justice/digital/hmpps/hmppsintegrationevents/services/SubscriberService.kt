@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypeValue
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.OutgoingEventType
 
 @Service
 class SubscriberService(
@@ -30,7 +30,7 @@ class SubscriberService(
     val events = clientConfig.value
       .flatMap { url ->
         listOfNotNull(
-          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { EventTypeValue.REGISTRATION_ADDED.name },
+          url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { OutgoingEventType.MAPPA_DETAIL_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }

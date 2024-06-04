@@ -48,7 +48,7 @@ class EventSubscriberTest() {
 
   private final val eventTopic by lazy { hmppsQueueService.findByTopicId("integrationeventtopic") as HmppsTopic }
   private final val hmppsEventsTopicSnsClient by lazy { eventTopic.snsClient }
-  private final val subscriberArn by lazy { integrationEventTopicService.getSubscriptionArnByQueueName("integrationeventtestqueue") }
+  private final val subscriberArn by lazy { integrationEventTopicService.getSubscriptionArnByQueueName("subscribertestqueue") }
 
   fun getSubscriberFilterList(): String? {
     val getSubscriptionAttributesRequest = GetSubscriptionAttributesRequest.builder().subscriptionArn(subscriberArn).build()
@@ -63,16 +63,16 @@ class EventSubscriberTest() {
     stubApiResponse()
     val originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
     secretService.setSecretValue("testSecret", originalFilterPolicy)
-    integrationEventTopicService.updateSubscriptionAttributes("integrationeventtestqueue", "FilterPolicy", originalFilterPolicy)
-    await.atMost(10, TimeUnit.SECONDS).untilAsserted {
+    integrationEventTopicService.updateSubscriptionAttributes("subscribertestqueue", "FilterPolicy", originalFilterPolicy)
+    await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
       wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v1/config/authorisation")))
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue("testSecret")
-      updatedSecretValue.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+      updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
       // subscriber filter update
       val updatedFilterPolicy = getSubscriberFilterList()
-      updatedFilterPolicy.shouldBe("{\"eventType\":[\"REGISTRATION_ADDED\"]}")
+      updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
     }
   }
   companion object {
