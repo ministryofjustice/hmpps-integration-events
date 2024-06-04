@@ -20,9 +20,10 @@ class SubscriberService(
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
     val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
+    val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
-    apiResponse.filter { client -> subscriberProperties.secrets.containsKey(client.key) }
-      .forEach { refreshClientFilter(it, subscriberProperties.secrets[it.key]!!) }
+    apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
+      .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
@@ -34,12 +35,12 @@ class SubscriberService(
       }
       .ifEmpty { listOf("DEFAULT") }
 
-    val secretValue = secretsManagerService.getSecretValue(subscriber.secretName)
+    val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
     val filterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
 
     if (filterList.eventType != events && filterList.eventType.isNotEmpty()) {
       val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(events))
-      secretsManagerService.setSecretValue(subscriber.secretName, filterPolicy)
+      secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
       integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueName, "FilterPolicy", filterPolicy)
     }
   }

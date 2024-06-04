@@ -13,17 +13,17 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
 )
 class SecretsManagerService(private val secretsManagerClient: SecretsManagerClient) {
 
-  fun getSecretValue(secretName: String): String {
+  fun getSecretValue(secretId: String): String {
     val getSecretValueRequest = GetSecretValueRequest.builder()
-      .secretId(secretName)
+      .secretId(secretId)
       .build()
 
     return secretsManagerClient.getSecretValue(getSecretValueRequest).secretString()
   }
 
-  fun setSecretValue(secretName: String, secretValue: String) {
+  fun setSecretValue(secretId: String, secretValue: String) {
     val putSecretValueRequest = PutSecretValueRequest.builder()
-      .secretId(secretName)
+      .secretId(secretId)
       .secretString(secretValue)
       .build()
 
