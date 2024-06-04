@@ -19,13 +19,11 @@ class SubscriberService(
 ) {
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
-    try {
       val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
       val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
       apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
         .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
-    } catch (ex: Exception) {}
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
