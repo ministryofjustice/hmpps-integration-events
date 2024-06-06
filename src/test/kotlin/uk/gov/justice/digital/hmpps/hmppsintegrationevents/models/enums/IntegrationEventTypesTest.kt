@@ -10,10 +10,11 @@ class IntegrationEventTypesTest {
     val map = mapOf(
       "probation-case.registration.added" to IntegrationEventTypes.MAPPA_DETAIL_CHANGED,
       "probation-case.registration.updated" to IntegrationEventTypes.MAPPA_DETAIL_CHANGED,
-      "risk-assessment.scores.determined"  to IntegrationEventTypes.RISK_SCORE_CHANGED,
-      "probation-case.risk-scores.ogrs.manual-calculation" to IntegrationEventTypes.RISK_SCORE_CHANGED)
+      "risk-assessment.scores.determined" to IntegrationEventTypes.RISK_SCORE_CHANGED,
+      "probation-case.risk-scores.ogrs.manual-calculation" to IntegrationEventTypes.RISK_SCORE_CHANGED,
+    )
 
-    map.forEach { it->
+    map.forEach { it ->
       val result = IntegrationEventTypes.from(it.key)
       result?.shouldBe(it.value)
     }
