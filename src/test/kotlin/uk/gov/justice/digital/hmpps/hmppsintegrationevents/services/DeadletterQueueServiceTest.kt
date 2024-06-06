@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.matchers.shouldBe
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -9,6 +10,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.services.sns.SnsAsyncClient
@@ -29,6 +31,8 @@ class DeadletterQueueServiceTest {
   val hmppsEventSqsClient: SqsAsyncClient = Mockito.mock()
   val hmppsEventDLSqsClient: SqsAsyncClient = Mockito.mock()
 
+  @Autowired
+  private lateinit var objectMapper: ObjectMapper
   lateinit var service: DeadLetterQueueService
 
   @BeforeEach
@@ -38,7 +42,7 @@ class DeadletterQueueServiceTest {
     whenever(hmppsQueueService.findByQueueId("hmppsdomainqueue"))
       .thenReturn(HmppsQueue("hmppsdomainqueue", hmppsEventSqsClient, "hmpps_integrations_events_queue", hmppsEventDLSqsClient, "hmpps_integrations_events_queue_dlq"))
 
-    service = DeadLetterQueueService(hmppsQueueService)
+    service = DeadLetterQueueService(hmppsQueueService, objectMapper)
   }
 
   @Test
