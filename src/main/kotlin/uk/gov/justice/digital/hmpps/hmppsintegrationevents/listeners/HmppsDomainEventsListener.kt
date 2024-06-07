@@ -8,12 +8,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IncomingEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.RegistrationEventsService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 
 @Service
-class HmppsDomainEventsListener(@Autowired val registrationEventsService: RegistrationEventsService, @Autowired val deadLetterQueueService: DeadLetterQueueService) {
+class HmppsDomainEventsListener(
+  @Autowired val hmppsDomainEventService: HmppsDomainEventService,
+  @Autowired val deadLetterQueueService: DeadLetterQueueService,
+) {
 
   private companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -33,12 +36,11 @@ class HmppsDomainEventsListener(@Autowired val registrationEventsService: Regist
   }
 
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
-    when (val hmppsDomainEventType = IncomingEventType.from(hmppsDomainEvent.messageAttributes.eventType.value)) {
-      IncomingEventType.REGISTRATION_ADDED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
-      IncomingEventType.REGISTRATION_UPDATED -> registrationEventsService.execute(hmppsDomainEvent, hmppsDomainEventType)
-      else -> {
-        deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
-      }
+    val hmppsDomainEventType = IntegrationEventTypes.from(hmppsDomainEvent.messageAttributes.eventType.value)
+    if (hmppsDomainEventType != null) {
+      hmppsDomainEventService.execute(hmppsDomainEvent, hmppsDomainEventType)
+    } else {
+      deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
     }
   }
 }

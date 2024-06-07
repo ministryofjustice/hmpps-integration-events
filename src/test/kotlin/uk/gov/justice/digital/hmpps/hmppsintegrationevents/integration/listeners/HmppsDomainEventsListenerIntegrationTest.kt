@@ -65,7 +65,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val message = deadLetterQueueMessage.messages().first()
     val payload = message.body()
     val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-    payload.shouldBe(hmppsDomainEvent.toString())
+    payload.shouldBe(objectMapper.writeValueAsString(hmppsDomainEvent))
     message.messageAttributes()["Error"]!!.stringValue().shouldBe("Unexpected event type some.other-event")
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
@@ -73,7 +73,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will not process and save a domain event message with an unknown register type code`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateRawRegistrationEvent(registerTypeCode = "OtherType")
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawHmppsDomainEvent(registerTypeCode = "OtherType")
 
     sendDomainSqsMessage(rawMessage)
 
@@ -84,7 +84,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will not process and save a domain event message with no crn type and log to dead letter queue`() {
-    val rawMessage = SqsNotificationGeneratingHelper().generateRawRegistrationEvent(identifiers = "[]")
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawHmppsDomainEvent(identifiers = "[]")
 
     sendDomainSqsMessage(rawMessage)
 
@@ -93,7 +93,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val message = deadLetterQueueMessage.messages().first()
     val payload = message.body()
     val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-    payload.shouldBe(hmppsDomainEvent.toString())
+    payload.shouldBe(objectMapper.writeValueAsString(hmppsDomainEvent))
     message.messageAttributes()["Error"]!!.stringValue().shouldBe("CRN could not be found in registration event message")
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
