@@ -31,6 +31,7 @@ class SubscriberService(
       .flatMap { url ->
         listOfNotNull(
           url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { IntegrationEventTypes.MAPPA_DETAIL_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/.*/risks/scores") }?.let { IntegrationEventTypes.RISK_SCORE_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
