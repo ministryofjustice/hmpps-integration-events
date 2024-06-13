@@ -1,0 +1,25 @@
+@startuml context
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+skinparam linetype polyline
+
+title [Context] HMPPS Integration API
+
+System_Ext(consumer, "Consumer Application", "An authenticated consumer of the Integration API.")
+
+Boundary(moj, "Ministry of Justice (MOJ)", "Ministerial Department") {
+  Boundary(hmpps, "His Majesty's Prison and Probation Service (HMPPS)", "Executive Agency") {
+
+    System(messaging, "Messaging System", "SNS/SQS Service.")
+
+    System_Ext(upstream, "Upstream Systems", "Integrated systems where data is retrieved from.")
+  }
+}
+
+Rel_Up(upstream, messaging, "Posts updates")
+Rel_Up(messaging, consumer, "Retrieves updates")
+
+SHOW_DYNAMIC_LEGEND()
+
+@enduml

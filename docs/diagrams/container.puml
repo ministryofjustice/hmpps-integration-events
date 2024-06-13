@@ -1,0 +1,37 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam linetype polyline
+
+title [Container] Events Based System
+
+System_Ext(UpstreamQueue, "Upstream HMPPS Domain Event Queue", "External system that sends messages")
+
+Boundary(SpringApp, "Kotlin Spring Boot Application") {
+  Container(Listener, "Listener", "Kotlin Component", "Receives raw message, transforms it into a data class, and calls the appropriate service")
+  Container(Service, "Service", "Kotlin Component", "Handles the message body and interacts with JPA Repo")
+  Container(JPARepo, "JPA Repo", "Spring Data JPA", "Interacts with the Postgres DB")
+  Container(SubscriberService, "SubscriberService", "Kotlin Component", "Interacts with IntegrationApiGateway for authorization config data")
+  Container(IntegrationApiGateway, "IntegrationApiGateway", "Kotlin Component", "Fetches credentials from s3 and calls the hmpps integration api to recieve auth data")
+  Container(EventNotifierService, "EventNotifierService", "Kotlin Component", "Polls DB every 5 minutes and broadcasts notifications")
+}
+
+System_Ext(Database, "Postgres DB", "Database containing events to aid in de-duplicating received messages and stop sending multiple of the same notification to our consumer")
+System_Ext(SNS, "SNS", "Simple Notification Service which broadcasts notifications to listening consumer queues")
+System_Ext(S3, "S3", "Amazon Simple Storage Service, stores certificates")
+System_Ext(HmppsSystemIntegrationApi, "Hmpps System Integration Api", "API that provides authorisation config data")
+
+Rel(UpstreamQueue, Listener, "Listens for raw messages")
+Rel_Down(Listener, Service, "Transforms and determines message type, then calls service")
+Rel_Down(Service, JPARepo, "Handles message and interacts with JPA Repo")
+Rel(JPARepo, Database, "Checks and updates/inserts message")
+Rel(EventNotifierService, Database, "Polls DB every 5 minutes")
+Rel(EventNotifierService, SNS, "Broadcasts notifications")
+Rel(SubscriberService, IntegrationApiGateway, "gets authorisation data to make SNS calls safely")
+Rel(IntegrationApiGateway, S3, "Fetches certificate from")
+Rel(IntegrationApiGateway, HmppsSystemIntegrationApi, "Makes API call for authorisation config data")
+
+SHOW_LEGEND()
+
+@enduml

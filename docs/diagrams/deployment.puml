@@ -1,0 +1,66 @@
+@startuml deployment
+
+    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+    !define SPRITESURL https://raw.githubusercontent.com/plantuml-stdlib/gilbarbara-plantuml-sprites/master/sprites
+    !includeurl SPRITESURL/helm.puml
+    !includeurl SPRITESURL/docker-icon.puml
+    !includeurl SPRITESURL/github-icon.puml
+    !includeurl SPRITESURL/gradle.puml
+    !includeurl SPRITESURL/kotlin.puml
+    !includeurl SPRITESURL/kubernetes.puml
+
+    'skinparam linetype polyline
+
+    Title [Deployment Flow] HMPPS Integration Events
+
+    AddRelTag("subprocess", $textColor="#808080", $lineColor="#808080", $lineStyle = DashedLine())
+
+    !global $TEXT_HELMDEPLOY = "Configures hosting Kubernetes environment"
+    !global $TEXT_DOCKERBUILD = "Creates a built image for deployment"
+    !global $TEXT_EVENTPOD = "An instance of the events spring boot"
+
+    Person(engineer, "Engineer")
+
+    Boundary(local, "Local", "Developer Machine"){
+        Container(hmpps_integration_events, "HMPPS Integration Events", "Local Branch", $sprite=kotlin*0.4)
+    }
+
+    Container(git, "Source Control", "Git", $sprite=github-icon*0.6)
+
+    Boundary(circleci, "CircleCI", "Deployment Pipeline"){
+        Boundary(checks, "Code Checks"){
+            Container(validate, "Lint, Helm Lint and Unit Test", "Gradle", $sprite=gradle*0.6)
+        }
+
+        Boundary(dev_build_and_deploy, "Development"){
+            Container(dev_build, "Build", "Docker", $TEXT_DOCKERBUILD, $sprite=docker-icon*0.6)
+            Container(dev_helm, "Deploy", "Helm", $TEXT_HELMDEPLOY, $sprite=helm*0.6)
+
+            Boundary(dev_cp, "Cloud Platform Development", "Kubernetes"){
+                Container(dev_quay, "Container Registry", "Quay Container Registry")
+
+                Boundary(dev_service, "Service", "Kubernetes"){
+                    Container(hmpps_integration_events_dev_pod1, "HMPPS Integration Events", "Pod", $TEXT_EVENTPOD, $sprite=kubernetes*0.4)
+                    Container(hmpps_integration_events_dev_pod2, "HMPPS Integration Events", "Pod", $TEXT_EVENTPOD, $sprite=kubernetes*0.4)
+                }
+            }
+        }
+    }
+
+    !global $TEXT_SUCCESS = "On success"
+    !global $TEXT_PUSHTO = "Pushes to"
+
+    'RELATIONSHIPS
+    Rel(engineer, local, "Writes code")
+    Rel(hmpps_integration_events, git, "Committed to")
+    Rel(git, checks, "Automated pipeline integration")
+
+    Rel(checks, dev_build, $TEXT_SUCCESS)
+
+    Rel(dev_build, dev_quay, $TEXT_PUSHTO, $tags=subprocess)
+    Rel(dev_helm, dev_service, $TEXT_PUSHTO, $tags=subprocess)
+    Rel_Right(dev_build, dev_helm, $TEXT_SUCCESS)
+
+    SHOW_DYNAMIC_LEGEND()
+
+@enduml
