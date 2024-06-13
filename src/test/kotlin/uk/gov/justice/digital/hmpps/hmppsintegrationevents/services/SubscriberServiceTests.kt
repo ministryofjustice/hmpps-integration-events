@@ -83,6 +83,20 @@ class SubscriberServiceTests {
   }
 
   @Test
+  fun `grant access to risk score events if client has access to risk score endpoint`() {
+    // Arrange
+    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/persons/.*/risks/scores"))
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"RISK_SCORE_CHANGED\"]}")
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"RISK_SCORE_CHANGED\"]}")
+  }
+
+  @Test
   fun `set filter list to be DEFAULT if client has no event access`() {
     // Arrange
     val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/otherendpoints"))

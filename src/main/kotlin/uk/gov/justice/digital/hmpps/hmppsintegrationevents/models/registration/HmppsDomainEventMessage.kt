@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class RegistrationAddedEventMessage(
+data class HmppsDomainEventMessage(
+  @JsonProperty("eventType") val eventType: String,
   @JsonProperty("occurredAt") val occurredAt: String,
   @JsonProperty("personReference") val personReference: PersonReference,
   @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation,
@@ -27,8 +28,8 @@ data class Identifier(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AdditionalInformation(
-  @JsonProperty("registerTypeDescription") val registerTypeDescription: String,
-  @JsonProperty("registerTypeCode") val registerTypeCode: String,
+  @JsonProperty("registerTypeDescription") val registerTypeDescription: String? = null,
+  @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
 ) {
   fun isMappRegistrationType(): Boolean = (
     this.registerTypeCode == "MAPP"

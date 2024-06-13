@@ -33,17 +33,18 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
-  fun generateRawRegistrationEvent(
+  fun generateRawHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
     identifiers: String = "[{\\\"type\\\":\\\"CRN\\\",\\\"value\\\":\\\"X777776\\\"}]",
+    messageEventType: String = eventType,
   ): String = (
     """
     {
      "Type" : "Notification",
      "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
      "TopicArn" : "arn:aws:sns:eu-west-2:123456789123:cloud-platform-Digital-Prison-Services-12a3456bc12345a1a12345ab3c123b12",
-     "Message" : "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+     "Message" : "{\"eventType\":\"$messageEventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
      "Timestamp" : "$isoInstantTimestamp",
      "SignatureVersion" : "1",
      "Signature" : "A5cK8hNQj+3PTeLwS9D4bFYUvz1aI6cGvT2XWmRkE+7MoJZniFQjDeo2tI3BwKhLI9RXznGvZD1KbOoEMp4kUqBnA2Wr3bH5D6NfYhJKYV8sGpVcWzUMlTgbxErC1L7RgM2o7bHWlCKqfzOiDRsLpPeuJElmuTcYJtn+Lxv3R4TyYndafQSoVpErHcRJwWjDSf5l6jrKVa4m0NQbgtyZlxVPcHYf+wpWcuJ1BvLSnDHM+egRw7GqpxDB+IU1kEolC3eL4RUjXGmkQ9YtczF2P1JrThsRi0oEgnp7f/VtB6oqOKkYvlMXaF/+uhdwZbWlDa/83HcYV9MkJpWpx8UeisflEMNt57hbJXIgGQvsTYo4cRn9VgWQJxb6yDw8zS+I6yuGNbcL5L2Aj+whsEM1ovcR7KBPvgsMlxtCyVYzj36sDa4nUfiR5iZkVDeT==",
@@ -58,16 +59,17 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
-  fun createRegistrationAddedDomainEvent(
+  fun createHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
+    attributeEventTypes: String = eventType,
   ): HmppsDomainEvent = (
     HmppsDomainEvent(
       type = "Notification",
       message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
       messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = eventType)),
+      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
     )
     )
 }
