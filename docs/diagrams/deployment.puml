@@ -29,7 +29,7 @@
 
     Boundary(circleci, "CircleCI", "Deployment Pipeline"){
         Boundary(checks, "Code Checks"){
-            Container(validate, "Lint, Helm Lint and Unit Test", "Gradle", $sprite=gradle*0.6)
+            Container(validate, "Validate", "Gradle Lint, Helm Lint and Unit Test checks", $sprite=gradle*0.6)
         }
 
         Boundary(dev_build_and_deploy, "Development"){
