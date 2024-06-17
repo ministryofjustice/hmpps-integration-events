@@ -1,49 +1,129 @@
 # hmpps-integration-events
-[![repo standards badge](https://img.shields.io/badge/dynamic/json?color=blue&style=flat&logo=github&label=MoJ%20Compliant&query=%24.result&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fhmpps-integration-events)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-github-repositories.html#hmpps-integration-events "Link to report")
-[![CircleCI](https://circleci.com/gh/ministryofjustice/hmpps-integration-events/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/hmpps-integration-events)
-[![Docker Repository on Quay](https://quay.io/repository/hmpps/hmpps-integration-events/status "Docker Repository on Quay")](https://quay.io/repository/hmpps/hmpps-integration-events)
-[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://hmpps-integration-events-dev.hmpps.service.justice.gov.uk/webjars/swagger-ui/index.html?configUrl=/v3/api-docs)
 
-This is a skeleton project from which to create new kotlin projects from.
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/ministryofjustice/hmpps-integration-events/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/ministryofjustice/hmpps-integration-events/tree/main)
+[![repo standards badge](https://img.shields.io/badge/endpoint.svg?&style=flat&logo=github&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fhmpps-integration-events)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-report/hmpps-integration-events "Link to report")
+[![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-integration-events)
 
-# Instructions
+## Contents
 
-If this is a HMPPS project then the project will be created as part of bootstrapping - 
-see https://github.com/ministryofjustice/dps-project-bootstrap.
+- [About this project](#about-this-project)
+  - [Technologies](#technologies)
+  - [External Dependencies](#external-dependencies)
+- [Runbook](#runbook)
+- [Get started locally](#get-started-locally)
+  - [local dependencies](#local-dependencies)
+  - [Using IntelliJ IDEA](#using-intellij-idea)
+  - [Running the tests](#running-the-tests)
+  - [Running the linter](#running-the-linter)
+  - [Running all checks](#running-all-checks)
+- [Further documentation](#further-documentation)
+- [Related repositories](#related-repositories)
+- [License](#license)
 
-## Creating a CloudPlatform namespace
+## About this project
 
-When deploying to a new namespace, you may wish to use this template kotlin project namespace as the basis for your new namespace:
+A Kotlin Spring boot application which triggers SNS notifications by processing upstream MoJ domain events which are related to the information served by the [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api). This allows the clients of our API to be notified when a change occurs to a domain that is of interest to them.
 
-<https://github.com/ministryofjustice/cloud-platform-environments/tree/main/namespaces/live.cloud-platform.service.justice.gov.uk/hmpps-integration-events>
+### Technologies
 
-Copy this folder, update all the existing namespace references, and submit a PR to the CloudPlatform team. Further instructions from the CloudPlatform team can be found here: <https://user-guide.cloud-platform.service.justice.gov.uk/#cloud-platform-user-guide>
+- [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/#cloud-platform-user-guide) - Ministry of
+  Justice's (MOJ) cloud hosting platform built on top of AWS which offers numerous tools such as logging, monitoring and
+  - [AWS](https://aws.amazon.com/) - Services utilise AWS features through Cloud Platform such
+    as:
+    - [Simple Queue Service (SQS)](https://aws.amazon.com/sqs/) to consume and persist incoming AWS SNS notifications.
+    - [Simple Notification Service (SNS)](https://aws.amazon.com/sns/) to emit notifications to our consumers.
+    - [Simple Storage Service (S3)](https://aws.amazon.com/s3/) to hold client certificates.
+    - [Secrets Manager](https://aws.amazon.com/secrets-manager/) to manage authorisation.
+    - [Relational Database Service (RDS)](https://aws.amazon.com/rds/) to manage state to avoid creating duplicate notifications.
+- [CircleCI](https://circleci.com/developer) - Used for our build platform, responsible for executing workflows to
+  build, validate, test and deploy our project.
+- [Docker](https://www.docker.com/) - The API is built into docker images which are deployed to our containers.
+- [Kubernetes](https://kubernetes.io/docs/home/) - Creates 'pods' to host our environment. Manages auto-scaling, load
+  balancing and networking to our application.
 
-## Renaming from Hmpps Integration Events - github Actions
+### External Dependencies
 
-Once the new repository is deployed. Navigate to the repository in github, and select the `Actions` tab.
-Click the link to `Enable Actions on this repository`.
+- [hmpps-domain-events](https://github.com/ministryofjustice/hmpps-domain-events)
 
-Find the Action workflow named: `rename-project-create-pr` and click `Run workflow`.  This workflow will
-execute the `rename-project.bash` and create Pull Request for you to review.  Review the PR and merge.
+## Runbook
 
-Note: ideally this workflow would run automatically however due to a recent change github Actions are not
-enabled by default on newly created repos. There is no way to enable Actions other then to click the button in the UI.
-If this situation changes we will update this project so that the workflow is triggered during the bootstrap project.
-Further reading: <https://github.community/t/workflow-isnt-enabled-in-repos-generated-from-template/136421>
+The [runbook](https://github.com/ministryofjustice/hmpps-integration-events/tree/main/docs/runbook.md) for this application can be found in the docs folder of this repo.
 
-## Manually renaming from Hmpps Integration Events
+## Get started locally
 
-Run the `rename-project.bash` and create a PR.
+### Local dependencies
 
-The `rename-project.bash` script takes a single argument - the name of the project and calculates from it:
-* The main class name (project name converted to pascal case) 
-* The project description (class name with spaces between the words)
-* The main package name (project name with hyphens removed)
+- [localstack](https://www.localstack.cloud/) a cloud software development framework to emulate AWS services.
+- [docker](https://www.docker.com/) used to manage virtual application containers on a common OS to ease development.
 
-It then performs a search and replace and directory renames so the project is ready to be used.
+### Using IntelliJ IDEA
 
-## Filling in the `productId`
+When using an IDE like [IntelliJ IDEA](https://www.jetbrains.com/idea/), getting started is very simple as it will
+handle installing the required Java SDK and [Gradle](https://gradle.org/) versions. The following are the steps for
+using IntelliJ but other IDEs will prove similar.
 
-To allow easy identification of an application, the product Id of the overall product should be set in `values.yaml`.
-The Service Catalogue contains a list of these IDs and is currently in development here https://developer-portal.hmpps.service.justice.gov.uk/products
+1. Clone the repo.
+
+```bash
+git clone git@github.com:ministryofjustice/hmpps-integration-events.git
+```
+
+2. Launch IntelliJ and open the `hmpps-integration-events` project by navigating to the location of the repository. Upon opening the project, IntelliJ will begin downloading and installing necessary dependencies which may take a few
+   minutes.
+
+3. Ensuring that docker is running within the root folder of the codebase run the command.
+4. Obtain an API key for [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) and set in [application-localstack.yml](src%2Fmain%2Fresources%2Fapplication-localstack.yml)
+
+```bash
+make serve
+```
+
+This will spin up the Spring Boot events application, Postgres DB and Localstack containers within Docker. For ease of development it may be easier to run the Spring Boot events application in IntelliJ to avoid having to spin up and down containers when you make changes. This can be done by creating a configuration file in IntelliJ with an active profile set as `localstack` and clicking the run button in the IDE.
+
+### Running the tests
+
+To run unit tests using the command line:
+
+```bash
+make unit-test
+```
+
+### Running the linter
+
+To lint the code using [Ktlint](https://pinterest.github.io/ktlint/):
+
+```bash
+make lint
+```
+
+To autofix any styling issues with the code:
+
+```bash
+make format
+```
+
+### Running all checks
+
+To run all the tests and linting:
+
+```bash
+make check
+```
+## Developer guides
+- [Setting up a new consumer](docs%2Fguides%2Fsetting-up-a-new-consumer.md)
+
+## Further documentation
+
+- [Architecture Decision Records (ADRs)](/docs/adr)
+- [Architecture diagrams](/docs/diagrams)
+
+## Related repositories
+
+| Name                                                                                          | Purpose                                                                            |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) | A long-lived API that exposes data from HMPPS systems.                             |
+| [hmpps-domain-events](https://github.com/ministryofjustice/hmpps-domain-events)               | Captures and broadcasts the occurrence of significant activity in an HMPPS domain. |
+
+## License
+
+[MIT License](LICENSE)

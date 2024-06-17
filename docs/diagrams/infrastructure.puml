@@ -1,0 +1,34 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam linetype polyline
+
+title [Infrastructure] Hmpps Integration Events
+
+Boundary(cloudplatform, "Cloud Platform"){
+    
+    Boundary(K8sCluster, "Kubernetes Cluster") {
+        Container(EventsAPP, "Events Application", "Kotlin/Spring Boot", "Handles events and authorization config data")
+    }
+
+    Container(UpstreamQueue, "Upstream HMPPS Domain Event Queue", "External system that sends messages")
+    Container(Database, "Postgres DB", "Database containing events to aid in de-duplicating received messages and stop sending multiple of the same notification to our consumer")
+    Container(SNS, "SNS", "Simple Notification Service which broadcasts notifications to listening consumer queues")
+    Container(S3, "S3", "Amazon Simple Storage Service, stores certificates")
+    Container(AuthAPI, "Authorization API", "API that provides authorization config data")
+    Container(SecretsManager, "AWS Secrets Manager", "Stores authorization config data")
+    Container(ClientConsumerSQS, "Client Consumer SQS", "SQS queue that receives messages from SNS notifications")
+  }
+
+Rel(UpstreamQueue, EventsAPP, "Sends messages to")
+Rel(EventsAPP, Database, "Interacts with")
+Rel(EventsAPP, SNS, "Broadcasts notifications to")
+Rel(SNS, ClientConsumerSQS, "Delivers notifications to")
+Rel(EventsAPP, S3, "Fetches certificates from")
+Rel(EventsAPP, AuthAPI, "Requests authorization config data from")
+Rel(EventsAPP, SecretsManager, "Stores authorization config data in")
+
+SHOW_LEGEND()
+
+@enduml
