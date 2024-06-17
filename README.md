@@ -72,6 +72,7 @@ git clone git@github.com:ministryofjustice/hmpps-integration-events.git
    minutes.
 
 3. Ensuring that docker is running within the root folder of the codebase run the command.
+4. Obtain an API key for [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) and set in [application-localstack.yml](src%2Fmain%2Fresources%2Fapplication-localstack.yml)
 
 ```bash
 make serve
@@ -108,6 +109,8 @@ To run all the tests and linting:
 ```bash
 make check
 ```
+## Developer guides
+- [Setting up a new consumer](docs%2Fguides%2Fsetting-up-a-new-consumer.md)
 
 ## Further documentation
 
