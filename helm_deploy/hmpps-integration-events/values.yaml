@@ -39,20 +39,32 @@ generic-service:
       SERVICES_INTEGRATION-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
       SERVICES_INTEGRATION-API_CERTIFICATEPATH: "event_service_certificate_path"
       HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKETNAME: "bucket_name"
+      CERTIFICATE_BUCKET_NAME: "bucket_name"
+      CERTIFICATE_PASSWORD: "event_service_certificate_password"
+      CERTIFICATE_PATH: "event_service_certificate_path"
     consumer-api-keys:
       SERVICES_INTEGRATION-API_APIKEY: "event-service"
+      API_KEY: "event-service"
     hmpps-integration-events-topic:
       HMPPS_SQS_TOPICS_INTEGRATIONEVENTTOPIC_ARN: "sns_arn"
+      INTEGRATION_EVENT_TOPIC_ARN: "sns_arn"
     hmpps-integration-api-domain-events-sqs-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUEARN: "sqs_arn"
       HMPPS_SQS_TOPICS_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
+      HMPPS_DOMAIN_QUEUE_NAME: "sqs_name"
+      HMPPS_DOMAIN_QUEUE_ARN: "sqs_arn"
+      HMPPS_DOMAIN_TOPIC_ARN: "hmpps_domain_events_topic_arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
+      HMPPS_DOMAIN_DL_QUEUE_NAME: "sqs_name"
     event-mapps-queue:
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUENAME: "sqs_name"
       HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
       HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRETID: "mapps_filter_policy_secret_id"
+      MAPPS_QUEUE_NAME: "sqs_name"
+      MAPPS_QUEUE_ARN: "sqs_arn"
+      MAPPS_FILTER_POLICY_SECRECT_ID: "mapps_filter_policy_secret_id"
     rds-postgresql-instance-output:
       DB_SERVER: "rds_instance_endpoint"
       DB_NAME: "database_name"

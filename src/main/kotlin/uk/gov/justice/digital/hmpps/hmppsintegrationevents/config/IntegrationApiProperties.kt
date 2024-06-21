@@ -10,3 +10,4 @@ data class IntegrationApiProperties(
   val certificatePassword: String,
   var certificatePath: String,
 )
+
