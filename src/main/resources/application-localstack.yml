@@ -15,7 +15,7 @@ services:
   integration-api:
     url: https://dev.integration-api.hmpps.service.justice.gov.uk
 #    ADD api key from namespace secret
-    apikey: ""
+    apikey: "LIJGe1vhuo7FefAcG8Aii1Pi9QcOibE3Hy7MVsab"
     certificate-bucket-name: "certificate-backup"
     certificate-password: "client"
     certificate-path: "testclient/client.p12"
@@ -34,6 +34,10 @@ hmpps.sqs:
       queueArn: arn:aws:sns:eu-west-2:000000000000:hmpps_integrations_events_queue
       dlqName: hmpps_integrations_events_queue_dlq
       subscribeTopicId: domainevents
+    mappssubscriberqueue:
+      queueName: mapps_subscriber_queue
+      dlqName: mapps_subscriber_queue_dlq
+      subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
@@ -46,8 +50,12 @@ hmpps.secret:
   secrets:
     mapps-client-org:
       secretId: testSecret
-      queueName: integrationeventtestqueue
+      queueName: mappssubscriberqueue
 
+event.clients:
+  mapps-client-org:
+    queue-name: mappssubscriberqueue
+    pathCode: "mapps"
 
 hmpps.s3:
   provider: localstack

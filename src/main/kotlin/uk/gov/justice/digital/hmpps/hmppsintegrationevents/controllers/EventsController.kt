@@ -1,17 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.controllers
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.ClientEventService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.EventResponse
 
 @RestController
 @RequestMapping("/events")
-class EventsController {
+class EventsController(
+  @Autowired val clientEventService: ClientEventService,
+) {
 
-  @GetMapping("/{client}")
-  fun getEvents(@PathVariable client:String):String{
-
-    return client
+  @GetMapping("/{pathCode}")
+  fun getEvents(@PathVariable pathCode: String): EventResponse {
+    return clientEventService.getClientMessage(pathCode)
   }
 }
