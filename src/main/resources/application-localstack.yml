@@ -38,6 +38,7 @@ hmpps.sqs:
       queueName: mapps_subscriber_queue
       dlqName: mapps_subscriber_queue_dlq
       subscribeTopicId: integrationeventtopic
+
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
@@ -52,10 +53,6 @@ hmpps.secret:
       secretId: testSecret
       queueId: mappssubscriberqueue
 
-event.clients:
-  mapps-client-org:
-    queueId: mappssubscriberqueue
-    pathCode: "mapps"
 
 hmpps.s3:
   provider: localstack

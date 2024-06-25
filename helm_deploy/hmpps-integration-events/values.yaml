@@ -22,9 +22,6 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "logstash"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
-    HMPPS_SQS_USE_WEB_TOKEN: "true"
-    HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_QUEUE-NAME: "MAPPSQUEUE"
-    HMPPS_SQS_QUEUES_MAPPSQUEUE_SUBSCRIBETOPICID: "INTEGRATIONEVENTTOPIC"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -35,33 +32,20 @@ generic-service:
     hmpps-integration-events:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
     certificate-store:
-      SERVICES_INTEGRATION-API_CERTIFICATEBUCKETNAME: "bucket_name"
-      SERVICES_INTEGRATION-API_CERTIFICATEPASSWORD: "event_service_certificate_password"
-      SERVICES_INTEGRATION-API_CERTIFICATEPATH: "event_service_certificate_path"
-      HMPPS_S3_BUCKETS_CERTIFICATE-BACKUP_BUCKETNAME: "bucket_name"
       CERTIFICATE_BUCKET_NAME: "bucket_name"
       CERTIFICATE_PASSWORD: "event_service_certificate_password"
       CERTIFICATE_PATH: "event_service_certificate_path"
     consumer-api-keys:
-      SERVICES_INTEGRATION-API_APIKEY: "event-service"
       API_KEY: "event-service"
     hmpps-integration-events-topic:
-      HMPPS_SQS_TOPICS_INTEGRATIONEVENTTOPIC_ARN: "sns_arn"
       INTEGRATION_EVENT_TOPIC_ARN: "sns_arn"
     hmpps-integration-api-domain-events-sqs-instance-output:
-      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUENAME: "sqs_name"
-      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUEARN: "sqs_arn"
-      HMPPS_SQS_TOPICS_DOMAINEVENTS_ARN: "hmpps_domain_events_topic_arn"
       HMPPS_DOMAIN_QUEUE_NAME: "sqs_name"
       HMPPS_DOMAIN_QUEUE_ARN: "sqs_arn"
       HMPPS_DOMAIN_TOPIC_ARN: "hmpps_domain_events_topic_arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
-      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQNAME: "sqs_name"
       HMPPS_DOMAIN_DL_QUEUE_NAME: "sqs_name"
     event-mapps-queue:
-      HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUENAME: "sqs_name"
-      HMPPS_SQS_QUEUES_MAPPSQUEUE_QUEUEARN: "sqs_arn"
-      HMPPS_SECRET_SECRETS_MAPPS-CLIENT-ORG_SECRETID: "mapps_filter_policy_secret_id"
       MAPPS_QUEUE_NAME: "sqs_name"
       MAPPS_QUEUE_ARN: "sqs_arn"
       MAPPS_FILTER_POLICY_SECRECT_ID: "mapps_filter_policy_secret_id"
@@ -70,7 +54,10 @@ generic-service:
       DB_NAME: "database_name"
       DB_USER: "database_username"
       DB_PASS: "database_password"
-
+    event_pnd_queue:
+      PND_QUEUE_NAME: "sqs_name"
+      PND_QUEUE_ARN: "sqs_arn"
+      PND_FILTER_POLICY_SECRECT_ID: "pnd_filter_policy_secret_id"
   allowlist:
     groups:
       - internal

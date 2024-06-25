@@ -1,0 +1,60 @@
+
+  integration-api:
+    apikey: ${API_KEY}
+    certificate-bucket-name: ${CERTIFICATE_BUCKET_NAME}
+    certificate-password: ${CERTIFICATE_PASSWORD}
+    certificate-path: ${CERTIFICATE_PATH}
+
+hmpps.sqs:
+  useWebToken: true
+  queues:
+    hmppsdomainqueue:
+      queueName: ${HMPPS_DOMAIN_QUEUE_NAME}
+      queueArn: ${HMPPS_DOMAIN_QUEUE_ARN}
+      dlqName: ${HMPPS_DOMAIN_DL_QUEUE_NAME}
+      subscribeTopicId: domainevents
+    mappssubscriberqueue:
+      queueName: ${MAPPS_QUEUE_NAME}
+      queueArn: ${MAPPS_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
+    pndsubscriberqueue:
+      queueName: ${PND_QUEUE_NAME}
+      queueArn: ${PND_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
+  topics:
+    domainevents:
+      arn: ${HMPPS_DOMAIN_TOPIC_ARN}
+    integrationeventtopic:
+      arn: ${INTEGRATION_EVENT_TOPIC_ARN}
+
+hmpps.secret:
+  secrets:
+    mapps-client-org:
+      secretId: ${MAPPS_FILTER_POLICY_SECRECT_ID}
+      queueId: mappssubscriberqueue
+    pnd:
+      secret-id: ${PND_FILTER_POLICY_SECRECT_ID}
+      queueId: pndsubscriberqueue
+
+event.clients:
+  mapps-client-org:
+    queueId: mappssubscriberqueue
+    pathCode: "mapps"
+  pnd:
+    queueId: pndsubscriberqueue
+    pathCode: "pnd"
+
+hmpps.s3:
+  buckets:
+    certificate-backup:
+      bucketName: ${CERTIFICATE_BUCKET_NAME}
+
+
+
+notifier:
+  schedule:
+    rate: 10000
+
+subscriber-checker:
+  schedule:
+    rate: 3600000
