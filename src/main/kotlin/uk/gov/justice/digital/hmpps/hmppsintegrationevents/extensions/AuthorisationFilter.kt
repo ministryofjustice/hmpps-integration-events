@@ -45,10 +45,7 @@ class AuthorisationFilter(
         return
       }
 
-      if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(
-          subjectDistinguishedName,
-        )
-      ) {
+      if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(subjectDistinguishedName) || clientProperties.clients[subjectDistinguishedName]!!.pathCode != req.requestURI.split("/").last()) {
         res.sendError(
           HttpServletResponse.SC_FORBIDDEN,
           "Unable to authorise $requestedPath for $subjectDistinguishedName",

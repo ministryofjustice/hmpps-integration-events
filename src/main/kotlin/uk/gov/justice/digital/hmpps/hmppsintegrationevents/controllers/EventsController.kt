@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventResponse
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.ClientEventService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.EventResponse
 
 @RestController
 @RequestMapping("/events")

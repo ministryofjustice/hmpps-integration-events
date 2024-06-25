@@ -8,6 +8,6 @@ data class EventClientProperties(
 )
 
 data class ClientConfig(
-  val queueName: String,
+  val queueId: String,
   val pathCode: String,
 )

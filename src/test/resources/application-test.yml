@@ -62,11 +62,11 @@ hmpps.secret:
   secrets:
     MOCKSERVICE1:
       secret-id: testSecret
-      queue-name: subscribertestqueue
+      queueId: subscribertestqueue
 
 event.clients:
   MockService1:
-    queue-name: subscribertestqueue
+    queueId: subscribertestqueue
     pathCode: "mockservice"
 
 notifier:

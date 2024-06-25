@@ -50,11 +50,11 @@ hmpps.secret:
   secrets:
     mapps-client-org:
       secretId: testSecret
-      queueName: mappssubscriberqueue
+      queueId: mappssubscriberqueue
 
 event.clients:
   mapps-client-org:
-    queue-name: mappssubscriberqueue
+    queueId: mappssubscriberqueue
     pathCode: "mapps"
 
 hmpps.s3:
