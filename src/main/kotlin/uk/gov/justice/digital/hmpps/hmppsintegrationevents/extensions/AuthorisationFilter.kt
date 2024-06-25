@@ -20,7 +20,7 @@ class AuthorisationFilter(
   private val clientProperties: EventClientProperties,
 ) : Filter {
   val pathPattern: String = "/events/\\.*+[^/]*\$"
-  val allowedList= listOf("/info","/health", "/health/ping","/health/readiness","/health/liveness")
+  val allowedList = listOf("/info", "/health", "/health/ping", "/health/readiness", "/health/liveness")
 
   @Throws(IOException::class, ServletException::class)
   override fun doFilter(
@@ -36,26 +36,26 @@ class AuthorisationFilter(
 
     val requestedPath = req.requestURI
 
-    if(!allowedList.contains(requestedPath)){
-        if (subjectDistinguishedName == null) {
-          res.sendError(
-            HttpServletResponse.SC_FORBIDDEN,
-            "No subject-distinguished-name header provided for authorisation"
-          )
-          return
-        }
-
-        if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(
-            subjectDistinguishedName
-          )
-        ) {
-          res.sendError(
-            HttpServletResponse.SC_FORBIDDEN,
-            "Unable to authorise $requestedPath for $subjectDistinguishedName"
-          )
-          return
-        }
+    if (!allowedList.contains(requestedPath)) {
+      if (subjectDistinguishedName == null) {
+        res.sendError(
+          HttpServletResponse.SC_FORBIDDEN,
+          "No subject-distinguished-name header provided for authorisation",
+        )
+        return
       }
+
+      if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(
+          subjectDistinguishedName,
+        )
+      ) {
+        res.sendError(
+          HttpServletResponse.SC_FORBIDDEN,
+          "Unable to authorise $requestedPath for $subjectDistinguishedName",
+        )
+        return
+      }
+    }
 
     chain.doFilter(request, response)
   }
