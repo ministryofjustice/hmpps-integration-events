@@ -11,7 +11,7 @@ class EventAPIMockMvc(
   @Autowired var mockMvc: MockMvc,
 ) {
   fun performAuthorised(path: String): MvcResult {
-    val subjectDistinguishedName = "C=GB,ST=London,L=London,O=Home Office,CN=MockService1"
+    val subjectDistinguishedName = "MockService1c"
     return mockMvc.perform(MockMvcRequestBuilders.get(path).header("subject-distinguished-name", subjectDistinguishedName)).andReturn()
   }
 
