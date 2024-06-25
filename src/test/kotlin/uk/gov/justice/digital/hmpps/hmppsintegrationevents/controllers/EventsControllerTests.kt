@@ -60,7 +60,7 @@ class EventsControllerTests() {
       ),
     )
 
-    val result = mockMvc.performAuthorisedWithCN(basePath,"MockService2")
+    val result = mockMvc.performAuthorisedWithCN(basePath, "MockService2")
     var expectedResult = """
          {
           "ReceiveMessageResponse": {
