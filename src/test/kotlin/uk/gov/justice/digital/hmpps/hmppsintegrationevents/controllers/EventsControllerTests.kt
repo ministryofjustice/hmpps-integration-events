@@ -25,7 +25,7 @@ class EventsControllerTests() {
   @MockBean private lateinit var clientEventService: ClientEventService
 
   @Autowired private lateinit var objectMapper: ObjectMapper
-  private val basePath = "/events/mockservice"
+  private val basePath = "/events/mockservice2"
   private val mockMvc: EventAPIMockMvc by lazy { EventAPIMockMvc(springMockMvc) }
 
   @Test
@@ -51,7 +51,7 @@ class EventsControllerTests() {
 
   @Test
   fun `Valid consumer, return consumer event`() {
-    whenever(clientEventService.getClientMessage("mockservice")).thenReturn(
+    whenever(clientEventService.getClientMessage("mockservice2")).thenReturn(
       EventResponse(
         MessageResponse(
           receiveMessageResult = ReceiveMessageResult(messages = listOf(Message.builder().body("MockMessageBody"))),
@@ -60,7 +60,7 @@ class EventsControllerTests() {
       ),
     )
 
-    val result = mockMvc.performAuthorised(basePath)
+    val result = mockMvc.performAuthorisedWithCN(basePath,"MockService2")
     var expectedResult = """
          {
           "ReceiveMessageResponse": {

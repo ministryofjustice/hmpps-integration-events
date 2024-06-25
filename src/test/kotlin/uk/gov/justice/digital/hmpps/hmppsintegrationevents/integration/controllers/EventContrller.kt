@@ -18,7 +18,7 @@ class EventContrller : IntegrationTestBase() {
   @Autowired
   private lateinit var objectMapper: ObjectMapper
 
-  private val mockServiceClientQueueConfig by lazy { hmppsQueueService.findByQueueId("subscribertestqueue") ?: throw MissingQueueException("Queue subscribertestqueue not found") }
+  private val mockServiceClientQueueConfig by lazy { hmppsQueueService.findByQueueId("subscribertestqueue2") ?: throw MissingQueueException("Queue subscribertestqueue not found") }
   private val queueClient by lazy { mockServiceClientQueueConfig.sqsClient }
   private val queueUrl by lazy { mockServiceClientQueueConfig.queueUrl }
 
@@ -76,8 +76,8 @@ class EventContrller : IntegrationTestBase() {
 
     queueClient.sendMessage(SendMessageRequest.builder().queueUrl(queueUrl).messageBody(expectedResult).build()).get()
     val result = webTestClient.get()
-      .uri("/events/mockservice")
-      .headers { it.add("subject-distinguished-name", "C=GB,ST=London,L=London,O=Home Office,CN=MockService1") }
+      .uri("/events/mockservice2")
+      .headers { it.add("subject-distinguished-name", "C=GB,ST=London,L=London,O=Home Office,CN=MockService2") }
       .exchange()
       .expectStatus()
       .isOk
