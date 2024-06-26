@@ -12,7 +12,7 @@ generic-service:
     SERVICES_INTEGRATION-API_URL: https://dev.integration-api.hmpps.service.justice.gov.uk
 
   namespace_secrets:
-    event_test_client_queue:
+    event-test-client-queue:
       TEST_CLIENT_QUEUE_NAME: "sqs_name"
       TEST_CLIENT_QUEUE_ARN: "sqs_arn"
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
