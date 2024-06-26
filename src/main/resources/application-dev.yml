@@ -1,8 +1,9 @@
-integration-api:
-  apikey: ${API_KEY}
-  certificate-bucket-name: ${CERTIFICATE_BUCKET_NAME}
-  certificate-password: ${CERTIFICATE_PASSWORD}
-  certificate-path: ${CERTIFICATE_PATH}
+services:
+  integration-api:
+    apikey: ${API_KEY}
+    certificate-bucket-name: ${CERTIFICATE_BUCKET_NAME}
+    certificate-password: ${CERTIFICATE_PASSWORD}
+    certificate-path: ${CERTIFICATE_PATH}
 
 hmpps.sqs:
   useWebToken: true
