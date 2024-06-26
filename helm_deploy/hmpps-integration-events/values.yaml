@@ -54,7 +54,7 @@ generic-service:
       DB_NAME: "database_name"
       DB_USER: "database_username"
       DB_PASS: "database_password"
-    event_pnd_queue:
+    pnd-filter-list:
       PND_QUEUE_NAME: "sqs_name"
       PND_QUEUE_ARN: "sqs_arn"
       PND_FILTER_POLICY_SECRECT_ID: "pnd_filter_policy_secret_id"
