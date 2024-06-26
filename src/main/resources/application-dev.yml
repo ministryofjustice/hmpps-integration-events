@@ -17,10 +17,10 @@ hmpps.sqs:
       queueName: ${MAPPS_QUEUE_NAME}
       queueArn: ${MAPPS_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
-    pndsubscriberqueue:
-      queueName: ${PND_QUEUE_NAME}
-      queueArn: ${PND_QUEUE_ARN}
-      subscribeTopicId: integrationeventtopic
+#    pndsubscriberqueue:
+#      queueName: ${PND_QUEUE_NAME}
+#      queueArn: ${PND_QUEUE_ARN}
+#      subscribeTopicId: integrationeventtopic
     testclientsubscriberqueue:
       queueName: ${TEST_CLIENT_QUEUE_NAME}
       queueArn: ${TEST_CLIENT_QUEUE_ARN}
@@ -44,9 +44,9 @@ event.clients:
   mapps-client-org:
     queueId: mappssubscriberqueue
     pathCode: "mapps"
-  pnd:
-    queueId: pndsubscriberqueue
-    pathCode: "pnd"
+#  pnd:
+#    queueId: pndsubscriberqueue
+#    pathCode: "pnd"
   test-client:
     queueId: testclientsubscriberqueue
     pathCode: "test-client"
