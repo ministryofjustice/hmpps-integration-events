@@ -63,8 +63,7 @@ generic-service:
       DB_PASS: "database_password"
 
   allowlist:
-    groups:
-      - internal
+    unrestricted: "0.0.0.0/0"
 
 generic-prometheus-alerts:
   targetApplication: hmpps-integration-events
