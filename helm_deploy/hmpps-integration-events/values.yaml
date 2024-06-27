@@ -59,7 +59,7 @@ generic-service:
     event-pnd-queue:
       PND_QUEUE_NAME: "sqs_name"
       PND_QUEUE_ARN: "sqs_arn"
-      PND_FILTER_POLICY_SECRECT_ID: "mapps_filter_policy_secret_id"
+      PND_FILTER_POLICY_SECRECT_ID: "pnd_filter_policy_secret_id"
     rds-postgresql-instance-output:
       DB_SERVER: "rds_instance_endpoint"
       DB_NAME: "database_name"
