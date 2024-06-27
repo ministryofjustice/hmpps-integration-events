@@ -6,7 +6,8 @@ generic-service:
 
   ingress:
     host: hmpps-integration-events-dev.apps.live.cloud-platform.service.justice.gov.uk
-
+    annotations:
+      nginx.ingress.kubernetes.io/auth-tls-secret: "hmpps-integration-api-dev/client-certificate-auth"
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SERVICES_INTEGRATION-API_URL: https://dev.integration-api.hmpps.service.justice.gov.uk
