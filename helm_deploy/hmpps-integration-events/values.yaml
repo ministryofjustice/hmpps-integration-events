@@ -12,8 +12,15 @@ generic-service:
 
   ingress:
     enabled: true
-    host: app-hostname.local # override per environment
-    tlsSecretName: hmpps-integration-events-cert
+    v1_2_enabled: true
+    v0_47_enabled: false
+    host: app-hostname.local    # override per environment
+    tlsSecretName: ""
+    annotations:
+      nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+      nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+      nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+      nginx.ingress.kubernetes.io/limit-rps: "100"
 
   # Environment variables to load into the deployment
   env:
