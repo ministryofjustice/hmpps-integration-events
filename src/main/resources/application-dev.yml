@@ -33,9 +33,6 @@ hmpps.secret:
     mapps-client-org:
       secretId: ${MAPPS_FILTER_POLICY_SECRECT_ID}
       queueId: mappssubscriberqueue
-    pnd:
-      secret-id: ${PND_FILTER_POLICY_SECRECT_ID}
-      queueId: pndsubscriberqueue
 
 event.clients:
   mapps-client-org:
