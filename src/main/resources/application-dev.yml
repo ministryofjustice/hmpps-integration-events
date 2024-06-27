@@ -39,7 +39,7 @@ event.clients:
     queueId: mappssubscriberqueue
     pathCode: "mapps"
 
-  test-client:
+  event-service:
     queueId: testclientsubscriberqueue
     pathCode: "test-client"
 
