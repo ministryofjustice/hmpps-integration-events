@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.Integration
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 
-class EventContrller : IntegrationTestBase() {
+class EventController : IntegrationTestBase() {
 
   @Autowired
   protected lateinit var hmppsQueueService: HmppsQueueService
