@@ -8,4 +8,3 @@ awslocal s3 mb s3://$BACK_UP_BUCKET
 #Copy client certificate to bucket
 awslocal s3 cp "/etc/localstack/client.p12" "s3://certificate-backup/testclient/client.p12"
 awslocal secretsmanager create-secret --region $AWS_REGION --name $TEST_CLIENT_SECRET --description "Test Client Filter" --secret-string $TEST_CLIENT_SECRET_VALUE
-

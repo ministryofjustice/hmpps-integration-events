@@ -5,12 +5,18 @@ generic-service:
   replicaCount: 2
 
   ingress:
-    host: hmpps-integration-events-dev.hmpps.service.justice.gov.uk
-
+    host: hmpps-integration-events-dev.apps.live.cloud-platform.service.justice.gov.uk
+    annotations:
+      nginx.ingress.kubernetes.io/auth-tls-secret: "hmpps-integration-api-dev/client-certificate-auth"
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SERVICES_INTEGRATION-API_URL: https://dev.integration-api.hmpps.service.justice.gov.uk
+    SPRING_PROFILES_ACTIVE: dev
 
+  namespace_secrets:
+    event-test-client-queue:
+      TEST_CLIENT_QUEUE_NAME: "sqs_name"
+      TEST_CLIENT_QUEUE_ARN: "sqs_arn"
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:

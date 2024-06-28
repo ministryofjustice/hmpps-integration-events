@@ -42,7 +42,7 @@ class SubscriberService(
     if (filterList.eventType != events && filterList.eventType.isNotEmpty()) {
       val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(events))
       secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
-      integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueName, "FilterPolicy", filterPolicy)
+      integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
     }
   }
 }

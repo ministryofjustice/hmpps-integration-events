@@ -48,9 +48,6 @@ abstract class SqsIntegrationTestBase {
     domainEventsDeadLetterSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(domainEventsDeadLetterSqsUrl).build()).get()
   }
 
-  protected fun getNumberOfMessagesCurrentlyOndomainEventsQueueSqsClient(): Int = domainEventsQueueSqsClient.countAllMessagesOnQueue(domainEventsQueueSqsUrl).get()
-  protected fun getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue(): Int = integrationEventTestQueueSqsClient.countAllMessagesOnQueue(integrationEventTestQueueUrl).get()
-
   protected fun getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue(): Int = domainEventsDeadLetterSqsClient.countAllMessagesOnQueue(domainEventsDeadLetterSqsUrl).get()
   protected fun geMessagesCurrentlyOnTestQueue(): List<String> {
     val messageResult = integrationEventTestQueueSqsClient.receiveMessage(
