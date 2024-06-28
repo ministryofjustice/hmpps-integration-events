@@ -33,6 +33,24 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
+  fun generatePrisonerReleasedEvent(
+    eventTypeValue: String = "prison-offender-events.prisoner.released",
+  ): String = (
+    """
+    {
+     "Type" : "Notification",
+     "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
+     "Message" : "{\"eventType\":\"$eventTypeValue\",\"version\":1,\"reason\":\"RELEASED\",\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"nomsNumber\",\"value\":\"mockNomsNumber\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+     "Timestamp" : "$isoInstantTimestamp",
+     "MessageAttributes" : {
+       "eventType" : {"Type":"String","Value":"$eventTypeValue"},
+       "id" : {"Type":"String","Value":"12345678-a1af-a0ba-1b22-d12e12d1234f"},
+       "timestamp" : {"Type":"Number.java.lang.Long","Value":"$millis"}
+     }
+    }
+    """
+    )
+
   fun generateRawHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",

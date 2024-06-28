@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 
@@ -39,6 +40,19 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldNotBeNull()
+  }
+
+  @Test
+  fun `will process and save a prisoner released event SQS message`() {
+    val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+    savedEvent.hmppsId.shouldBe("mockNomsNumber")
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockNomsNumber/sentences/latest-key-dates-and-adjustments")
   }
 
   @Test
