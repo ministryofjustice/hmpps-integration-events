@@ -15,7 +15,7 @@ services:
   integration-api:
     url: https://dev.integration-api.hmpps.service.justice.gov.uk
 #    ADD api key from namespace secret
-    apikey: "LIJGe1vhuo7FefAcG8Aii1Pi9QcOibE3Hy7MVsab"
+    apikey: ""
     certificate-bucket-name: "certificate-backup"
     certificate-password: "client"
     certificate-path: "testclient/client.p12"
