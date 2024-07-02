@@ -59,6 +59,19 @@ management:
       cache:
         time-to-live: 2000ms
 
+services:
+  integration-api:
+    apikey: ${API_KEY}
+    certificate-bucket-name: ${CERTIFICATE_BUCKET_NAME}
+    certificate-password: ${CERTIFICATE_PASSWORD}
+    certificate-path: ${CERTIFICATE_PATH}
+  hmpps-auth:
+    base-url: ${HMPPS_AUTH_URL}
+    username: ${CLIENT_ID}
+    password: ${CLIENT_SECRET}
+  probation-integration:
+    base-url: ${PROBATION_INTEGRATION_API_URL}
+
 notifier:
   schedule:
     rate: 10000
