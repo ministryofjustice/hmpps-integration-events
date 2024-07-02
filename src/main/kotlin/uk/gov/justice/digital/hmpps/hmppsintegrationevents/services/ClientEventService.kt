@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.EventClientProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventResponse
@@ -26,6 +27,11 @@ class ClientEventService(
     val rawResponse = clientQueueConfig.sqsClient.receiveMessage(
       ReceiveMessageRequest.builder().queueUrl(clientQueueConfig.queueUrl).messageAttributeNames("All").maxNumberOfMessages(1).waitTimeSeconds(1).build(),
     ).get()
+    rawResponse.messages().firstOrNull()?.let { message ->
+      //TODO Audit
+      val deleteRequest = DeleteMessageRequest.builder().queueUrl(clientQueueConfig.queueUrl).receiptHandle(message.receiptHandle()).build()
+      clientQueueConfig.sqsClient.deleteMessage(deleteRequest)
+    }
 
     return EventResponse(
       MessageResponse(

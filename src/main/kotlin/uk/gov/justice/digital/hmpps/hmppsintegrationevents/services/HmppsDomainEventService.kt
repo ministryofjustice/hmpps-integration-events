@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.PrisonerReleaseTypes
@@ -14,13 +15,13 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.H
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 @Configuration
 class HmppsDomainEventService(
   @Autowired val repo: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
+  @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
   @Value("\${services.integration-api.url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
@@ -49,13 +50,11 @@ class HmppsDomainEventService(
     if(crn != null) {
       return crn
     }
-
     val nomsNumber = hmppsEvent.personReference.findNomsIdentifier()
     if(nomsNumber!=null){
-      //TODO retrieve CRN number from probation integration service
-      return nomsNumber
+      val identifier = probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)
+      return identifier?.crn
     }
-
     return null
   }
 
