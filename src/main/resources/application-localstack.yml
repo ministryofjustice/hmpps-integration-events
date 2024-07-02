@@ -38,6 +38,8 @@ hmpps.sqs:
       queueName: mapps_subscriber_queue
       dlqName: mapps_subscriber_queue_dlq
       subscribeTopicId: integrationeventtopic
+    audit:
+      queueName: "audit"
 
   topics:
     domainevents:

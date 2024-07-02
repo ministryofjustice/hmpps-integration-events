@@ -23,6 +23,7 @@ import java.time.ZoneId
 
 @Configuration
 @ActiveProfiles("test")
+
 class HmppsDomainEventServiceTest {
 
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"

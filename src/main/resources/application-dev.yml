@@ -19,6 +19,8 @@ hmpps.sqs:
       queueName: ${TEST_CLIENT_QUEUE_NAME}
       queueArn: ${TEST_CLIENT_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    audit:
+      queueName: ${AUDIT_QUEUE_NAME}
   topics:
     domainevents:
       arn: ${HMPPS_DOMAIN_TOPIC_ARN}
