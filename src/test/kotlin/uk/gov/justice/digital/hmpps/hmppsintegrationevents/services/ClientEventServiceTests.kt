@@ -93,8 +93,7 @@ class ClientEventServiceTests {
     whenever(hmppsEventSqsClient.receiveMessage(any<ReceiveMessageRequest>())).thenReturn(
       CompletableFuture.completedFuture(
         ReceiveMessageResponse.builder()
-          .messages(listOf(Message.builder().body("MockMessage").receiptHandle("MockHandle") .build()))
-
+          .messages(listOf(Message.builder().body("MockMessage").receiptHandle("MockHandle").build()))
           .responseMetadata(
             DefaultAwsResponseMetadata.create(
               mapOf("AWS_REQUEST_ID" to "mockRequestId"),

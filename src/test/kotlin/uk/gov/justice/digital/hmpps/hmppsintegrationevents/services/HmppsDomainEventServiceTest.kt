@@ -30,11 +30,12 @@ class HmppsDomainEventServiceTest {
   private val repo = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(repo = repo, deadLetterQueueService,probationIntegrationApiGateway, baseUrl)
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(repo = repo, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
-  private val mockNomisId="mockNomisId"
-  private val mockCrn ="mockCrn"
+  private val mockNomisId = "mockNomisId"
+  private val mockCrn = "mockCrn"
+
   @BeforeEach
   fun setup() {
     mockkStatic(LocalDateTime::class)
@@ -44,7 +45,7 @@ class HmppsDomainEventServiceTest {
     every { repo.save(any()) } returnsArgument 0
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
 
-    every {probationIntegrationApiGateway.getPersonIdentifier(mockNomisId)} returns PersonIdentifier(mockCrn,mockNomisId)
+    every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
   }
 
   @Test

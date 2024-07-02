@@ -35,7 +35,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
 
   fun generatePrisonerReleasedEvent(
     eventTypeValue: String = "prison-offender-events.prisoner.released",
-    reason:String ="RELEASED"
+    reason: String = "RELEASED",
   ): String = (
     """
     {
@@ -83,7 +83,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     registerTypeCode: String = "MAPP",
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
-    reason:String ="RELEASED"
+    reason: String = "RELEASED",
   ): HmppsDomainEvent = (
     HmppsDomainEvent(
       type = "Notification",

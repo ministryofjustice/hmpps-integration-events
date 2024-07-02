@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,14 +18,13 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HMPPSAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
-import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
-@ExtendWith(ProbationIntegrationApiExtension::class, HMPPSAuthExtension::class)
+@ExtendWith(ProbationIntegrationApiExtension::class, HmppsAuthExtension::class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
@@ -51,10 +48,9 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will process and save a prisoner released event SQS message`() {
-    ProbationIntegrationApiExtension.server.stubGetPersonIdentifier("mockNomsNumber","mockCrn")
+    ProbationIntegrationApiExtension.server.stubGetPersonIdentifier("mockNomsNumber", "mockCrn")
     val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
     sendDomainSqsMessage(rawMessage)
-
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvent = repo.findAll().firstOrNull()

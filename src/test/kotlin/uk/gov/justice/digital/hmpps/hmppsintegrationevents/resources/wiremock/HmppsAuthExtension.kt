@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
-class HMPPSAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class HmppsAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
   override fun afterAll(context: ExtensionContext): Unit = server.stop()
 
   override fun beforeAll(context: ExtensionContext) {
@@ -16,6 +16,6 @@ class HMPPSAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallba
   override fun beforeEach(context: ExtensionContext): Unit = server.resetRequests()
 
   companion object {
-    val server = HMPPSAuthMockServer()
+    val server = HmppsAuthMockServer()
   }
 }

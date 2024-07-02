@@ -9,7 +9,7 @@ data class HmppsDomainEventMessage(
   @JsonProperty("occurredAt") val occurredAt: String,
   @JsonProperty("personReference") val personReference: PersonReference,
   @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation,
-  @JsonProperty("reason") val reason: String?= null,
+  @JsonProperty("reason") val reason: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
