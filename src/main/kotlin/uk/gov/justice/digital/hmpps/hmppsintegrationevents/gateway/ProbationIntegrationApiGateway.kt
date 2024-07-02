@@ -32,8 +32,8 @@ class ProbationIntegrationApiGateway(
       }
 
       is WebClientWrapperResponse.Error -> {
-        //TODO log error
-        return null;
+        // TODO log error
+        return null
       }
     }
   }
@@ -49,5 +49,5 @@ class ProbationIntegrationApiGateway(
 
 data class PersonIdentifier(
   val crn: String,
-  val nomisId:String
+  val nomisId: String,
 )

@@ -28,7 +28,7 @@ class ClientEventService(
       ReceiveMessageRequest.builder().queueUrl(clientQueueConfig.queueUrl).messageAttributeNames("All").maxNumberOfMessages(1).waitTimeSeconds(1).build(),
     ).get()
     rawResponse.messages().firstOrNull()?.let { message ->
-      //TODO Audit
+      // TODO Audit
       val deleteRequest = DeleteMessageRequest.builder().queueUrl(clientQueueConfig.queueUrl).receiptHandle(message.receiptHandle()).build()
       clientQueueConfig.sqsClient.deleteMessage(deleteRequest)
     }

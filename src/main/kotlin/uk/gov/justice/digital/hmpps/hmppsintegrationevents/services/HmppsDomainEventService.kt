@@ -47,11 +47,11 @@ class HmppsDomainEventService(
 
   private fun getHmppsId(hmppsEvent: HmppsDomainEventMessage): String? {
     val crn: String? = hmppsEvent.personReference.findCrnIdentifier()
-    if(crn != null) {
+    if (crn != null) {
       return crn
     }
     val nomsNumber = hmppsEvent.personReference.findNomsIdentifier()
-    if(nomsNumber!=null){
+    if (nomsNumber != null) {
       val identifier = probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)
       return identifier?.crn
     }
@@ -60,14 +60,14 @@ class HmppsDomainEventService(
 
   private fun getPrisonerReleasedEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
     val prisonerReleaseEvent = PrisonerReleaseTypes.from(message.eventType)
-    if(prisonerReleaseEvent != null) {
-      if(prisonerReleaseEvent== PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED || message.reason.uppercase() == "RELEASED") {
-          return EventNotification(
-            eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
-            hmppsId = hmppsId,
-            url = "$baseUrl/v1/persons/$hmppsId/sentences/latest-key-dates-and-adjustments",
-            lastModifiedDateTime = LocalDateTime.now(),
-          )
+    if (prisonerReleaseEvent != null) {
+      if (prisonerReleaseEvent == PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED || message.reason.uppercase() == "RELEASED") {
+        return EventNotification(
+          eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/sentences/latest-key-dates-and-adjustments",
+          lastModifiedDateTime = LocalDateTime.now(),
+        )
       }
     }
     return null

@@ -12,7 +12,7 @@ import java.util.*
 @Component
 class HmppsAuthGateway(
   @Value("\${services.hmpps-auth.base-url}") hmppsAuthUrl: String,
-)  {
+) {
   private val webClient: WebClient = WebClient.builder().baseUrl(hmppsAuthUrl).build()
 
   @Value("\${services.hmpps-auth.username}")
@@ -22,7 +22,7 @@ class HmppsAuthGateway(
   private lateinit var password: String
 
   companion object Credentials {
-    fun toBasicAuth( username: String,  password: String): String {
+    fun toBasicAuth(username: String, password: String): String {
       val encodedCredentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
       return "Basic $encodedCredentials"
     }
@@ -49,5 +49,3 @@ class HmppsAuthGateway(
     }
   }
 }
-
-
