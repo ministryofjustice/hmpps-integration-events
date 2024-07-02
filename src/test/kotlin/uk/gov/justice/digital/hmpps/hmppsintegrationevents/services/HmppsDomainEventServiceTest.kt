@@ -188,7 +188,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will not process and save a domain registration event message with no CRN and cannot find CRN by nomis number`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"nomisNumber\",\"value\":\"2018/0123456X\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"nomisNumber\",\"value\":\"2018/0123456X\"}]")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED)
 
@@ -198,7 +198,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a prisoner released domain event message for event with message event type of CALCULATED_RELEASE_DATES_PRISONER_CHANGED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
 
@@ -216,7 +216,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a prisoner released domain event message for event with message with reason is RELEASED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = PrisonerReleaseTypes.PRISON_OFFENDER_EVEVNTS_PRISONER_RELEASE.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = PrisonerReleaseTypes.PRISON_OFFENDER_EVEVNTS_PRISONER_RELEASE.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
 
