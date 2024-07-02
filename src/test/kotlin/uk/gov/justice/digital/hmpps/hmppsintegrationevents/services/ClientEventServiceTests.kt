@@ -12,6 +12,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.ActiveProfiles
 import software.amazon.awssdk.awscore.DefaultAwsResponseMetadata
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
@@ -85,5 +86,30 @@ class ClientEventServiceTests {
     Assertions.assertThat(result).isNotNull
     Assertions.assertThat(result.messageResponse.responseMetadata.requestId).isEqualTo("mockRequestId")
     Assertions.assertThat(result.messageResponse.receiveMessageResult.messages.first().build().body()).isEqualTo("MockMessage")
+  }
+
+  @Test
+  fun `Delete message from queue after retrieve`() {
+    whenever(hmppsEventSqsClient.receiveMessage(any<ReceiveMessageRequest>())).thenReturn(
+      CompletableFuture.completedFuture(
+        ReceiveMessageResponse.builder()
+          .messages(listOf(Message.builder().body("MockMessage").receiptHandle("MockHandle") .build()))
+
+          .responseMetadata(
+            DefaultAwsResponseMetadata.create(
+              mapOf("AWS_REQUEST_ID" to "mockRequestId"),
+            ),
+          )
+          .build() as ReceiveMessageResponse,
+      ),
+    )
+
+    service.getClientMessage("mockClient")
+
+    argumentCaptor<DeleteMessageRequest>().apply {
+      verify(hmppsEventSqsClient, times(1)).deleteMessage(capture())
+      Assertions.assertThat(firstValue.queueUrl()).isEqualTo("mockUrl")
+      Assertions.assertThat(firstValue.receiptHandle()).isEqualTo("MockHandle")
+    }
   }
 }

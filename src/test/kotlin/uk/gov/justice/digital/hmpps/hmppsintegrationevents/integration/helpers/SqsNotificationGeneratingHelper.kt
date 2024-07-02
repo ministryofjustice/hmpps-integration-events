@@ -35,12 +35,13 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
 
   fun generatePrisonerReleasedEvent(
     eventTypeValue: String = "prison-offender-events.prisoner.released",
+    reason:String ="RELEASED"
   ): String = (
     """
     {
      "Type" : "Notification",
      "MessageId" : "1a2345bc-de67-890f-1g01-11h21314h151",
-     "Message" : "{\"eventType\":\"$eventTypeValue\",\"version\":1,\"reason\":\"RELEASED\",\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"nomsNumber\",\"value\":\"mockNomsNumber\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+     "Message" : "{\"eventType\":\"$eventTypeValue\",\"version\":1,\"reason\":\"$reason\",\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":[{\"type\":\"nomsNumber\",\"value\":\"mockNomsNumber\"}]},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"MAPP\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
      "Timestamp" : "$isoInstantTimestamp",
      "MessageAttributes" : {
        "eventType" : {"Type":"String","Value":"$eventTypeValue"},
@@ -82,10 +83,11 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     registerTypeCode: String = "MAPP",
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
+    reason:String ="RELEASED"
   ): HmppsDomainEvent = (
     HmppsDomainEvent(
       type = "Notification",
-      message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+      message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"reason\":\"$reason\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
       messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
       messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
     )

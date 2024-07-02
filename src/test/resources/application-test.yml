@@ -24,7 +24,12 @@ services:
     certificate-bucket-name: "certificate-backup"
     certificate-password: "client"
     certificate-path: "testclient/client.p12"
-
+  hmpps-auth:
+    base-url: http://localhost:8444/
+    username: "TestClient"
+    password: "TestSecret"
+  probation-integration:
+    base-url: http://localhost:8445/
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4566

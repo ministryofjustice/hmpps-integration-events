@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Upstream
 
 @Component
 class ProbationIntegrationApiGateway(
-  @Value("\${services.ndelius.base-url}") baseUrl: String,
+  @Value("\${services.probation-integration.base-url}") baseUrl: String,
 ) {
   private val webClient = WebClientWrapper(baseUrl)
 

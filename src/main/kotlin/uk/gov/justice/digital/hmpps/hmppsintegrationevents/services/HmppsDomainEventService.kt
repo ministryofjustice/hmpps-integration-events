@@ -61,7 +61,7 @@ class HmppsDomainEventService(
   private fun getPrisonerReleasedEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
     val prisonerReleaseEvent = PrisonerReleaseTypes.from(message.eventType)
     if (prisonerReleaseEvent != null) {
-      if (prisonerReleaseEvent == PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED || message.reason.uppercase() == "RELEASED") {
+      if (prisonerReleaseEvent == PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED || message.reason?.uppercase() == "RELEASED") {
         return EventNotification(
           eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = hmppsId,

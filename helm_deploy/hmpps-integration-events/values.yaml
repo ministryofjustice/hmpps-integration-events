@@ -65,6 +65,10 @@ generic-service:
       DB_NAME: "database_name"
       DB_USER: "database_username"
       DB_PASS: "database_password"
+    hmpps-auth:
+      CLIENT_ID: "client-id"
+      CLIENT_SECRET: "client-secret"
+
 
   allowlist:
     unrestricted: "0.0.0.0/0"
