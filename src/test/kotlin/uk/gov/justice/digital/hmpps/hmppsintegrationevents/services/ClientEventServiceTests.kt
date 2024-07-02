@@ -21,12 +21,8 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.ClientConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.EventClientProperties
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.AuthorisationFilter
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
 @ActiveProfiles("test")
@@ -67,7 +63,7 @@ class ClientEventServiceTests(@Autowired private val objectMapper: ObjectMapper)
     whenever(hmppsQueueService.findByQueueId("mockClientQueue"))
       .thenReturn(mockQueue)
 
-    service = ClientEventService(clientProperties, hmppsQueueService,objectMapper,auditService)
+    service = ClientEventService(clientProperties, hmppsQueueService, objectMapper, auditService)
   }
 
   @Test

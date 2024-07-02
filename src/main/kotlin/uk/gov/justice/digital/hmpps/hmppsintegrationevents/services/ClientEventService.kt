@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.MessageResponse
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ReceiveMessageResult
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ResponseMetadata
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 

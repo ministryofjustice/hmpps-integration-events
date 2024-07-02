@@ -68,7 +68,8 @@ generic-service:
     hmpps-auth:
       CLIENT_ID: "client-id"
       CLIENT_SECRET: "client-secret"
-
+    sqs-hmpps-audit-secret:
+      AUDIT_QUEUE_NAME: "sqs_queue_name"
 
   allowlist:
     unrestricted: "0.0.0.0/0"
