@@ -10,7 +10,7 @@ class HmppsAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallba
 
   override fun beforeAll(context: ExtensionContext) {
     server.start()
-    server.stubGrantToken()
+    server.stubGetOAuthToken("TestClient", "TestSecret")
   }
 
   override fun beforeEach(context: ExtensionContext): Unit = server.resetRequests()

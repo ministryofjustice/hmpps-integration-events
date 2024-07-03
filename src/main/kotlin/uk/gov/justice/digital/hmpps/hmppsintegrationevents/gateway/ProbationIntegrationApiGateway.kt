@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.WebClientWrapper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.WebClientWrapper.WebClientWrapperResponse
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.UpstreamApi
 
 @Component
@@ -27,13 +28,12 @@ class ProbationIntegrationApiGateway(
       )
 
     return when (result) {
-      is WebClientWrapper.WebClientWrapperResponse.Success -> {
-        return result.data
+      is WebClientWrapperResponse.Success -> {
+        result.data
       }
 
       is WebClientWrapperResponse.Error -> {
-        // TODO log error
-        return null
+        null
       }
     }
   }
@@ -47,7 +47,3 @@ class ProbationIntegrationApiGateway(
   }
 }
 
-data class PersonIdentifier(
-  val crn: String,
-  val nomisId: String,
-)
