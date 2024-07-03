@@ -32,16 +32,14 @@ class ProbationIntegrationApiGatewayTest {
   }
 
   @Test
-  fun `Return null if person identifier is not found`(){
-
+  fun `Return null if person identifier is not found`() {
     val result = probationIntegrationApiGateway.getPersonIdentifier("otherNomis")
 
     result.shouldBeNull()
   }
 
   @Test
-  fun `Return person identifier`(){
-
+  fun `Return person identifier`() {
     val result = probationIntegrationApiGateway.getPersonIdentifier("mockNomis")
 
     result.shouldNotBeNull()
