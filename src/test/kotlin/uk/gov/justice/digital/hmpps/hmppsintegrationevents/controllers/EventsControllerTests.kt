@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -15,9 +16,12 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.MessageRespons
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ReceiveMessageResult
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ResponseMetadata
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.EventAPIMockMvc
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.ClientEventService
 
 @WebMvcTest(controllers = [EventsController::class])
+@ExtendWith(ProbationIntegrationApiExtension::class, HmppsAuthExtension::class)
 @ActiveProfiles("test")
 class EventsControllerTests() {
   @Autowired private lateinit var springMockMvc: MockMvc
@@ -61,7 +65,7 @@ class EventsControllerTests() {
     )
 
     val result = mockMvc.performAuthorisedWithCN(basePath, "MockService2")
-    var expectedResult = """
+    val expectedResult = """
          {
           "ReceiveMessageResponse": {
             "ReceiveMessageResult": {
