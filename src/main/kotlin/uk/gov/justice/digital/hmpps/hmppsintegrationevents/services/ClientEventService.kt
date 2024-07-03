@@ -37,7 +37,7 @@ class ClientEventService(
 
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(message.body())
       val hmppsEvent: EventNotification = objectMapper.readValue(hmppsDomainEvent.message)
-      auditService.createEvent("$pathCode received event", mapOf("eventType" to hmppsEvent.eventType.name, "hmppsId" to hmppsEvent.hmppsId))
+      auditService.createEvent(pathCode, "$pathCode received event", mapOf("eventType" to hmppsEvent.eventType.name, "hmppsId" to hmppsEvent.hmppsId))
 
       val deleteRequest = DeleteMessageRequest.builder().queueUrl(clientQueueConfig.queueUrl).receiptHandle(message.receiptHandle()).build()
       clientQueueConfig.sqsClient.deleteMessage(deleteRequest)

@@ -3,8 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import org.springframework.web.context.request.RequestAttributes
-import org.springframework.web.context.request.RequestContextHolder
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsAuditEvent
 import uk.gov.justice.hmpps.sqs.HmppsQueue
@@ -21,13 +19,10 @@ class AuditService(
   private val auditQueueUrl by lazy { auditQueue.queueUrl }
 
   fun createEvent(
+    username: String,
     what: String,
     detail: Map<String, String?>,
   ) {
-    val username =
-      RequestContextHolder.currentRequestAttributes()
-        .getAttribute("clientName", RequestAttributes.SCOPE_REQUEST) as String
-
     auditSqsClient.sendMessage(
       SendMessageRequest.builder()
         .queueUrl(auditQueueUrl)

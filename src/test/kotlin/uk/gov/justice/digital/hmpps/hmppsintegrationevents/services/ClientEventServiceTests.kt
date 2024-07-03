@@ -131,7 +131,7 @@ class ClientEventServiceTests(@Autowired private val objectMapper: ObjectMapper)
 
     service.getClientMessage("mockClient")
 
-    verify(auditService, times(1)).createEvent("mockClient received event", mapOf("eventType" to "RISK_SCORE_CHANGED", "hmppsId" to "X627337"))
+    verify(auditService, times(1)).createEvent("mockClient", "mockClient received event", mapOf("eventType" to "RISK_SCORE_CHANGED", "hmppsId" to "X627337"))
   }
 
   @Test
