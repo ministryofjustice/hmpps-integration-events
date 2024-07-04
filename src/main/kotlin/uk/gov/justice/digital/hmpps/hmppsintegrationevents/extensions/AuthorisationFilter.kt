@@ -44,11 +44,11 @@ class AuthorisationFilter(
         )
         return
       }
-
-      if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(subjectDistinguishedName) || clientProperties.clients[subjectDistinguishedName]!!.pathCode != req.requestURI.split("/").last()) {
+      val clientName = subjectDistinguishedName.replace(".", "-")
+      if (!Regex(pathPattern).matches(req.requestURI) || !clientProperties.clients.containsKey(clientName) || clientProperties.clients[clientName]!!.pathCode != req.requestURI.split("/").last()) {
         res.sendError(
           HttpServletResponse.SC_FORBIDDEN,
-          "Unable to authorise $requestedPath for $subjectDistinguishedName",
+          "Unable to authorise $requestedPath for $clientName",
         )
         return
       }
