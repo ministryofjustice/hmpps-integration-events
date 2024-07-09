@@ -13,11 +13,13 @@ To enable event service to manage client subscriptions, the follow settings are 
 
 Replace clientCNname with the Common Name(CN) name of client certificate created in the [Setting up a new consumer](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md) step. 
 
-Replace client name with name of the client(no space).
+The follow application settings for each environment needs setup:
 ```bash
-  HMPPS_SECRET_SECRETS_[clientCDNname]_QUEUE-NAME: "[clientname]QUEUE"
-  HMPPS_SQS_QUEUES_[clientname]QUEUE_QUEUENAME: "[key of kubernetes secret]"
-  HMPPS_SQS_QUEUES_[clientname]QUEUE_QUEUEARN: "[key of kubernetes secret]"
-  HMPPS_SQS_QUEUES_[clientname]QUEUE_SUBSCRIBETOPICID: "INTEGRATIONEVENTTOPIC"
-  HMPPS_SECRET_SECRETS_[clientCDNname]_SECRETID: "[key of kubernetes secret]"
+hmpps.sqs.[client].queuename
+hmpps.sqs.[client].queuearn
+hmpps.sqs.[client].subscriberTopicId
+hmpps.secrets.secrets.[client].secretId
+hmpps.secrets.secrets.[client].queueId
+event.clients.[client].queueId
+event.clients.[client].pathCode
 ```
