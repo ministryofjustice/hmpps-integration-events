@@ -15,7 +15,11 @@ class IntegrationEventTypesTest {
     )
 
     map.forEach { it ->
-      val result = IntegrationEventTypes.from(it.key, null)
+      val registerType = when (it.key) {
+        "probation-case.registration.added", "probation-case.registration.updated" -> "MAPP"
+        else -> null
+      }
+      val result = IntegrationEventTypes.from(it.key, registerType)
       result?.shouldBe(it.value)
     }
   }
