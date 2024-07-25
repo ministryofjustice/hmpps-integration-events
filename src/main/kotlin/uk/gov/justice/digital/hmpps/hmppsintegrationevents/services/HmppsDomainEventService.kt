@@ -32,6 +32,7 @@ class HmppsDomainEventService(
 
     if (hmppsId != null) {
       val notification = when (eventType) {
+        IntegrationEventTypes.PROBATION_STATUS_CHANGED -> getPersonStatusUpdateEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.MAPPA_DETAIL_CHANGED -> getMappsDetailUpdateEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.RISK_SCORE_CHANGED -> getRiskScoreChangedEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE -> getPrisonerReleasedEvent(hmppsEvent, hmppsId)
@@ -73,8 +74,20 @@ class HmppsDomainEventService(
     return null
   }
 
+  private fun getPersonStatusUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
+    if (message.additionalInformation.hasMatchingRegistrationType(listOf("ASFO", "WRSM"))) {
+      return EventNotification(
+        eventType = IntegrationEventTypes.PROBATION_STATUS_CHANGED,
+        hmppsId = hmppsId,
+        url = "$baseUrl/v1/persons/$hmppsId/status-information",
+        lastModifiedDateTime = LocalDateTime.now(),
+      )
+    }
+    return null
+  }
+
   private fun getMappsDetailUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    if (message.additionalInformation.isMappRegistrationType()) {
+    if (message.additionalInformation.hasMatchingRegistrationType(listOf("MAPP"))) {
       return EventNotification(
         eventType = IntegrationEventTypes.MAPPA_DETAIL_CHANGED,
         hmppsId = hmppsId,

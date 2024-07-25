@@ -15,14 +15,18 @@ class IntegrationEventTypesTest {
     )
 
     map.forEach { it ->
-      val result = IntegrationEventTypes.from(it.key)
+      val registerType = when (it.key) {
+        "probation-case.registration.added", "probation-case.registration.updated" -> "MAPP"
+        else -> null
+      }
+      val result = IntegrationEventTypes.from(it.key, registerType)
       result?.shouldBe(it.value)
     }
   }
 
   @Test
   fun `from return null value for unknow code`() {
-    val result = IntegrationEventTypes.from("Some type")
+    val result = IntegrationEventTypes.from("Some type", "")
     result.shouldBe(null)
   }
 }

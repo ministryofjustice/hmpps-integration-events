@@ -33,6 +33,7 @@ class SubscriberService(
           url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { IntegrationEventTypes.MAPPA_DETAIL_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/risks/scores") }?.let { IntegrationEventTypes.RISK_SCORE_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/sentences/latest-key-dates-and-adjustments") }?.let { IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE.name },
+          url.takeIf { it.contains("/v1/persons/.*/status-information") }?.let { IntegrationEventTypes.PROBATION_STATUS_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }

@@ -51,8 +51,8 @@ class HmppsDomainEventsListenerTest {
 
   @Test
   fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
