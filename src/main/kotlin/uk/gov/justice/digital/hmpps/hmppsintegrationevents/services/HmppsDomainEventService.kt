@@ -74,7 +74,6 @@ class HmppsDomainEventService(
     return null
   }
 
-
   private fun getPersonStatusUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
     if (message.additionalInformation.hasMatchingRegistrationType(listOf("ASFO", "WRSM"))) {
       return EventNotification(

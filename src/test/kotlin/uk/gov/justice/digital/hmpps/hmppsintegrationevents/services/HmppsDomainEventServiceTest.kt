@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
@@ -62,7 +61,7 @@ class HmppsDomainEventServiceTest {
     "probation-case.registration.deregistered,WRSM",
     "probation-case.registration.updated,WRSM",
   )
-  fun `will process and save a person status event`(eventType: String, registerTypeCode: String ) {
+  fun `will process and save a person status event`(eventType: String, registerTypeCode: String) {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType, registerTypeCode)
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.PROBATION_STATUS_CHANGED)

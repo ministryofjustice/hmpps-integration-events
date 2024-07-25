@@ -36,6 +36,6 @@ data class AdditionalInformation(
   @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
-        registerTypeCode.contains(this.registerTypeCode)
+    registerTypeCode.contains(this.registerTypeCode)
     )
 }
