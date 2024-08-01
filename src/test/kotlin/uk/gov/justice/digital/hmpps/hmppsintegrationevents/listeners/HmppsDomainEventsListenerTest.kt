@@ -78,6 +78,6 @@ class HmppsDomainEventsListenerTest {
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify { hmppsDomainEventService wasNot Called }
-    verify(exactly = 1) { deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}") }
+    verify { deadLetterQueueService wasNot Called }
   }
 }
