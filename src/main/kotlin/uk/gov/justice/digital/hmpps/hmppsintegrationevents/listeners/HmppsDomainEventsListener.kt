@@ -41,8 +41,6 @@ class HmppsDomainEventsListener(
     val hmppsDomainEventType = IntegrationEventTypes.from(hmppsDomainEvent.messageAttributes.eventType.value, hmppsEvent.additionalInformation.registerTypeCode)
     if (hmppsDomainEventType != null) {
       hmppsDomainEventService.execute(hmppsDomainEvent, hmppsDomainEventType)
-    } else {
-      deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}")
     }
   }
 }

@@ -74,18 +74,12 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `will not process and save a domain event message with an unknown type and log to dead letter queue`() {
+  fun `will not process and save a domain event message with an unknown type`() {
     val rawMessage = SqsNotificationGeneratingHelper().generateRawGenericEvent(eventTypeValue = "some.other-event")
 
     sendDomainSqsMessage(rawMessage)
 
-    Awaitility.await().until { getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue() == 1 }
-    val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
-    val message = deadLetterQueueMessage.messages().first()
-    val payload = message.body()
-    val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-    payload.shouldBe(objectMapper.writeValueAsString(hmppsDomainEvent))
-    message.messageAttributes()["Error"]!!.stringValue().shouldBe("Unexpected event type some.other-event")
+    Awaitility.await().until { getNumberOfMessagesCurrentlyOndomainEventsDeadLetterQueue() == 0 }
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
   }

@@ -1,9 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
-import io.mockk.Called
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.json.JsonTest
@@ -78,6 +75,6 @@ class HmppsDomainEventsListenerTest {
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify { hmppsDomainEventService wasNot Called }
-    verify(exactly = 1) { deadLetterQueueService.sendEvent(hmppsDomainEvent, "Unexpected event type ${hmppsDomainEvent.messageAttributes.eventType.value}") }
+    verify { deadLetterQueueService wasNot Called }
   }
 }
