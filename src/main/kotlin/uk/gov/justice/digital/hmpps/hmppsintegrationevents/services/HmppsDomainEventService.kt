@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.DYNAMIC_RISKS_REGISTER_TYPES
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.MAPPA_DETAIL_REGISTER_TYPES
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.PROBATION_STATUS_REGISTER_TYPES
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.PrisonerReleaseTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RiskScoreTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
@@ -32,6 +35,7 @@ class HmppsDomainEventService(
 
     if (hmppsId != null) {
       val notification = when (eventType) {
+        IntegrationEventTypes.DYNAMIC_RISKS_CHANGED -> getDynamicRisksUpdateEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.PROBATION_STATUS_CHANGED -> getPersonStatusUpdateEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.MAPPA_DETAIL_CHANGED -> getMappsDetailUpdateEvent(hmppsEvent, hmppsId)
         IntegrationEventTypes.RISK_SCORE_CHANGED -> getRiskScoreChangedEvent(hmppsEvent, hmppsId)
@@ -74,8 +78,20 @@ class HmppsDomainEventService(
     return null
   }
 
+  private fun getDynamicRisksUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
+    if (message.additionalInformation.hasMatchingRegistrationType(DYNAMIC_RISKS_REGISTER_TYPES)) {
+      return EventNotification(
+        eventType = IntegrationEventTypes.DYNAMIC_RISKS_CHANGED,
+        hmppsId = hmppsId,
+        url = "$baseUrl/v1/persons/$hmppsId/risks/dynamic",
+        lastModifiedDateTime = LocalDateTime.now(),
+      )
+    }
+    return null
+  }
+
   private fun getPersonStatusUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    if (message.additionalInformation.hasMatchingRegistrationType(listOf("ASFO", "WRSM"))) {
+    if (message.additionalInformation.hasMatchingRegistrationType(PROBATION_STATUS_REGISTER_TYPES)) {
       return EventNotification(
         eventType = IntegrationEventTypes.PROBATION_STATUS_CHANGED,
         hmppsId = hmppsId,
@@ -87,7 +103,7 @@ class HmppsDomainEventService(
   }
 
   private fun getMappsDetailUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    if (message.additionalInformation.hasMatchingRegistrationType(listOf("MAPP"))) {
+    if (message.additionalInformation.hasMatchingRegistrationType(MAPPA_DETAIL_REGISTER_TYPES)) {
       return EventNotification(
         eventType = IntegrationEventTypes.MAPPA_DETAIL_CHANGED,
         hmppsId = hmppsId,
