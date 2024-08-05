@@ -49,6 +49,20 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
+enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val registerType: List<String>, val path: String) {
+  DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, DYNAMIC_RISKS_REGISTER_TYPES, "risks/dynamic"),
+  PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, PROBATION_STATUS_REGISTER_TYPES, "status-information"),
+  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, MAPPA_DETAIL_REGISTER_TYPES, "risks/mappadetail"), ;
+
+  companion object {
+    fun from(eventType: IntegrationEventTypes, registerType: String?): EventTypes? =
+      EventTypes.entries.firstOrNull {
+        it.integrationEventTypes == eventType &&
+          it.registerType.contains(registerType)
+      }
+  }
+}
+
 enum class IntegrationEventTypes(val value: String, val registerTypes: List<String>?, val upstreamEventTypes: List<String>) {
   DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", DYNAMIC_RISKS_REGISTER_TYPES, listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)),
   PROBATION_STATUS_CHANGED("ProbationStatus.Changed", PROBATION_STATUS_REGISTER_TYPES, listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)),
