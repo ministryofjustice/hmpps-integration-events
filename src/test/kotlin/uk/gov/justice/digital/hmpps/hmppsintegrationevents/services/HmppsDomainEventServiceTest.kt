@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
@@ -170,63 +171,17 @@ class HmppsDomainEventServiceTest {
     verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
   }
 
-  @Test
-  fun `will process and save a risk changed domain event message for event with message event type of RISK_OF_SERIOUS_RECIDIVISM`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "risk-assessment.scores.rsr.determined")
-
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
-
-    verify(exactly = 1) {
-      repo.save(
-        EventNotification(
-          eventType = IntegrationEventTypes.RISK_SCORE_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/scores",
-          lastModifiedDateTime = currentTime,
-        ),
-      )
-    }
-  }
-
-  @Test
-  fun `will process and save a risk changed domain event message for event with message event type of OFFENDER_GROUP_RECONVICTION_SCALE`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "risk-assessment.scores.ogrs.determined")
-
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
-
-    verify(exactly = 1) {
-      repo.save(
-        EventNotification(
-          eventType = IntegrationEventTypes.RISK_SCORE_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/scores",
-          lastModifiedDateTime = currentTime,
-        ),
-      )
-    }
-  }
-
-  @Test
-  fun `will process and save a risk changed domain event message for event with message event type of OFFENDER_GROUP_RECONVICTION_SCALE_MANUAL_CALCULATION`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "probation-case.risk-scores.ogrs.manual-calculation")
-
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
-
-    verify(exactly = 1) {
-      repo.save(
-        EventNotification(
-          eventType = IntegrationEventTypes.RISK_SCORE_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/scores",
-          lastModifiedDateTime = currentTime,
-        ),
-      )
-    }
-  }
-
-  @Test
-  fun `will process and save a risk changed domain event message for event with message event type of ASSESSMENT_SUMMARY_PRODUCED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      "risk-assessment.scores.rsr.determined",
+      "probation-case.risk-scores.ogrs.manual-calculation",
+      "risk-assessment.scores.ogrs.determined",
+      "assessment.summary.produced",
+    ],
+  )
+  fun `will process and save a risk changed domain event message`(eventType: String) {
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = eventType)
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
