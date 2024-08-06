@@ -16,8 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.PrisonerReleaseTypes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RiskScoreTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -174,7 +172,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a risk changed domain event message for event with message event type of RISK_OF_SERIOUS_RECIDIVISM`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = RiskScoreTypes.RISK_OF_SERIOUS_RECIDIVISM.code)
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "risk-assessment.scores.rsr.determined")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
@@ -192,7 +190,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a risk changed domain event message for event with message event type of OFFENDER_GROUP_RECONVICTION_SCALE`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = RiskScoreTypes.OFFENDER_GROUP_RECONVICTION_SCALE.code)
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "risk-assessment.scores.ogrs.determined")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
@@ -210,7 +208,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a risk changed domain event message for event with message event type of OFFENDER_GROUP_RECONVICTION_SCALE_MANUAL_CALCULATION`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = RiskScoreTypes.OFFENDER_GROUP_RECONVICTION_SCALE_MANUAL_CALCULATION.code)
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "probation-case.risk-scores.ogrs.manual-calculation")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
@@ -228,7 +226,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a risk changed domain event message for event with message event type of ASSESSMENT_SUMMARY_PRODUCED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = RiskScoreTypes.ASSESSMENT_SUMMARY_PRODUCED.code)
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
@@ -255,7 +253,7 @@ class HmppsDomainEventServiceTest {
   fun `will update an events lastModifiedDate if a relevant risk score changed event is already stored`() {
     every { repo.existsByHmppsIdAndEventType("X777776", IntegrationEventTypes.RISK_SCORE_CHANGED) } returns true
 
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = RiskScoreTypes.ASSESSMENT_SUMMARY_PRODUCED.code)
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
@@ -274,7 +272,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a prisoner released domain event message for event with message event type of CALCULATED_RELEASE_DATES_PRISONER_CHANGED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = "calculate-release-dates.prisoner.changed", reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
 
@@ -292,7 +290,7 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will process and save a prisoner released domain event message for event with message with reason is RELEASED`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = PrisonerReleaseTypes.PRISON_OFFENDER_EVEVNTS_PRISONER_RELEASE.code, reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = "prison-offender-events.prisoner.released", reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
 
