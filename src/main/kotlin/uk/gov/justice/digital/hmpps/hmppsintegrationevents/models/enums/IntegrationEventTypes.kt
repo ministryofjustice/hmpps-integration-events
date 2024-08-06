@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.VISOR_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WARRANT_SUMMONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 
 const val PROBATION_CASE_REGISTRATION_ADDED = "probation-case.registration.added"
 const val PROBATION_CASE_REGISTRATION_DELETED = "probation-case.registration.deleted"
@@ -19,6 +20,10 @@ const val PROBATION_CASE_REGISTRATION_DEREGISTERED = "probation-case.registratio
 const val PROBATION_CASE_REGISTRATION_UPDATED = "probation-case.registration.updated"
 
 val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
+
+val PRISONER_RELEASE_TYPES = listOf("prisoner-offender-search.prisoner.released", "prison-offender-events.prisoner.released", "calculate-release-dates.prisoner.changed")
+
+val RISK_SCORE_TYPES = listOf("risk-assessment.scores.ogrs.determined", "probation-case.risk-scores.ogrs.manual-calculation", "risk-assessment.scores.rsr.determined", "assessment.summary.produced")
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
@@ -49,16 +54,25 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val registerType: List<String>, val path: String) {
+enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val messageFilterAttributes: List<String>, val path: String) {
   DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, DYNAMIC_RISKS_REGISTER_TYPES, "risks/dynamic"),
   PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, PROBATION_STATUS_REGISTER_TYPES, "status-information"),
-  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, MAPPA_DETAIL_REGISTER_TYPES, "risks/mappadetail"), ;
+  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, MAPPA_DETAIL_REGISTER_TYPES, "risks/mappadetail"),
+  RISK_SCORE(IntegrationEventTypes.RISK_SCORE_CHANGED, RISK_SCORE_TYPES, "risks/scores"),
+  KEY_DATES_PRISONER_RELEASE(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE, PRISONER_RELEASE_TYPES, "sentences/latest-key-dates-and-adjustments"),
+  ;
 
   companion object {
-    fun from(eventType: IntegrationEventTypes, registerType: String?): EventTypes? =
+    fun from(eventType: IntegrationEventTypes, message: HmppsDomainEventMessage): EventTypes? =
       EventTypes.entries.firstOrNull {
-        it.integrationEventTypes == eventType &&
-          it.registerType.contains(registerType)
+        (
+          it.integrationEventTypes == eventType &&
+            it.messageFilterAttributes.contains(message.additionalInformation.registerTypeCode)
+          ) ||
+          (
+            it.integrationEventTypes == eventType &&
+              it.messageFilterAttributes.contains(message.eventType)
+            )
       }
   }
 }
