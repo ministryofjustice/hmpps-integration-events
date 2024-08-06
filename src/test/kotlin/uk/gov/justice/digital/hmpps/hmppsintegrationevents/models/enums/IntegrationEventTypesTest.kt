@@ -25,7 +25,7 @@ class IntegrationEventTypesTest {
   }
 
   @Test
-  fun `from return null value for unknow code`() {
+  fun `from return null value for unknown code`() {
     val result = IntegrationEventTypes.from("Some type", "")
     result.shouldBe(null)
   }

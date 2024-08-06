@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.PrisonerReleaseTypes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RiskScoreTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -31,12 +30,7 @@ class HmppsDomainEventService(
     val hmppsId = getHmppsId(hmppsEvent)
 
     if (hmppsId != null) {
-      val notification = when (eventType) {
-        IntegrationEventTypes.PROBATION_STATUS_CHANGED -> getPersonStatusUpdateEvent(hmppsEvent, hmppsId)
-        IntegrationEventTypes.MAPPA_DETAIL_CHANGED -> getMappsDetailUpdateEvent(hmppsEvent, hmppsId)
-        IntegrationEventTypes.RISK_SCORE_CHANGED -> getRiskScoreChangedEvent(hmppsEvent, hmppsId)
-        IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE -> getPrisonerReleasedEvent(hmppsEvent, hmppsId)
-      }
+      val notification = getEventNotification(eventType, hmppsEvent, hmppsId)
 
       if (notification != null) {
         handleMessage(notification)
@@ -59,52 +53,13 @@ class HmppsDomainEventService(
     return null
   }
 
-  private fun getPrisonerReleasedEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    val prisonerReleaseEvent = PrisonerReleaseTypes.from(message.eventType)
-    if (prisonerReleaseEvent != null) {
-      if (prisonerReleaseEvent == PrisonerReleaseTypes.CALCULATED_RELEASE_DATES_PRISONER_CHANGED || message.reason?.uppercase() == "RELEASED") {
-        return EventNotification(
-          eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
-          hmppsId = hmppsId,
-          url = "$baseUrl/v1/persons/$hmppsId/sentences/latest-key-dates-and-adjustments",
-          lastModifiedDateTime = LocalDateTime.now(),
-        )
-      }
-    }
-    return null
-  }
-
-  private fun getPersonStatusUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    if (message.additionalInformation.hasMatchingRegistrationType(listOf("ASFO", "WRSM"))) {
+  private fun getEventNotification(integrationEventType: IntegrationEventTypes, message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
+    val eventType = EventTypes.from(integrationEventType, message)
+    if (eventType != null) {
       return EventNotification(
-        eventType = IntegrationEventTypes.PROBATION_STATUS_CHANGED,
+        eventType = eventType.integrationEventTypes,
         hmppsId = hmppsId,
-        url = "$baseUrl/v1/persons/$hmppsId/status-information",
-        lastModifiedDateTime = LocalDateTime.now(),
-      )
-    }
-    return null
-  }
-
-  private fun getMappsDetailUpdateEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    if (message.additionalInformation.hasMatchingRegistrationType(listOf("MAPP"))) {
-      return EventNotification(
-        eventType = IntegrationEventTypes.MAPPA_DETAIL_CHANGED,
-        hmppsId = hmppsId,
-        url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
-        lastModifiedDateTime = LocalDateTime.now(),
-      )
-    }
-    return null
-  }
-
-  private fun getRiskScoreChangedEvent(message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    val riskScoreType = RiskScoreTypes.from(message.eventType)
-    if (riskScoreType != null) {
-      return EventNotification(
-        eventType = IntegrationEventTypes.RISK_SCORE_CHANGED,
-        hmppsId = hmppsId,
-        url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
+        url = "$baseUrl/v1/persons/$hmppsId/${eventType.path}",
         lastModifiedDateTime = LocalDateTime.now(),
       )
     }
