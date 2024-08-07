@@ -65,12 +65,9 @@ enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val mess
   companion object {
     fun from(eventType: IntegrationEventTypes, message: HmppsDomainEventMessage): EventTypes? =
       EventTypes.entries.firstOrNull {
-        (
-          it.integrationEventTypes == eventType &&
-            it.messageFilterAttributes.contains(message.additionalInformation.registerTypeCode)
-          ) ||
+        it.integrationEventTypes == eventType &&
           (
-            it.integrationEventTypes == eventType &&
+            it.messageFilterAttributes.contains(message.additionalInformation.registerTypeCode) ||
               it.messageFilterAttributes.contains(message.eventType)
             )
       }
