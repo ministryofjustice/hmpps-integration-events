@@ -3,6 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.awspring.cloud.sqs.annotation.SqsListener
+import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
+import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
+import io.sentry.Sentry
+import io.sentry.spring.jakarta.tracing.SentryTransaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
+import java.util.concurrent.CompletionException
 
 @Service
 class HmppsDomainEventsListener(
@@ -25,6 +30,7 @@ class HmppsDomainEventsListener(
 
   private val objectMapper = ObjectMapper()
 
+  @SentryTransaction(operation = "messaging")
   @SqsListener("hmppsdomainqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
@@ -32,7 +38,8 @@ class HmppsDomainEventsListener(
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       determineEventProcess(hmppsDomainEvent)
     } catch (e: Exception) {
-      deadLetterQueueService.sendEvent(rawMessage, "Malformed event received. Could not parse JSON")
+      Sentry.captureException(unwrapSqsExceptions(e))
+      throw e
     }
   }
 
@@ -42,5 +49,20 @@ class HmppsDomainEventsListener(
     if (hmppsDomainEventType != null) {
       hmppsDomainEventService.execute(hmppsDomainEvent, hmppsDomainEventType)
     }
+  }
+
+  fun unwrapSqsExceptions(e: Throwable): Throwable {
+    fun unwrap(e: Throwable) = e.cause ?: e
+    var cause = e
+    if (cause is CompletionException) {
+      cause = unwrap(cause)
+    }
+    if (cause is AsyncAdapterBlockingExecutionFailedException) {
+      cause = unwrap(cause)
+    }
+    if (cause is ListenerExecutionFailedException) {
+      cause = unwrap(cause)
+    }
+    return cause
   }
 }

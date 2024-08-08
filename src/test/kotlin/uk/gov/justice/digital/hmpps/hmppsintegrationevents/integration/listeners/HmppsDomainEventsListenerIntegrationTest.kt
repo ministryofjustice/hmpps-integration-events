@@ -68,7 +68,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
     val message = deadLetterQueueMessage.messages().first()
     message.body().shouldBe("BAD JSON")
-    message.messageAttributes()["Error"]!!.stringValue().shouldBe("Malformed event received. Could not parse JSON")
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
   }
