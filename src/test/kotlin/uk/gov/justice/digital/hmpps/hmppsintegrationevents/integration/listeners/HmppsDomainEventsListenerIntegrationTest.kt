@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -14,7 +13,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
@@ -68,7 +66,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
     val message = deadLetterQueueMessage.messages().first()
     message.body().shouldBe("BAD JSON")
-    message.messageAttributes()["Error"]!!.stringValue().shouldBe("Malformed event received. Could not parse JSON")
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
   }
@@ -105,9 +102,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val deadLetterQueueMessage = geMessagesCurrentlyOnDomainEventsDeadLetterQueue()
     val message = deadLetterQueueMessage.messages().first()
     val payload = message.body()
-    val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-    payload.shouldBe(objectMapper.writeValueAsString(hmppsDomainEvent))
-    message.messageAttributes()["Error"]!!.stringValue().shouldBe("CRN could not be found in registration event message")
+    payload.shouldBe(rawMessage)
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
   }

@@ -1,11 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
+import com.fasterxml.jackson.core.JsonParseException
 import io.mockk.Called
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
@@ -34,6 +38,8 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent()
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
 
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) } just runs
+
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
@@ -43,6 +49,8 @@ class HmppsDomainEventsListenerTest {
   fun `when a valid registration updated sqs event is received it should call the hmppsDomainEventService`() {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent("probation-case.registration.updated")
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent("probation-case.registration.updated")
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
@@ -54,6 +62,8 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
 
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) } just runs
+
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) }
@@ -63,10 +73,9 @@ class HmppsDomainEventsListenerTest {
   fun `when an invalid message is received it should be sent to the dead letter queue`() {
     val rawMessage = "Invalid JSON message"
 
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+    assertThrows<JsonParseException> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
 
     verify { hmppsDomainEventService wasNot Called }
-    verify(exactly = 1) { deadLetterQueueService.sendEvent(rawMessage, "Malformed event received. Could not parse JSON") }
   }
 
   @Test
