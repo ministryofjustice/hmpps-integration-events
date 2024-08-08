@@ -221,12 +221,13 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will not process and save a domain registration event message with no CRN and cannot find CRN by nomis number`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"nomisNumber\",\"value\":\"2018/0123456X\"}]")
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"0123456X\"}]")
 
+    every { probationIntegrationApiGateway.getPersonIdentifier("0123456X") } returns null
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
 
     verify { repo wasNot Called }
-    assertThat(exception.message, equalTo("CRN could not be found in registration event message Identifier(type=nomisNumber, value=2018/0123456X)"))
+    assertThat(exception.message, equalTo("Person not found nomsNumber 0123456X"))
   }
 
   @Test

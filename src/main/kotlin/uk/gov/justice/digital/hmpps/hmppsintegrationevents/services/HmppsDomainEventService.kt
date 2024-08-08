@@ -49,7 +49,7 @@ class HmppsDomainEventService(
     val nomsNumber = hmppsEvent.personReference.findNomsIdentifier()
 
     nomsNumber?.let {
-      return probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)?.crn ?: throw NotFoundException("Person not found $nomsNumber")
+      return probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)?.crn ?: throw NotFoundException("Person not found nomsNumber $nomsNumber")
     }
 
     return null
