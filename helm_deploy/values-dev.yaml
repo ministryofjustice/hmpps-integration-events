@@ -14,6 +14,7 @@ generic-service:
     HMPPS_AUTH_URL: https://sign-in-dev.hmpps.service.justice.gov.uk
     PROBATION_INTEGRATION_API_URL: https://external-api-and-delius-dev.hmpps.service.justice.gov.uk
     SPRING_PROFILES_ACTIVE: dev
+    SENTRY_ENVIRONMENT: dev
 
   namespace_secrets:
     event-test-client-queue:
