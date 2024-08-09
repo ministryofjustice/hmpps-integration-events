@@ -6,11 +6,17 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 
 object DomainEvents {
 
+  val occuredAt = "2024-08-09T12:20:40.282+01:00"
+
   val PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE = """
-    {\"eventType\":\"probation-case.engagement.created\",\"version\":1,\"detailUrl\":\"https://domain-events-and-delius.hmpps.service.justice.gov.uk/probation-case.engagement.created/X777776\",\"occurredAt\":\"2024-08-09T12:20:40.282+01:00\",\"description\":\"A probation case record for a person has been created in Delius\",\"additionalInformation\":{},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]}}
+    {\"eventType\":\"probation-case.engagement.created\",\"version\":1,\"detailUrl\":\"https://domain-events-and-delius.hmpps.service.justice.gov.uk/probation-case.engagement.created/X777776\",\"occurredAt\":\"$occuredAt\",\"description\":\"A probation case record for a person has been created in Delius\",\"additionalInformation\":{},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]}}
   """.trimIndent()
 
-  val PERSON_HMPPS_ID_MESSAGE = "{\"eventType\":\"probation-case.engagement.created\",\"version\":1,\"detailUrl\":\"https://domain-events-and-delius.hmpps.service.justice.gov.uk/probation-case.engagement.created/X777776\",\"occurredAt\":\"2024-08-09T12:20:40.282+01:00\",\"description\":\"A probation case record for a person has been created in Delius\",\"additionalInformation\":{},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]}}"
+  val PROBATION_CASE_REGISTRATION_UPDATED = """
+    {\"eventType\":\"probation-case.registration.updated\",\"version\":1,\"occurredAt\":\"$$occuredAt\",\"description\":\"A registration has been updated on the probation case\",\"additionalInformation\":{\"registrationLevelDescription\":\"\",\"registerTypeDescription\":\"Victim Contact\",\"registrationCategoryCode\":\"\",\"registrationId\":\"1506296709\",\"registerTypeCode\":\"INVI\",\"updatedDateAndTime\":\"Fri Aug 09 12:24:08 BST 2024\",\"registrationCategoryDescription\":\"\",\"registrationLevelCode\":\"\"},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"P832098\"},{\"type\":\"NOMS\",\"value\":\"A6640FA\"}]}}
+  """.trimIndent()
+
+  val PERSON_HMPPS_ID_MESSAGE = "{\"eventType\":\"probation-case.engagement.created\",\"version\":1,\"detailUrl\":\"https://domain-events-and-delius.hmpps.service.justice.gov.uk/probation-case.engagement.created/X777776\",\"occurredAt\":\"$occuredAt\",\"description\":\"A probation case record for a person has been created in Delius\",\"additionalInformation\":{},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"X777776\"}]}}"
 
   fun generateDomainEvent(eventType: String, message: String) = """
     {
