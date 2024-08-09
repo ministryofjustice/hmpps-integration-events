@@ -10,8 +10,14 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PERSON_HMPPS_ID_MESSAGE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
@@ -31,6 +37,23 @@ class HmppsDomainEventsListenerTest {
   @BeforeEach
   fun setup() {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = ["probation-case.engagement.created"])
+  fun `process event processing for api persons {hmppsId} `(eventType: String) {
+    val message = when (eventType) {
+      "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+      else -> "aaa"
+    }
+
+    val hmppsMessage = PERSON_HMPPS_ID_MESSAGE
+    val payload = generateDomainEvent(eventType, message)
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PERSON_STATUS_CHANGED) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
   }
 
   @Test
