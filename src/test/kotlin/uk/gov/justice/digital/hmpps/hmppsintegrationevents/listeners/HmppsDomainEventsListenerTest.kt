@@ -89,4 +89,14 @@ class HmppsDomainEventsListenerTest {
     verify { hmppsDomainEventService wasNot Called }
     verify { deadLetterQueueService wasNot Called }
   }
+
+  @Test
+  fun `will not process and save a domain registration event message of none MAPP type`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP")
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify { hmppsDomainEventService wasNot Called }
+    verify { deadLetterQueueService wasNot Called }
+  }
 }

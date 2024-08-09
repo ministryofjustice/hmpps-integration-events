@@ -146,15 +146,6 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not process and save a domain registration event message of none MAPP type`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(registerTypeCode = "NOTMAPP")
-
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED)
-
-    verify { repo wasNot Called }
-  }
-
-  @Test
   fun `will not process and save a domain registration event message with no CRN or no Nomis Number`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
@@ -199,13 +190,6 @@ class HmppsDomainEventServiceTest {
         ),
       )
     }
-  }
-
-  @Test
-  fun `will process and save a risk changed domain event message for event with unkonwn message event type `() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "someType")
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
-    verify { repo wasNot Called }
   }
 
   @Test
