@@ -85,7 +85,7 @@ class SubscriberServiceTests {
   }
 
   @ParameterizedTest
-  @CsvSource("/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED", "/v1/persons/\\.*+[^/]*\$, PERSON_STATUS_CHANGED")
+  @CsvSource("/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED", "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED")
   fun `grant access to risk score events if client has access to risk score endpoint`(clientConsumerPath: String, eventType: String) {
     // Arrange
     val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf(clientConsumerPath))
