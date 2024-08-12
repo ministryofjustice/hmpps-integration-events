@@ -152,7 +152,7 @@ class HmppsDomainEventServiceTest {
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
 
     verify { repo wasNot Called }
-    assertThat(exception.message, equalTo("CRN could not be found in registration event message Identifier(type=PNC, value=2018/0123456X)"))
+    assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
   }
 
   @Test
@@ -249,4 +249,39 @@ class HmppsDomainEventServiceTest {
       )
     }
   }
+
+//  @ParameterizedTest
+//  @ValueSource(
+//    strings = [
+//      "probation-case.engagement.created",
+//      "probation-case.registration.updated",
+//      "prisoner-offender-search.prisoner.created",
+//      "prisoner-offender-search.prisoner.updated",
+//    ],
+//  )
+//  fun `process event processing for api persons {hmppsId} `(eventType: String) {
+//    val message = when (eventType) {
+//      "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+//      "probation-case.registration.updated" -> PROBATION_CASE_REGISTRATION_UPDATED
+//      "prisoner-offender-search.prisoner.created" -> PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
+//      "prisoner-offender-search.prisoner.updated" -> PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
+//      else -> throw RuntimeException("Unexpected event type: $eventType")
+//    }
+//
+//    val hmppsMessage = message.replace("\\", "")
+//    val payload = generateDomainEvent(eventType, message)
+//    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
+//
+//    verify(exactly = 1) {
+//      repo.save(
+//        EventNotification(
+//          eventType = IntegrationEventTypes.PERSON_STATUS_CHANGED,
+//          hmppsId = mockCrn,
+//          url = "$baseUrl/v1/persons/$mockCrn",
+//          lastModifiedDateTime = currentTime,
+//        ),
+//      )
+//    }
+//
+//  }
 }

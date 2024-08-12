@@ -57,11 +57,12 @@ object RegisterTypes {
 }
 
 enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val path: String) {
-  DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, "risks/dynamic"),
-  PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, "status-information"),
-  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "risks/mappadetail"),
-  RISK_SCORE(IntegrationEventTypes.RISK_SCORE_CHANGED, "risks/scores"),
-  KEY_DATES_PRISONER_RELEASE(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE, "sentences/latest-key-dates-and-adjustments"),
+  DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, "/risks/dynamic"),
+  PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, "/status-information"),
+  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "/risks/mappadetail"),
+  RISK_SCORE(IntegrationEventTypes.RISK_SCORE_CHANGED, "/risks/scores"),
+  KEY_DATES_PRISONER_RELEASE(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE, "/sentences/latest-key-dates-and-adjustments"),
+  PERSON_STATUS(IntegrationEventTypes.PERSON_STATUS_CHANGED, ""),
   ;
 
   companion object {

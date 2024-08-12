@@ -37,16 +37,16 @@ class HmppsDomainEventService(
         handleMessage(notification)
       }
     } else {
-      throw NotFoundException("CRN could not be found in registration event message ${hmppsEvent.personReference.identifiers.joinToString(",")}")
+      throw NotFoundException("Identifier could not be found in domain event message ${hmppsDomainEvent.messageId}")
     }
   }
 
   private fun getHmppsId(hmppsEvent: HmppsDomainEventMessage): String? {
-    val crn: String? = hmppsEvent.personReference.findCrnIdentifier()
+    val crn: String? = hmppsEvent.personReference?.findCrnIdentifier()
     if (crn != null) {
       return crn
     }
-    val nomsNumber = hmppsEvent.personReference.findNomsIdentifier()
+    val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
 
     nomsNumber?.let {
       return probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)?.crn ?: throw NotFoundException("Person not found nomsNumber $nomsNumber")
@@ -61,7 +61,7 @@ class HmppsDomainEventService(
       return EventNotification(
         eventType = eventType.integrationEventTypes,
         hmppsId = hmppsId,
-        url = "$baseUrl/v1/persons/$hmppsId/${eventType.path}",
+        url = "$baseUrl/v1/persons/$hmppsId${eventType.path}",
         lastModifiedDateTime = LocalDateTime.now(),
       )
     }
