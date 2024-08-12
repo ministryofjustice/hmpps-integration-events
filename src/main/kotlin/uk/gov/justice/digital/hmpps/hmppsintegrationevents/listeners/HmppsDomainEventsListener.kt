@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypesFilters
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
@@ -45,7 +45,8 @@ class HmppsDomainEventsListener(
 
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
-    val hmppsDomainEventType = IntegrationEventTypes.from(hmppsDomainEvent.messageAttributes.eventType.value, hmppsEvent.additionalInformation.registerTypeCode)
+//    val hmppsDomainEventType = IntegrationEventTypes.from(hmppsDomainEvent.messageAttributes.eventType.value, hmppsEvent.additionalInformation.registerTypeCode)
+    val hmppsDomainEventType = IntegrationEventTypesFilters.filters.firstOrNull { it.predicate.invoke(hmppsEvent) }?.integrationEventTypes
     if (hmppsDomainEventType != null) {
       hmppsDomainEventService.execute(hmppsDomainEvent, hmppsDomainEventType)
     }

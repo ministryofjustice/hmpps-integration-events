@@ -33,6 +33,10 @@ val PERSON_EVENTS = listOf("probation-case.engagement.created", "probation-case.
 
 val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
 
+val PRISONER_RELEASE_TYPES = listOf("prisoner-offender-search.prisoner.released", "prison-offender-events.prisoner.released", "calculate-release-dates.prisoner.changed")
+
+val RISK_SCORE_TYPES = listOf("risk-assessment.scores.ogrs.determined", "probation-case.risk-scores.ogrs.manual-calculation", "risk-assessment.scores.rsr.determined", "assessment.summary.produced")
+
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
 val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
@@ -111,12 +115,12 @@ object IntegrationEventTypesFilters {
       MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation.registerTypeCode)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.RISK_SCORE_CHANGED) {
-      RISK_SCORE_CHANGED_EVENTS.contains(it.eventType)
+      RISK_SCORE_TYPES.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE) {
       KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PROBATION_STATUS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventTypes.PERSON_STATUS_CHANGED) {
       PERSON_EVENTS.contains(it.eventType)
     },
   )
