@@ -25,6 +25,8 @@ val PRISONER_RELEASE_TYPES = listOf("prisoner-offender-search.prisoner.released"
 
 val RISK_SCORE_TYPES = listOf("risk-assessment.scores.ogrs.determined", "probation-case.risk-scores.ogrs.manual-calculation", "risk-assessment.scores.rsr.determined", "assessment.summary.produced")
 
+val PERSON_EVENTS = listOf("probation-case.engagement.created", "probation-case.prison-identifier.added", "prisoner-offender-search.prisoner.created", "prisoner-offender-search.prisoner.updated")
+
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
 val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
@@ -54,22 +56,19 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val messageFilterAttributes: List<String>, val path: String) {
-  DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, DYNAMIC_RISKS_REGISTER_TYPES, "risks/dynamic"),
-  PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, PROBATION_STATUS_REGISTER_TYPES, "status-information"),
-  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, MAPPA_DETAIL_REGISTER_TYPES, "risks/mappadetail"),
-  RISK_SCORE(IntegrationEventTypes.RISK_SCORE_CHANGED, RISK_SCORE_TYPES, "risks/scores"),
-  KEY_DATES_PRISONER_RELEASE(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE, PRISONER_RELEASE_TYPES, "sentences/latest-key-dates-and-adjustments"),
+enum class EventTypes(val integrationEventTypes: IntegrationEventTypes, val path: String) {
+  DYNAMIC_RISKS(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED, "/risks/dynamic"),
+  PROBATION_STATUS(IntegrationEventTypes.PROBATION_STATUS_CHANGED, "/status-information"),
+  MAPPA_DETAIL(IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "/risks/mappadetail"),
+  RISK_SCORE(IntegrationEventTypes.RISK_SCORE_CHANGED, "/risks/scores"),
+  KEY_DATES_PRISONER_RELEASE(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE, "/sentences/latest-key-dates-and-adjustments"),
+  PERSON_STATUS(IntegrationEventTypes.PERSON_STATUS_CHANGED, ""),
   ;
 
   companion object {
     fun from(eventType: IntegrationEventTypes, message: HmppsDomainEventMessage): EventTypes? =
       EventTypes.entries.firstOrNull {
-        it.integrationEventTypes == eventType &&
-          (
-            it.messageFilterAttributes.contains(message.additionalInformation.registerTypeCode) ||
-              it.messageFilterAttributes.contains(message.eventType)
-            )
+        it.integrationEventTypes == eventType
       }
   }
 }
@@ -80,6 +79,7 @@ enum class IntegrationEventTypes(val value: String, val registerTypes: List<Stri
   MAPPA_DETAIL_CHANGED("MappaDetail.Changed", MAPPA_DETAIL_REGISTER_TYPES, listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)),
   RISK_SCORE_CHANGED("RiskScore.Changed", null, listOf("risk-assessment.scores.determined", "probation-case.risk-scores.ogrs.manual-calculation")),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("KeyDatesAndAdjustments.PrisonerReleased", null, listOf("prisoner-offender-search.prisoner.released", "prison-offender-events.prisoner.released", "calculate-release-dates.prisoner.changed")),
+  PERSON_STATUS_CHANGED("PersonStatus.Changed", null, PERSON_EVENTS),
   ;
 
   companion object {

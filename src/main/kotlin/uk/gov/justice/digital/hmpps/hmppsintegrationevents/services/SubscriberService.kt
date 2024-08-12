@@ -35,6 +35,7 @@ class SubscriberService(
           url.takeIf { it.contains("/v1/persons/.*/sentences/latest-key-dates-and-adjustments") }?.let { IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE.name },
           url.takeIf { it.contains("/v1/persons/.*/status-information") }?.let { IntegrationEventTypes.PROBATION_STATUS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/risks/dynamic") }?.let { IntegrationEventTypes.DYNAMIC_RISKS_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/[^/]*$") }?.let { IntegrationEventTypes.PERSON_STATUS_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }

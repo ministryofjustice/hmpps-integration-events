@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -82,18 +84,19 @@ class SubscriberServiceTests {
     verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
   }
 
-  @Test
-  fun `grant access to risk score events if client has access to risk score endpoint`() {
+  @ParameterizedTest
+  @CsvSource("/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED", "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED")
+  fun `grant access to risk score events if client has access to risk score endpoint`(clientConsumerPath: String, eventType: String) {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/persons/.*/risks/scores"))
+    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf(clientConsumerPath))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"RISK_SCORE_CHANGED\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"RISK_SCORE_CHANGED\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"$eventType\"]}")
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"$eventType\"]}")
   }
 
   @Test

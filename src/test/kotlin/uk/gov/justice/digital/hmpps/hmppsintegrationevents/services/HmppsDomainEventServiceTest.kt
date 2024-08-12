@@ -17,6 +17,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_REGISTRATION_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
@@ -146,22 +151,13 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not process and save a domain registration event message of none MAPP type`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(registerTypeCode = "NOTMAPP")
-
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED)
-
-    verify { repo wasNot Called }
-  }
-
-  @Test
   fun `will not process and save a domain registration event message with no CRN or no Nomis Number`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
 
     verify { repo wasNot Called }
-    assertThat(exception.message, equalTo("CRN could not be found in registration event message Identifier(type=PNC, value=2018/0123456X)"))
+    assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
   }
 
   @Test
@@ -199,13 +195,6 @@ class HmppsDomainEventServiceTest {
         ),
       )
     }
-  }
-
-  @Test
-  fun `will process and save a risk changed domain event message for event with unkonwn message event type `() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "someType")
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
-    verify { repo wasNot Called }
   }
 
   @Test
@@ -260,6 +249,42 @@ class HmppsDomainEventServiceTest {
           eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockCrn,
           url = "$baseUrl/v1/persons/$mockCrn/sentences/latest-key-dates-and-adjustments",
+          lastModifiedDateTime = currentTime,
+        ),
+      )
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      "probation-case.engagement.created",
+      "probation-case.registration.updated",
+      "prisoner-offender-search.prisoner.created",
+      "prisoner-offender-search.prisoner.updated",
+    ],
+  )
+  fun `process event processing for api persons {hmppsId} `(eventType: String) {
+    val message = when (eventType) {
+      "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+      "probation-case.registration.updated" -> PROBATION_CASE_REGISTRATION_UPDATED
+      "prisoner-offender-search.prisoner.created" -> PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
+      "prisoner-offender-search.prisoner.updated" -> PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
+      else -> throw RuntimeException("Unexpected event type: $eventType")
+    }
+
+    val hmppsMessage = message.replace("\\", "")
+    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
+
+    every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.PERSON_STATUS_CHANGED)
+
+    verify(exactly = 1) {
+      repo.save(
+        EventNotification(
+          eventType = IntegrationEventTypes.PERSON_STATUS_CHANGED,
+          hmppsId = "X777776",
+          url = "$baseUrl/v1/persons/X777776",
           lastModifiedDateTime = currentTime,
         ),
       )

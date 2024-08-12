@@ -10,8 +10,16 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_REGISTRATION_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
@@ -31,6 +39,33 @@ class HmppsDomainEventsListenerTest {
   @BeforeEach
   fun setup() {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      "probation-case.engagement.created",
+      "probation-case.registration.updated",
+      "prisoner-offender-search.prisoner.created",
+      "prisoner-offender-search.prisoner.updated",
+    ],
+  )
+  fun `process event processing for api persons {hmppsId} `(eventType: String) {
+    val message = when (eventType) {
+      "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
+      "probation-case.registration.updated" -> PROBATION_CASE_REGISTRATION_UPDATED
+      "prisoner-offender-search.prisoner.created" -> PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
+      "prisoner-offender-search.prisoner.updated" -> PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
+      else -> throw RuntimeException("Unexpected event type: $eventType")
+    }
+
+    val hmppsMessage = message.replace("\\", "")
+    val payload = generateDomainEvent(eventType, message)
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PERSON_STATUS_CHANGED) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
   }
 
   @Test
@@ -83,6 +118,16 @@ class HmppsDomainEventsListenerTest {
     val unexpectedEventType = "unexpected.event.type"
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType = unexpectedEventType)
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType = unexpectedEventType)
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify { hmppsDomainEventService wasNot Called }
+    verify { deadLetterQueueService wasNot Called }
+  }
+
+  @Test
+  fun `will not process and save a domain registration event message of none MAPP type`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP")
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class HmppsDomainEventMessage(
   @JsonProperty("eventType") val eventType: String,
   @JsonProperty("occurredAt") val occurredAt: String,
-  @JsonProperty("personReference") val personReference: PersonReference,
+  @JsonProperty("personReference") val personReference: PersonReference?,
   @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation,
   @JsonProperty("reason") val reason: String? = null,
 )
@@ -34,6 +34,7 @@ data class Identifier(
 data class AdditionalInformation(
   @JsonProperty("registerTypeDescription") val registerTypeDescription: String? = null,
   @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
+  @JsonProperty("nomsNumber") val nomsNumber: String? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
     registerTypeCode.contains(this.registerTypeCode)
