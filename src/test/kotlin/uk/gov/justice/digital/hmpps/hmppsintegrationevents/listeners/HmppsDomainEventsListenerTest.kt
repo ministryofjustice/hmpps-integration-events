@@ -55,6 +55,74 @@ class HmppsDomainEventsListenerTest {
   }
 
   @ParameterizedTest
+  @CsvSource(
+    "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED",
+  )
+  fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String) {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) }
+  }
+
+  @ParameterizedTest
   @ValueSource(
     strings = [
       "probation-case.engagement.created",
@@ -134,73 +202,5 @@ class HmppsDomainEventsListenerTest {
 
     verify { hmppsDomainEventService wasNot Called }
     verify { deadLetterQueueService wasNot Called }
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-    "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED, status-information",
-
-    "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED, status-information",
-
-    "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-  )
-  fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String, path: String) {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
-
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) }
   }
 }

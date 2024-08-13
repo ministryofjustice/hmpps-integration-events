@@ -30,7 +30,7 @@ class HmppsDomainEventService(
     val hmppsId = getHmppsId(hmppsEvent)
 
     if (hmppsId != null) {
-      val notification = getEventNotification(eventType, hmppsEvent, hmppsId)
+      val notification = getEventNotification(eventType, hmppsId)
 
       if (notification != null) {
         handleMessage(notification)
@@ -54,8 +54,8 @@ class HmppsDomainEventService(
     return null
   }
 
-  private fun getEventNotification(integrationEventType: IntegrationEventTypes, message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    val eventType = IntegrationEventTypes.from(integrationEventType, message)
+  private fun getEventNotification(integrationEventType: IntegrationEventTypes, hmppsId: String): EventNotification? {
+    val eventType = IntegrationEventTypes.from(integrationEventType)
     if (eventType != null) {
       return EventNotification(
         eventType = eventType,

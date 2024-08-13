@@ -74,7 +74,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   ;
 
   companion object {
-    fun from(eventType: IntegrationEventTypes, message: HmppsDomainEventMessage): IntegrationEventTypes? =
+    fun from(eventType: IntegrationEventTypes): IntegrationEventTypes? =
       IntegrationEventTypes.entries.firstOrNull {
         it.value == eventType.value
       }

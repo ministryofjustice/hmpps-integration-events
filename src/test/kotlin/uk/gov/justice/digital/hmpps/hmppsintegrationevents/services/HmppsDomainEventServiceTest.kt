@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
@@ -55,6 +56,28 @@ class HmppsDomainEventServiceTest {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED, status-information",
+    "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
+  )
+  fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String, path: String) {
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType, registerTypeCode)
+
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.valueOf(integrationEvent))
+
+    verify(exactly = 1) {
+      repo.save(
+        EventNotification(
+          eventType = IntegrationEventTypes.valueOf(integrationEvent),
+          hmppsId = "X777776",
+          url = "$baseUrl/v1/persons/X777776/$path",
+          lastModifiedDateTime = currentTime,
+        ),
+      )
+    }
   }
 
   @Test
