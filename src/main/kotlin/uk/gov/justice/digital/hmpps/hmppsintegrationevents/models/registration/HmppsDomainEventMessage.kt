@@ -20,7 +20,7 @@ data class PersonReference(
     return this.identifiers.firstOrNull { it.type == "CRN" }?.value
   }
   fun findNomsIdentifier(): String? {
-    return this.identifiers.firstOrNull { it.type == "nomsNumber" }?.value
+    return this.identifiers.firstOrNull { it.type == "nomsNumber" || it.type == "NOMS" }?.value
   }
 }
 
