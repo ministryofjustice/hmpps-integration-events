@@ -41,6 +41,18 @@ class HmppsDomainEventsListenerTest {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
   }
 
+  @Test
+  fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) }
+  }
+
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -90,18 +102,6 @@ class HmppsDomainEventsListenerTest {
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
-  }
-
-  @Test
-  fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
-
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) }
   }
 
   @Test

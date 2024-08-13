@@ -45,7 +45,6 @@ class HmppsDomainEventsListener(
 
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
-//    val hmppsDomainEventType = IntegrationEventTypes.from(hmppsDomainEvent.messageAttributes.eventType.value, hmppsEvent.additionalInformation.registerTypeCode)
     val hmppsDomainEventType = IntegrationEventTypesFilters.filters.firstOrNull { it.predicate.invoke(hmppsEvent) }?.integrationEventTypes
     if (hmppsDomainEventType != null) {
       hmppsDomainEventService.execute(hmppsDomainEvent, hmppsDomainEventType)
