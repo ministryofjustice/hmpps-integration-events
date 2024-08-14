@@ -37,6 +37,7 @@ class SubscriberService(
           url.takeIf { it.contains("/v1/persons/.*/risks/dynamic") }?.let { IntegrationEventTypes.DYNAMIC_RISKS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/[^/]*$") }?.let { IntegrationEventTypes.PERSON_STATUS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/alerts/pnd") }?.let { IntegrationEventTypes.PND_ALERTS_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/.*/licences/conditions") }?.let { IntegrationEventTypes.LICENCE_CONDITION_CHANGES.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
