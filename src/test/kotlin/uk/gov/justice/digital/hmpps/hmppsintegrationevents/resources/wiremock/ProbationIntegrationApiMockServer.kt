@@ -14,7 +14,7 @@ class ProbationIntegrationApiMockServer internal constructor() : WireMockServer(
               """
                                       {
                                       "crn": "$crn",
-                                      "nomisId": "$nomisId"
+                                      "nomsId": "$nomisId"
                                   }
                                 
                                 """

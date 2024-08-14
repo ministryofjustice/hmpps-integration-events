@@ -15,7 +15,11 @@ object DomainEvents {
   """.trimIndent()
 
   val PROBATION_CASE_REGISTRATION_UPDATED = """
-    {\"eventType\":\"probation-case.registration.updated\",\"version\":1,\"occurredAt\":\"$$occuredAt\",\"description\":\"A registration has been updated on the probation case\",\"additionalInformation\":{\"registrationLevelDescription\":\"\",\"registerTypeDescription\":\"Victim Contact\",\"registrationCategoryCode\":\"\",\"registrationId\":\"1506296709\",\"registerTypeCode\":\"INVI\",\"updatedDateAndTime\":\"Fri Aug 09 12:24:08 BST 2024\",\"registrationCategoryDescription\":\"\",\"registrationLevelCode\":\"\"},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"$crn\"},{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]}}
+    {\"eventType\":\"probation-case.registration.updated\",\"version\":1,\"occurredAt\":\"$occuredAt\",\"description\":\"A registration has been updated on the probation case\",\"additionalInformation\":{\"registrationLevelDescription\":\"\",\"registerTypeDescription\":\"Victim Contact\",\"registrationCategoryCode\":\"\",\"registrationId\":\"1506296709\",\"registerTypeCode\":\"INVI\",\"updatedDateAndTime\":\"Fri Aug 09 12:24:08 BST 2024\",\"registrationCategoryDescription\":\"\",\"registrationLevelCode\":\"\"},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"$crn\"},{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]}}
+  """.trimIndent()
+
+  val PROBATION_CASE_PRISON_IDENTIFIER_ADDED = """
+    {\"eventType\":\"probation-case.prison-identifier.added\",\"version\":1,\"occurredAt\":\"$occuredAt\",\"description\":\"A probation case has been matched with a booking in the prison system. The prisoner and booking identifiers have been added to the probation case.\",\"additionalInformation\":{\"bookingNumber\":\"81702E\"},\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"$crn\"},{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]}}
   """.trimIndent()
 
   val PRISONER_OFFENDER_SEARCH_PRISONER_CREATED = """

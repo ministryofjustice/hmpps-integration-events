@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationInte
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_REGISTRATION_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_PRISON_IDENTIFIER_ADDED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
@@ -61,59 +61,7 @@ class HmppsDomainEventServiceTest {
   @ParameterizedTest
   @CsvSource(
     "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED, status-information",
-
-    "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED, status-information",
-    "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED, status-information",
-
     "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-
-    "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
-    "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED, risks/dynamic",
   )
   fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String, path: String) {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType, registerTypeCode)
@@ -259,7 +207,7 @@ class HmppsDomainEventServiceTest {
   @ValueSource(
     strings = [
       "probation-case.engagement.created",
-      "probation-case.registration.updated",
+      "probation-case.prison-identifier.added",
       "prisoner-offender-search.prisoner.created",
       "prisoner-offender-search.prisoner.updated",
     ],
@@ -267,7 +215,7 @@ class HmppsDomainEventServiceTest {
   fun `process event processing for api persons {hmppsId} `(eventType: String) {
     val message = when (eventType) {
       "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
-      "probation-case.registration.updated" -> PROBATION_CASE_REGISTRATION_UPDATED
+      "probation-case.prison-identifier.added" -> PROBATION_CASE_PRISON_IDENTIFIER_ADDED
       "prisoner-offender-search.prisoner.created" -> PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
       "prisoner-offender-search.prisoner.updated" -> PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
       else -> throw RuntimeException("Unexpected event type: $eventType")
@@ -285,6 +233,38 @@ class HmppsDomainEventServiceTest {
           eventType = IntegrationEventTypes.PERSON_STATUS_CHANGED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/persons/X777776",
+          lastModifiedDateTime = currentTime,
+        ),
+      )
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      "person.alert.changed",
+      "person.alert.changed",
+      "person.alert.deleted",
+      "person.alert.updated",
+    ],
+  )
+  fun `will process and save a pnd alert for person alert changed event `(eventType: String) {
+    val message = """
+      {\"eventType\":\"$eventType\",\"additionalInformation\":{\"alertUuid\":\"8339dd96-4a02-4d5b-bc78-4eda22f678fa\",\"alertCode\":\"BECTER\",\"source\":\"NOMIS\"},\"version\":1,\"description\":\"An alert has been created in the alerts service\",\"occurredAt\":\"2024-08-12T19:48:12.771347283+01:00\",\"detailUrl\":\"https://alerts-api.hmpps.service.justice.gov.uk/alerts/8339dd96-4a02-4d5b-bc78-4eda22f678fa\",\"personReference\":{\"identifiers\":[{\"type\":\"NOMS\",\"value\":\"A1234BC\"}]}}
+    """.trimIndent()
+
+    val hmppsMessage = message.replace("\\", "")
+    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
+
+    every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.PND_ALERTS_CHANGED)
+
+    verify(exactly = 1) {
+      repo.save(
+        EventNotification(
+          eventType = IntegrationEventTypes.PND_ALERTS_CHANGED,
+          hmppsId = "X777776",
+          url = "$baseUrl/v1/persons/X777776/alerts/pnd",
           lastModifiedDateTime = currentTime,
         ),
       )

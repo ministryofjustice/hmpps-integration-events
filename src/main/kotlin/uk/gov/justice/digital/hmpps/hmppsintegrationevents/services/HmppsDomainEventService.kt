@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -31,7 +30,7 @@ class HmppsDomainEventService(
     val hmppsId = getHmppsId(hmppsEvent)
 
     if (hmppsId != null) {
-      val notification = getEventNotification(eventType, hmppsEvent, hmppsId)
+      val notification = getEventNotification(eventType, hmppsId)
 
       if (notification != null) {
         handleMessage(notification)
@@ -55,11 +54,11 @@ class HmppsDomainEventService(
     return null
   }
 
-  private fun getEventNotification(integrationEventType: IntegrationEventTypes, message: HmppsDomainEventMessage, hmppsId: String): EventNotification? {
-    val eventType = EventTypes.from(integrationEventType, message)
+  private fun getEventNotification(integrationEventType: IntegrationEventTypes, hmppsId: String): EventNotification? {
+    val eventType = IntegrationEventTypes.from(integrationEventType)
     if (eventType != null) {
       return EventNotification(
-        eventType = eventType.integrationEventTypes,
+        eventType = eventType,
         hmppsId = hmppsId,
         url = "$baseUrl/v1/persons/$hmppsId${eventType.path}",
         lastModifiedDateTime = LocalDateTime.now(),

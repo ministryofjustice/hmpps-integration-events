@@ -20,7 +20,7 @@ data class PersonReference(
     return this.identifiers.firstOrNull { it.type == "CRN" }?.value
   }
   fun findNomsIdentifier(): String? {
-    return this.identifiers.firstOrNull { it.type == "nomsNumber" }?.value
+    return this.identifiers.firstOrNull { it.type == "nomsNumber" || it.type == "NOMS" }?.value
   }
 }
 
@@ -35,6 +35,7 @@ data class AdditionalInformation(
   @JsonProperty("registerTypeDescription") val registerTypeDescription: String? = null,
   @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
   @JsonProperty("nomsNumber") val nomsNumber: String? = null,
+  @JsonProperty("alertCode") val alertCode: String? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
     registerTypeCode.contains(this.registerTypeCode)

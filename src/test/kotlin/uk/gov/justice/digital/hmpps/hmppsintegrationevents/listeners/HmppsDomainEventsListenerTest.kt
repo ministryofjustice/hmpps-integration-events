@@ -11,13 +11,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_REGISTRATION_UPDATED
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_PRISON_IDENTIFIER_ADDED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
@@ -41,11 +42,91 @@ class HmppsDomainEventsListenerTest {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
   }
 
+  @Test
+  fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) }
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED",
+  )
+  fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String) {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.valueOf(integrationEvent)) }
+  }
+
   @ParameterizedTest
   @ValueSource(
     strings = [
       "probation-case.engagement.created",
-      "probation-case.registration.updated",
+      "probation-case.prison-identifier.added",
       "prisoner-offender-search.prisoner.created",
       "prisoner-offender-search.prisoner.updated",
     ],
@@ -53,7 +134,7 @@ class HmppsDomainEventsListenerTest {
   fun `process event processing for api persons {hmppsId} `(eventType: String) {
     val message = when (eventType) {
       "probation-case.engagement.created" -> PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
-      "probation-case.registration.updated" -> PROBATION_CASE_REGISTRATION_UPDATED
+      "probation-case.prison-identifier.added" -> PROBATION_CASE_PRISON_IDENTIFIER_ADDED
       "prisoner-offender-search.prisoner.created" -> PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
       "prisoner-offender-search.prisoner.updated" -> PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
       else -> throw RuntimeException("Unexpected event type: $eventType")
@@ -66,6 +147,8 @@ class HmppsDomainEventsListenerTest {
     every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PERSON_STATUS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PERSON_STATUS_CHANGED) }
   }
 
   @Test
@@ -90,18 +173,6 @@ class HmppsDomainEventsListenerTest {
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
-  }
-
-  @Test
-  fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
-
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.RISK_SCORE_CHANGED) }
   }
 
   @Test
