@@ -9,7 +9,6 @@ generic-service:
     annotations:
       nginx.ingress.kubernetes.io/auth-tls-secret: "hmpps-integration-api-dev/client-certificate-auth"
   env:
-    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SERVICES_INTEGRATION-API_URL: https://dev.integration-api.hmpps.service.justice.gov.uk
     HMPPS_AUTH_URL: https://sign-in-dev.hmpps.service.justice.gov.uk
     PROBATION_INTEGRATION_API_URL: https://external-api-and-delius-dev.hmpps.service.justice.gov.uk

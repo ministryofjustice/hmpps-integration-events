@@ -8,7 +8,6 @@ generic-service:
     host: hmpps-integration-events-preprod.apps.live.cloud-platform.service.justice.gov.uk
 
   env:
-    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SENTRY_ENVIRONMENT: preprod
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
