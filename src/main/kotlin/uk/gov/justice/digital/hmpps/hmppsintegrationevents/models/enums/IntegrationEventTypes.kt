@@ -116,7 +116,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("KeyDatesAndAdjustments.PrisonerReleased", "/sentences/latest-key-dates-and-adjustments"),
   PERSON_STATUS_CHANGED("PersonStatus.Changed", ""),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
-  LICENCE_CONDITION_CHANGES("LicenceCondition.Changed", "/licences/conditions"),
+  LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
   ;
 
   companion object {
@@ -150,7 +150,7 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventTypes.PND_ALERTS_CHANGED) {
       PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation.alertCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.LICENCE_CONDITION_CHANGES) {
+    IntegrationEventTypesFilter(IntegrationEventTypes.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
     },
   )

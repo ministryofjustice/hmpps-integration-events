@@ -72,8 +72,6 @@ class HmppsDomainEventService(
   private fun handleMessage(notification: EventNotification) {
     if (!repo.existsByHmppsIdAndEventType(notification.hmppsId, notification.eventType)) {
       repo.save(notification)
-    } else {
-      repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), notification.hmppsId, notification.eventType)
     }
   }
 }

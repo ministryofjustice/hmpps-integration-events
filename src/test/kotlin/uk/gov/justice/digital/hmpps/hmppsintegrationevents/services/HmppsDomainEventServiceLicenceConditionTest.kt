@@ -53,12 +53,12 @@ class HmppsDomainEventServiceLicenceConditionTest {
     val hmppsMessage = message.replace("\\", "")
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.LICENCE_CONDITION_CHANGES)
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.LICENCE_CONDITION_CHANGED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IntegrationEventTypes.LICENCE_CONDITION_CHANGES,
+          eventType = IntegrationEventTypes.LICENCE_CONDITION_CHANGED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/persons/X777776/licences/conditions",
           lastModifiedDateTime = currentTime,
