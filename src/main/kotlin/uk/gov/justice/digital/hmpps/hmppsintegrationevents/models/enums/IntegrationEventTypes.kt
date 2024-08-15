@@ -19,15 +19,34 @@ const val PROBATION_CASE_REGISTRATION_DELETED = "probation-case.registration.del
 const val PROBATION_CASE_REGISTRATION_DEREGISTERED = "probation-case.registration.deregistered"
 const val PROBATION_CASE_REGISTRATION_UPDATED = "probation-case.registration.updated"
 
-val DYNAMIC_RISK_EVENTS = listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)
+val DYNAMIC_RISK_EVENTS = listOf(
+  PROBATION_CASE_REGISTRATION_ADDED,
+  PROBATION_CASE_REGISTRATION_DELETED,
+  PROBATION_CASE_REGISTRATION_DEREGISTERED,
+  PROBATION_CASE_REGISTRATION_UPDATED,
+)
 
-val PROBATION_STATUS_CHANGED_EVENTS = listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)
+val PROBATION_STATUS_CHANGED_EVENTS = listOf(
+  PROBATION_CASE_REGISTRATION_ADDED,
+  PROBATION_CASE_REGISTRATION_DELETED,
+  PROBATION_CASE_REGISTRATION_DEREGISTERED,
+  PROBATION_CASE_REGISTRATION_UPDATED,
+)
 
-val MAPPA_DETAIL_REGISTER_EVENTS = listOf(PROBATION_CASE_REGISTRATION_ADDED, PROBATION_CASE_REGISTRATION_DELETED, PROBATION_CASE_REGISTRATION_DEREGISTERED, PROBATION_CASE_REGISTRATION_UPDATED)
+val MAPPA_DETAIL_REGISTER_EVENTS = listOf(
+  PROBATION_CASE_REGISTRATION_ADDED,
+  PROBATION_CASE_REGISTRATION_DELETED,
+  PROBATION_CASE_REGISTRATION_DEREGISTERED,
+  PROBATION_CASE_REGISTRATION_UPDATED,
+)
 
 val RISK_SCORE_CHANGED_EVENTS = listOf("risk-assessment.scores.determined", "probation-case.risk-scores.ogrs.manual-calculation")
 
-val KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS = listOf("prisoner-offender-search.prisoner.released", "prison-offender-events.prisoner.released", "calculate-release-dates.prisoner.changed")
+val KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS = listOf(
+  "prisoner-offender-search.prisoner.released",
+  "prison-offender-events.prisoner.released",
+  "calculate-release-dates.prisoner.changed",
+)
 
 val PERSON_EVENTS = listOf(
   "probation-case.engagement.created",
@@ -36,11 +55,23 @@ val PERSON_EVENTS = listOf(
   "prisoner-offender-search.prisoner.updated",
 )
 
-val PND_ALERT_EVENTS = listOf("person.alert.created", "person.alert.changed", "person.alert.deleted", "person.alert.updated")
+val PND_ALERT_EVENTS = listOf(
+  "person.alert.created",
+  "person.alert.changed",
+  "person.alert.deleted",
+  "person.alert.updated",
+)
+
+val LICENCE_CONDITION_EVENTS = listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
 
 val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
 
-val RISK_SCORE_TYPES = listOf("risk-assessment.scores.ogrs.determined", "probation-case.risk-scores.ogrs.manual-calculation", "risk-assessment.scores.rsr.determined", "assessment.summary.produced")
+val RISK_SCORE_TYPES = listOf(
+  "risk-assessment.scores.ogrs.determined",
+  "probation-case.risk-scores.ogrs.manual-calculation",
+  "risk-assessment.scores.rsr.determined",
+  "assessment.summary.produced",
+)
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
@@ -85,6 +116,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("KeyDatesAndAdjustments.PrisonerReleased", "/sentences/latest-key-dates-and-adjustments"),
   PERSON_STATUS_CHANGED("PersonStatus.Changed", ""),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
+  LICENCE_CONDITION_CHANGES("LicenceCondition.Changed", "/licences/conditions"),
   ;
 
   companion object {
@@ -117,6 +149,9 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.PND_ALERTS_CHANGED) {
       PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation.alertCode)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.LICENCE_CONDITION_CHANGES) {
+      LICENCE_CONDITION_EVENTS.contains(it.eventType)
     },
   )
 }

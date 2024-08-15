@@ -35,6 +35,7 @@ data class AdditionalInformation(
   @JsonProperty("registerTypeDescription") val registerTypeDescription: String? = null,
   @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
   @JsonProperty("nomsNumber") val nomsNumber: String? = null,
+  @JsonProperty("prisonerId") val prisonerId: String? = null,
   @JsonProperty("alertCode") val alertCode: String? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
