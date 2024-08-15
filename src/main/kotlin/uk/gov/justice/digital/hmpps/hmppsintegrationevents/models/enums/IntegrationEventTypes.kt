@@ -70,8 +70,9 @@ val RISK_SCORE_TYPES = listOf(
   "risk-assessment.scores.ogrs.determined",
   "probation-case.risk-scores.ogrs.manual-calculation",
   "risk-assessment.scores.rsr.determined",
-  "assessment.summary.produced",
 )
+
+val ROSH_TYPES = listOf("assessment.summary.produced")
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
@@ -117,6 +118,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   PERSON_STATUS_CHANGED("PersonStatus.Changed", ""),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
+  RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "/risks/serious-harm"),
   ;
 
   companion object {
@@ -130,13 +132,13 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
 object IntegrationEventTypesFilters {
   val filters: List<IntegrationEventTypesFilter> = listOf(
     IntegrationEventTypesFilter(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED) {
-      DYNAMIC_RISK_EVENTS.contains(it.eventType) && DYNAMIC_RISKS_REGISTER_TYPES.contains(it.additionalInformation.registerTypeCode)
+      DYNAMIC_RISK_EVENTS.contains(it.eventType) && DYNAMIC_RISKS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.PROBATION_STATUS_CHANGED) {
-      PROBATION_STATUS_CHANGED_EVENTS.contains(it.eventType) && PROBATION_STATUS_REGISTER_TYPES.contains(it.additionalInformation.registerTypeCode)
+      PROBATION_STATUS_CHANGED_EVENTS.contains(it.eventType) && PROBATION_STATUS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.MAPPA_DETAIL_CHANGED) {
-      MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation.registerTypeCode)
+      MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.RISK_SCORE_CHANGED) {
       RISK_SCORE_TYPES.contains(it.eventType)
@@ -148,10 +150,13 @@ object IntegrationEventTypesFilters {
       PERSON_EVENTS.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.PND_ALERTS_CHANGED) {
-      PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation.alertCode)
+      PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED) {
+      ROSH_TYPES.contains(it.eventType)
     },
   )
 }

@@ -126,7 +126,6 @@ class HmppsDomainEventServiceTest {
       "risk-assessment.scores.rsr.determined",
       "probation-case.risk-scores.ogrs.manual-calculation",
       "risk-assessment.scores.ogrs.determined",
-      "assessment.summary.produced",
     ],
   )
   fun `will process and save a risk changed domain event message`(eventType: String) {

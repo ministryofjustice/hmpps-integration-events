@@ -30,6 +30,10 @@ object DomainEvents {
     {\"additionalInformation\":{\"nomsNumber\":\"$nomsNumber\",\"categoriesChanged\":[\"IDENTIFIERS\"]},\"occurredAt\":\"$occuredAt\",\"eventType\":\"prisoner-offender-search.prisoner.updated\",\"version\":1,\"description\":\"A prisoner record has been updated\",\"detailUrl\":\"https://prisoner-search.prison.service.justice.gov.uk/prisoner/$nomsNumber\"}
   """.trimIndent()
 
+  val ASSESSMENT_SUMMARY_PRODUCED = """
+    {\"eventType\":\"assessment.summary.produced\",\"version\": 1,\"description\":\"Assessment Summary has been produced\",\"detailUrl\":\"https://oasys.service.justice.gov.uk/eor/oasys/ass/asssumm/R007565/ALLOW/2513077240/COMPLETE\",\"occurredAt\": \"2024-08-14T12:33:34+01:00\",\"personReference\":{\"identifiers\":[{\"type\": \"CRN\", \"value\": \"$crn\"}]}}
+  """.trimIndent()
+
   fun generateDomainEvent(eventType: String, message: String) = """
     {
       "Type" : "Notification",

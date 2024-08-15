@@ -38,6 +38,7 @@ class SubscriberService(
           url.takeIf { it.contains("/v1/persons/[^/]*$") }?.let { IntegrationEventTypes.PERSON_STATUS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/alerts/pnd") }?.let { IntegrationEventTypes.PND_ALERTS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/licences/conditions") }?.let { IntegrationEventTypes.LICENCE_CONDITION_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/.*/risks/serious-harm") }?.let { IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
