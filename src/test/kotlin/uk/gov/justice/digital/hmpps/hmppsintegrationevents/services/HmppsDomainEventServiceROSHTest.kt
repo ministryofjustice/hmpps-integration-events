@@ -5,11 +5,11 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.ASSESSMENT_SUMMARY_PRODUCED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 
 @Configuration
 @ActiveProfiles("test")
-class HmppsDomainEventServiceLicenceConditionTest {
+class HmppsDomainEventServiceROSHTest {
 
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
@@ -27,8 +27,6 @@ class HmppsDomainEventServiceLicenceConditionTest {
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
   private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(repo = repo, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
-  private val crn = "X777776"
-  private val nomsNumber = "A1234BC"
 
   @BeforeEach
   fun setup() {
@@ -38,29 +36,21 @@ class HmppsDomainEventServiceLicenceConditionTest {
     every { repo.save(any()) } returnsArgument 0
   }
 
-  @ParameterizedTest
-  @CsvSource(
-    value = [
-      "create-and-vary-a-licence.licence.activated, 99059",
-      "create-and-vary-a-licence.licence.inactivated, 90386",
-    ],
-  )
-  fun `will process and save a licence notification`(eventType: String, licenceId: String) {
-    val message = """
-      {\"eventType\":\"$eventType\",\"additionalInformation\":{\"licenceId\":\"99059\"},\"detailUrl\":\"https://create-and-vary-a-licence-api.hmpps.service.justice.gov.uk/public/licences/id/$licenceId\",\"version\":1,\"occurredAt\":\"2024-08-14T16:42:13.725721689+01:00\",\"description\":\"Licence activated for Licence ID $licenceId\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"$crn\"},{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]}}
-    """.trimIndent()
+  @Test
+  fun `will process and save a rosh notification`() {
+    val message = ASSESSMENT_SUMMARY_PRODUCED
 
     val hmppsMessage = message.replace("\\", "")
-    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
+    val event = generateHmppsDomainEvent("assessment.summary.produced", hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.LICENCE_CONDITION_CHANGED)
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IntegrationEventTypes.LICENCE_CONDITION_CHANGED,
+          eventType = IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED,
           hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/licences/conditions",
+          url = "$baseUrl/v1/persons/X777776/risks/serious-harm",
           lastModifiedDateTime = currentTime,
         ),
       )

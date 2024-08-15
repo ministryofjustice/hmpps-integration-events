@@ -46,8 +46,8 @@ class HmppsDomainEventService(
       return crn
     }
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
-      ?: hmppsEvent.additionalInformation.nomsNumber
-      ?: hmppsEvent.additionalInformation.prisonerId
+      ?: hmppsEvent.additionalInformation?.nomsNumber
+      ?: hmppsEvent.additionalInformation?.prisonerId
 
     nomsNumber?.let {
       return probationIntegrationApiGateway.getPersonIdentifier(nomsNumber)?.crn ?: throw NotFoundException("Person not found nomsNumber $nomsNumber")
@@ -72,8 +72,6 @@ class HmppsDomainEventService(
   private fun handleMessage(notification: EventNotification) {
     if (!repo.existsByHmppsIdAndEventType(notification.hmppsId, notification.eventType)) {
       repo.save(notification)
-    } else {
-      repo.updateLastModifiedDateTimeByHmppsIdAndEventType(LocalDateTime.now(), notification.hmppsId, notification.eventType)
     }
   }
 }

@@ -109,14 +109,15 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will update an events lastModifiedDate if a relevant event is already stored`() {
+  fun `will not insert or update db if a relevant event is already stored`() {
     every { repo.existsByHmppsIdAndEventType("X777776", IntegrationEventTypes.MAPPA_DETAIL_CHANGED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent()
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED)
 
-    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 0) { repo.save(any()) }
+    verify(exactly = 0) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
   }
 
   @ParameterizedTest
@@ -125,7 +126,6 @@ class HmppsDomainEventServiceTest {
       "risk-assessment.scores.rsr.determined",
       "probation-case.risk-scores.ogrs.manual-calculation",
       "risk-assessment.scores.ogrs.determined",
-      "assessment.summary.produced",
     ],
   )
   fun `will process and save a risk changed domain event message`(eventType: String) {
@@ -146,14 +146,15 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will update an events lastModifiedDate if a relevant risk score changed event is already stored`() {
+  fun `will not try to insert or update db if a relevant risk score changed event is already stored`() {
     every { repo.existsByHmppsIdAndEventType("X777776", IntegrationEventTypes.RISK_SCORE_CHANGED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
 
     hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_SCORE_CHANGED)
 
-    verify(exactly = 1) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventTypes.RISK_SCORE_CHANGED) }
+    verify(exactly = 0) { repo.save(any()) }
+    verify(exactly = 0) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventTypes.RISK_SCORE_CHANGED) }
   }
 
   @Test
