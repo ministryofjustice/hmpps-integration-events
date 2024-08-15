@@ -33,7 +33,7 @@ class HmppsDomainEventsListenerLicenceConditionTest {
       "create-and-vary-a-licence.licence.inactivated, 90386",
     ],
   )
-  fun `will process and save a pnd alert for person alert created event`(eventType: String, licenceId: String) {
+  fun `will process and save a licence notification`(eventType: String, licenceId: String) {
     val message = """
       {\"eventType\":\"$eventType\",\"additionalInformation\":{\"licenceId\":\"99059\"},\"detailUrl\":\"https://create-and-vary-a-licence-api.hmpps.service.justice.gov.uk/public/licences/id/$licenceId\",\"version\":1,\"occurredAt\":\"2024-08-14T16:42:13.725721689+01:00\",\"description\":\"Licence activated for Licence ID $licenceId\",\"personReference\":{\"identifiers\":[{\"type\":\"CRN\",\"value\":\"$crn\"},{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]}}
     """.trimIndent()
