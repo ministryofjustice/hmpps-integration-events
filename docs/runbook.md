@@ -19,12 +19,6 @@ This service triggers SNS notifications by processing upstream MoJ domain events
 - AWS RDS Postgres DB
 - AWS secrets manager
 
-## Service URLs
-
-- Development: https://dev.integration-api.hmpps.service.justice.gov.uk/events/<client_name>
-- Pre-Production: https://preprod.integration-api.hmpps.service.justice.gov.uk/events/<client_name>
-- Production: https://integration-api.hmpps.service.justice.gov.uk/events/<client_name>
-
 ## Incident response hours
 
 Office hours, usually 9am-6pm on working days.
@@ -65,5 +59,4 @@ Since we have a variety of consumers, the impact will be different for each of t
 
 Consumers need to be onboard and go through a mutual TLS authentication. They also need to send a pre-shared key (AWS API Gateway API Key) as a header for identification before being allowed to access the service.
 
-Once authenticated, there is an authorisation step at the application level to ensure the consumers are allowed to access the requested resources.
 There are no IP restrictions in place.

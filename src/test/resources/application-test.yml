@@ -74,11 +74,6 @@ hmpps.secret:
       secret-id: testSecret
       queueId: subscribertestqueue
 
-event.clients:
-  MockService2:
-    queueId: subscribertestqueue2
-    pathCode: "mockservice2"
-
 notifier:
   schedule:
     rate: 1000
