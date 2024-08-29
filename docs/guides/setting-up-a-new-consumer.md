@@ -20,6 +20,4 @@ hmpps.sqs.[client].queuearn
 hmpps.sqs.[client].subscriberTopicId
 hmpps.secrets.secrets.[client].secretId
 hmpps.secrets.secrets.[client].queueId
-event.clients.[client].queueId
-event.clients.[client].pathCode
 ```

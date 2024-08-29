@@ -36,17 +36,6 @@ hmpps.secret:
       secretId: ${PND_FILTER_POLICY_SECRECT_ID}
       queueId: pndsubscriberqueue
 
-event.clients:
-  mapps-client-org:
-    queueId: mappssubscriberqueue
-    pathCode: "mapps"
-  pnd:
-    queueId: pndsubscriberqueue
-    pathCode: "pnd"
-  event-service:
-    queueId: testclientsubscriberqueue
-    pathCode: "test-client"
-
 hmpps.s3:
   buckets:
     certificate-backup:
