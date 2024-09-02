@@ -65,4 +65,13 @@ class EventNotifierServiceTest {
     emitter.sentNotifications()
     verify(eventRepository, times(1)).deleteById(123)
   }
+
+  @Test
+  fun `on sns publish error do not delete event from db`() {
+    val event = EventNotification(123, "hmppsId", IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
+    whenever(integrationEventTopicService.sendEvent(event)).thenThrow(RuntimeException("error"))
+    emitter.sentNotifications()
+    verify(eventRepository, times(0)).deleteById(123)
+  }
 }
