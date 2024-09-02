@@ -14,7 +14,6 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 @Service
 class IntegrationEventTopicService(
   private val hmppsQueueService: HmppsQueueService,
-  private val deadLetterQueueService: DeadLetterQueueService,
   private val objectMapper: ObjectMapper,
 ) {
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
@@ -27,17 +26,13 @@ class IntegrationEventTopicService(
   }
 
   fun sendEvent(payload: EventNotification) {
-    try {
-      hmppsEventsTopicSnsClient.publish(
-        PublishRequest.builder()
-          .topicArn(topicArn)
-          .message(objectMapper.writeValueAsString(payload))
-          .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
-          .build(),
-      ).get()
-    } catch (e: Exception) {
-      deadLetterQueueService.sendEvent(payload, e.message)
-    }
+    hmppsEventsTopicSnsClient.publish(
+      PublishRequest.builder()
+        .topicArn(topicArn)
+        .message(objectMapper.writeValueAsString(payload))
+        .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
+        .build(),
+    ).get()
   }
 
   fun updateSubscriptionAttributes(queueName: String, attributeName: String, attributeValueJson: String) {

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
+import io.sentry.Sentry
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -17,8 +18,12 @@ class EventNotifierService(
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
     val events = eventRepository.findAllWithLastModifiedDateTimeBefore(fiveMinutesAgo)
     events.forEach {
-      integrationEventTopicService.sendEvent(it)
-      eventRepository.deleteById(it.eventId!!)
+      try {
+        integrationEventTopicService.sendEvent(it)
+        eventRepository.deleteById(it.eventId!!)
+      } catch (e: Exception) {
+        Sentry.captureException(e)
+      }
     }
   }
 }
