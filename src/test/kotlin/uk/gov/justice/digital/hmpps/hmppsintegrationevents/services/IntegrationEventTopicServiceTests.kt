@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
 import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicResponse
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import software.amazon.awssdk.services.sns.model.PublishResponse
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
 import software.amazon.awssdk.services.sns.model.Subscription
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
@@ -36,7 +37,6 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   val hmppsQueueService: HmppsQueueService = mock()
   val hmppsEventSnsClient: SnsAsyncClient = mock()
-  val deadLetterQueueService: DeadLetterQueueService = mock()
   val mockQueue: HmppsQueue = mock()
   private lateinit var service: IntegrationEventTopicService
   val currentTime = LocalDateTime.now()
@@ -47,13 +47,19 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       .thenReturn(HmppsTopic("integrationeventtopic", "sometopicarn", hmppsEventSnsClient))
     whenever(hmppsQueueService.findByQueueId("mockQueue")).thenReturn(mockQueue)
     whenever(mockQueue.queueArn).thenReturn("mockARN")
-    service = IntegrationEventTopicService(hmppsQueueService, deadLetterQueueService, objectMapper)
+    service = IntegrationEventTopicService(hmppsQueueService, objectMapper)
   }
 
   @Test
   fun `Publish Event `() {
     val event = EventNotification(123, "hmppsId", IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
 
+    val response = PublishResponse
+      .builder()
+      .messageId("123")
+      .build()
+
+    whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(response))
     service.sendEvent(event)
 
     argumentCaptor<PublishRequest>().apply {
@@ -66,23 +72,6 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       Assertions.assertThat(messageAttributes["eventType"])
         .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
     }
-  }
-
-  @Test
-  fun `Put event into dlq if failed to publish message`() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
-    whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException("MockError"))
-
-    service.sendEvent(event)
-    val eventCapture = argumentCaptor<EventNotification>()
-    val stringCapture = argumentCaptor<String>()
-
-    verify(deadLetterQueueService, times(1)).sendEvent(eventCapture.capture(), stringCapture.capture())
-    val payload = eventCapture.firstValue
-    Assertions.assertThat(payload.eventType).isEqualTo(event.eventType)
-    Assertions.assertThat(payload.hmppsId).isEqualTo(event.hmppsId)
-    Assertions.assertThat(payload.url).isEqualTo(event.url)
-    Assertions.assertThat(stringCapture.firstValue).isEqualTo("MockError")
   }
 
   @Test
