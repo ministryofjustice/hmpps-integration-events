@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.5"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
   kotlin("plugin.spring") version "2.0.20"
   kotlin("plugin.jpa") version "2.0.20"
   kotlin("plugin.lombok") version "2.0.20"
@@ -23,7 +23,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.11.0")
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.4.3") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.4.4") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
