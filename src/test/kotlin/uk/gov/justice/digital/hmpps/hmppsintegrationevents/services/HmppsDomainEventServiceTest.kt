@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -56,6 +57,7 @@ class HmppsDomainEventServiceTest {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
+    every { probationIntegrationApiGateway.getPersonExists("X777776") } returns PersonExists("X777776", true)
   }
 
   @ParameterizedTest
@@ -166,6 +168,18 @@ class HmppsDomainEventServiceTest {
 
     verify { repo wasNot Called }
     assertThat(exception.message, equalTo("Person not found nomsNumber 0123456X"))
+  }
+
+  @Test
+  fun `will not process and save a domain registration event message where CRN does not exist in delius`() {
+    val crn = "X123456"
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"CRN\",\"value\":\"$crn\"}]")
+
+    every { probationIntegrationApiGateway.getPersonExists("X123456") } returns PersonExists(crn, false)
+    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
+
+    verify { repo wasNot Called }
+    assertThat(exception.message, equalTo("Person with crn $crn not found"))
   }
 
   @Test

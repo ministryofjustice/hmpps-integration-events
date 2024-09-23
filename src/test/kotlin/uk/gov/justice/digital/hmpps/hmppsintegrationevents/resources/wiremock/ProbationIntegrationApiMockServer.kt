@@ -23,4 +23,24 @@ class ProbationIntegrationApiMockServer internal constructor() : WireMockServer(
         ),
     )
   }
+
+  fun stubGetIfPersonExists(crn: String) {
+    stubFor(
+      WireMock.get(WireMock.urlEqualTo("/exists-in-delius/crn/$crn"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              """
+                                      {
+                                      "crn": "$crn",
+                                      "existsInDelius": true
+                                  }
+                                
+                                """
+                .trimIndent(),
+            ),
+        ),
+    )
+  }
 }
