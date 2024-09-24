@@ -36,6 +36,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will process and save a valid domain event SQS message`() {
+    ProbationIntegrationApiExtension.server.stubGetIfPersonExists("X777776")
     val rawMessage = SqsNotificationGeneratingHelper().generateRawGenericEvent()
     sendDomainSqsMessage(rawMessage)
 

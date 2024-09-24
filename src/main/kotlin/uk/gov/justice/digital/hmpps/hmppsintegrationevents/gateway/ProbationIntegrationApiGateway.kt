@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.WebClientWrapper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.WebClientWrapper.WebClientWrapperResponse
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.UpstreamApi
 
@@ -34,6 +35,26 @@ class ProbationIntegrationApiGateway(
 
       is WebClientWrapperResponse.Error -> {
         null
+      }
+    }
+  }
+
+  fun getPersonExists(crn: String): PersonExists {
+    val result =
+      webClient.request<PersonExists>(
+        HttpMethod.GET,
+        "/exists-in-delius/crn/$crn",
+        authenticationHeader(),
+        UpstreamApi.PROBATION_INTEGRATION,
+      )
+
+    return when (result) {
+      is WebClientWrapperResponse.Success -> {
+        result.data
+      }
+
+      is WebClientWrapperResponse.Error -> {
+        PersonExists(crn, false)
       }
     }
   }

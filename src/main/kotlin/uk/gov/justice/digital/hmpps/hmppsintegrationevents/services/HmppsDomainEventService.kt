@@ -43,7 +43,13 @@ class HmppsDomainEventService(
   private fun getHmppsId(hmppsEvent: HmppsDomainEventMessage): String? {
     val crn: String? = hmppsEvent.personReference?.findCrnIdentifier()
     if (crn != null) {
-      return crn
+      probationIntegrationApiGateway.getPersonExists(crn).let {
+        if (it.existsInDelius) {
+          return crn
+        }
+
+        throw NotFoundException("Person with crn $crn not found")
+      }
     }
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
       ?: hmppsEvent.additionalInformation?.nomsNumber

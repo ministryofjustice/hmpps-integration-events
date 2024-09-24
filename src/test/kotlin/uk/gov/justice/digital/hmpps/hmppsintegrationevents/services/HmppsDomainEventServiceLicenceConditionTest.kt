@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -34,6 +35,7 @@ class HmppsDomainEventServiceLicenceConditionTest {
   fun setup() {
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
+    every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
     every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { repo.save(any()) } returnsArgument 0
   }
