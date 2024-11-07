@@ -94,6 +94,8 @@ val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
   HIGH_ROSH_CODE,
 )
 
+val PLP_INDUCTION_SCHEDULE_EVENT = listOf("plp.induction-schedule.updated")
+
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
   const val CHILD_CONCERNS_CODE = "RCCO" // Safeguarding concerns where a child is at risk from the offender
@@ -119,6 +121,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "/risks/serious-harm"),
+  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionScheduleChanged", "/plp/inductionScheduleUpdated"),
   ;
 
   companion object {
@@ -157,6 +160,9 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED) {
       ROSH_TYPES.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.PLP_INDUCTION_SCHEDULE_CHANGED) {
+      PLP_INDUCTION_SCHEDULE_EVENT.contains(it.eventType)
     },
   )
 }
