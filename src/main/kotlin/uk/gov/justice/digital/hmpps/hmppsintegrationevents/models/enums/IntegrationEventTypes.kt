@@ -121,7 +121,7 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "/risks/serious-harm"),
-  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionScheduleChanged", "/plp/inductionScheduleUpdated"),
+  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "/plp/inductionScheduleUpdated"),
   ;
 
   companion object {
