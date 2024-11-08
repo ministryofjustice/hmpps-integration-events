@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest
@@ -19,6 +20,10 @@ class IntegrationEventTopicService(
   private final val hmppsEventsTopicSnsClient: SnsAsyncClient
   private final val topicArn: String
 
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
+
   init {
     val hmppsEventTopic = hmppsQueueService.findByTopicId("integrationeventtopic")
     topicArn = hmppsEventTopic!!.arn
@@ -33,6 +38,7 @@ class IntegrationEventTopicService(
         .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
         .build(),
     ).get()
+    log.info("successfully published event ${payload.eventType.name} to integrationeventtopic. $payload")
   }
 
   fun updateSubscriptionAttributes(queueName: String, attributeName: String, attributeValueJson: String) {
