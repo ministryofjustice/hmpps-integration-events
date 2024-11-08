@@ -160,14 +160,27 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not process and save a domain registration event message with no CRN and cannot find CRN by nomis number`() {
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"0123456X\"}]")
+  fun `will process and save event message with no CRN and cannot find CRN by nomis number`() {
+    every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns null
 
-    every { probationIntegrationApiGateway.getPersonIdentifier("0123456X") } returns null
-    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventTypes.MAPPA_DETAIL_CHANGED) }
+    val hmppsMessage = """
+      {"eventType":"calculate-release-dates.prisoner.changed","description":"Prisoners release dates have been re-calculated","additionalInformation":{"prisonerId":"$mockNomisId","bookingId":1219387},"version":1,"occurredAt":"2024-08-13T14:15:16.460942253+01:00"}
+    """.trimIndent()
 
-    verify { repo wasNot Called }
-    assertThat(exception.message, equalTo("Person not found nomsNumber 0123456X"))
+    val event = generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", hmppsMessage)
+
+    hmppsDomainEventService.execute(event, IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+
+    verify(exactly = 1) {
+      repo.save(
+        EventNotification(
+          eventType = IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
+          hmppsId = mockNomisId,
+          url = "$baseUrl/v1/persons/$mockNomisId/sentences/latest-key-dates-and-adjustments",
+          lastModifiedDateTime = currentTime,
+        ),
+      )
+    }
   }
 
   @Test
