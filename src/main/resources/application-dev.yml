@@ -35,6 +35,9 @@ hmpps.secret:
     PND:
       secretId: ${PND_FILTER_POLICY_SECRECT_ID}
       queueId: pndsubscriberqueue
+    meganexus:
+      secretId: ${PLP_FILTER_POLICY_SECRECT_ID}
+      queueId: plpsubscriberqueue
 
 hmpps.s3:
   buckets:
