@@ -40,7 +40,8 @@ val MAPPA_DETAIL_REGISTER_EVENTS = listOf(
   PROBATION_CASE_REGISTRATION_UPDATED,
 )
 
-val RISK_SCORE_CHANGED_EVENTS = listOf("risk-assessment.scores.determined", "probation-case.risk-scores.ogrs.manual-calculation")
+val RISK_SCORE_CHANGED_EVENTS =
+  listOf("risk-assessment.scores.determined", "probation-case.risk-scores.ogrs.manual-calculation")
 
 val KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS = listOf(
   "prisoner-offender-search.prisoner.released",
@@ -62,7 +63,8 @@ val PND_ALERT_EVENTS = listOf(
   "person.alert.updated",
 )
 
-val LICENCE_CONDITION_EVENTS = listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
+val LICENCE_CONDITION_EVENTS =
+  listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
 
 val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
 
@@ -95,6 +97,7 @@ val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
 )
 
 val PLP_INDUCTION_SCHEDULE_EVENT = listOf("plp.induction-schedule.updated")
+val PLP_REVIEW_SCHEDULE_EVENT = listOf("plp.review-schedule.updated")
 
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
@@ -116,12 +119,16 @@ enum class IntegrationEventTypes(val value: String, val path: String) {
   PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "/status-information"),
   MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "/risks/mappadetail"),
   RISK_SCORE_CHANGED("RiskScore.Changed", "/risks/scores"),
-  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("KeyDatesAndAdjustments.PrisonerReleased", "/sentences/latest-key-dates-and-adjustments"),
+  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
+    "KeyDatesAndAdjustments.PrisonerReleased",
+    "/sentences/latest-key-dates-and-adjustments",
+  ),
   PERSON_STATUS_CHANGED("PersonStatus.Changed", ""),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "/risks/serious-harm"),
   PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "/plp/inductionScheduleUpdated"),
+  PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "/plp/reviewScheduleUpdated"),
   ;
 
   companion object {
@@ -163,6 +170,9 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.PLP_INDUCTION_SCHEDULE_CHANGED) {
       PLP_INDUCTION_SCHEDULE_EVENT.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.PLP_REVIEW_SCHEDULE_CHANGED) {
+      PLP_REVIEW_SCHEDULE_EVENT.contains(it.eventType)
     },
   )
 }

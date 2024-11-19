@@ -39,6 +39,8 @@ class SubscriberService(
           url.takeIf { it.contains("/v1/persons/.*/alerts/pnd") }?.let { IntegrationEventTypes.PND_ALERTS_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/licences/conditions") }?.let { IntegrationEventTypes.LICENCE_CONDITION_CHANGED.name },
           url.takeIf { it.contains("/v1/persons/.*/risks/serious-harm") }?.let { IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/.*/plp/inductionScheduleUpdated") }?.let { IntegrationEventTypes.PLP_INDUCTION_SCHEDULE_CHANGED.name },
+          url.takeIf { it.contains("/v1/persons/.*/plp/reviewScheduleUpdated") }?.let { IntegrationEventTypes.PLP_REVIEW_SCHEDULE_CHANGED.name },
         )
       }
       .ifEmpty { listOf("DEFAULT") }
