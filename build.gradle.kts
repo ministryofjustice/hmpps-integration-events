@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.8"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   kotlin("plugin.lombok") version "2.0.21"
@@ -23,15 +23,15 @@ dependencies {
   implementation("com.google.code.gson:gson:2.11.0")
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.1.1") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.0") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.17.0")
-  testImplementation("org.testcontainers:localstack:1.20.3")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
+  testImplementation("org.testcontainers:localstack:1.20.4")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.apache.commons:commons-compress:1.27.1")
   testImplementation("io.kotest:kotest-assertions-json-jvm:5.9.1")
