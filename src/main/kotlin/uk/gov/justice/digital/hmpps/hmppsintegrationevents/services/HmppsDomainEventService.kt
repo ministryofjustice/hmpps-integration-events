@@ -73,7 +73,7 @@ class HmppsDomainEventService(
       return EventNotification(
         eventType = eventType,
         hmppsId = hmppsId,
-        url = "$baseUrl/v1/persons/$hmppsId${eventType.path}",
+        url = "$baseUrl/${eventType.path(hmppsId)}",
         lastModifiedDateTime = LocalDateTime.now(),
       )
     }
