@@ -56,6 +56,18 @@ val PERSON_EVENTS = listOf(
   "prisoner-offender-search.prisoner.updated",
 )
 
+val PERSON_ADDRESS_EVENTS = listOf(
+  "probation-case.address.created",
+  "probation-case.address.updated",
+  "probation-case.address.deleted",
+)
+
+val RESPONSIBLE_OFFICER_EVENTS = listOf(
+  "person.community.manager.allocated",
+  "person.community.manager.transferred",
+  "probation.staff.updated",
+)
+
 val PND_ALERT_EVENTS = listOf(
   "person.alert.created",
   "person.alert.changed",
@@ -114,22 +126,26 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class IntegrationEventTypes(val value: String, val path: String) {
-  DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", "/risks/dynamic"),
-  PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "/status-information"),
-  MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "/risks/mappadetail"),
-  RISK_SCORE_CHANGED("RiskScore.Changed", "/risks/scores"),
+enum class IntegrationEventTypes(val value: String, private val pathTemplate: String) {
+  DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", "v1/persons/{hmppsId}/risks/dynamic"),
+  PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "v1/persons/{hmppsId}/status-information"),
+  MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "v1/persons/{hmppsId}/risks/mappadetail"),
+  RISK_SCORE_CHANGED("RiskScore.Changed", "v1/persons/{hmppsId}/risks/scores"),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
     "KeyDatesAndAdjustments.PrisonerReleased",
-    "/sentences/latest-key-dates-and-adjustments",
+    "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
   ),
-  PERSON_STATUS_CHANGED("PersonStatus.Changed", ""),
-  PND_ALERTS_CHANGED("PNDAlerts.Changed", "/alerts/pnd"),
-  LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "/licences/conditions"),
-  RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "/risks/serious-harm"),
-  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "/plp-induction-schedule"),
-  PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "/plp-review-schedule"),
+  PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
+  PND_ALERTS_CHANGED("PNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
+  LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
+  RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
+  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule"),
+  PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "v1/persons/{hmppsId}/plp-review-schedule"),
+  PERSON_ADDRESS_CHANGED("PersonAddress.Changed", "v1/persons/{hmppsId}/addresses"),
+  RESPONSIBLE_OFFICER_CHANGED("ResponsibleOfficer.Changed", "/v1/persons/{hmppsId}/person-responsible-officer"),
   ;
+
+  fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
 
   companion object {
     fun from(eventType: IntegrationEventTypes): IntegrationEventTypes? =
@@ -173,6 +189,12 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventTypes.PLP_REVIEW_SCHEDULE_CHANGED) {
       PLP_REVIEW_SCHEDULE_EVENT.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.PERSON_ADDRESS_CHANGED) {
+      PERSON_ADDRESS_EVENTS.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventTypes.RESPONSIBLE_OFFICER_CHANGED) {
+      RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType)
     },
   )
 }

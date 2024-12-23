@@ -14,9 +14,9 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockReset
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockReset
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
@@ -43,7 +43,7 @@ class IntegrationEventTest {
   @Autowired
   private lateinit var eventRepository: EventNotificationRepository
 
-  @SpyBean(reset = MockReset.BEFORE)
+  @MockitoSpyBean(reset = MockReset.BEFORE)
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
 
   internal val integrationEventTestQueue by lazy { hmppsQueueService.findByQueueId("integrationeventtestqueue") as HmppsQueue }

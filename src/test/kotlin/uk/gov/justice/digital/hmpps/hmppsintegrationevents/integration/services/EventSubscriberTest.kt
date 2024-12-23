@@ -17,9 +17,9 @@ import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockReset
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockReset.BEFORE
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import software.amazon.awssdk.services.sns.model.GetSubscriptionAttributesRequest
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
@@ -37,7 +37,7 @@ class EventSubscriberTest() {
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
 
-  @SpyBean(reset = MockReset.BEFORE)
+  @MockitoSpyBean(reset = BEFORE)
   private lateinit var subscriberService: SubscriberService
 
   @Autowired

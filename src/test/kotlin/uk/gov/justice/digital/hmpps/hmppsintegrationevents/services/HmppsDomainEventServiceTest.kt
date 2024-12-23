@@ -296,7 +296,7 @@ class HmppsDomainEventServiceTest {
         EventNotification(
           eventType = IntegrationEventTypes.PND_ALERTS_CHANGED,
           hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/alerts/pnd",
+          url = "$baseUrl/v1/pnd/persons/X777776/alerts",
           lastModifiedDateTime = currentTime,
         ),
       )
