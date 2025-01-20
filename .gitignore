@@ -73,3 +73,7 @@ sonar-project.properties
 
 # Localstack
 volume
+
+#Misc
+.DS_Store
+
