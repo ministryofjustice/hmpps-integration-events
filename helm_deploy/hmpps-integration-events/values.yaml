@@ -52,14 +52,6 @@ generic-service:
       HMPPS_DOMAIN_TOPIC_ARN: "hmpps_domain_events_topic_arn"
     hmpps-integration-api-domain-events-sqs-dl-instance-output:
       HMPPS_DOMAIN_DL_QUEUE_NAME: "sqs_name"
-    event-mapps-queue:
-      MAPPS_QUEUE_NAME: "sqs_name"
-      MAPPS_QUEUE_ARN: "sqs_arn"
-      MAPPS_FILTER_POLICY_SECRECT_ID: "mapps_filter_policy_secret_id"
-    event-pnd-queue:
-      PND_QUEUE_NAME: "sqs_name"
-      PND_QUEUE_ARN: "sqs_arn"
-      PND_FILTER_POLICY_SECRET_ID: "pnd_filter_policy_secret_id"
     event-plp-queue:
       PLP_QUEUE_NAME: "sqs_name"
       PLP_QUEUE_ARN: "sqs_arn"
