@@ -59,7 +59,7 @@ generic-service:
     event-mapps-queue:
       MAPPS_QUEUE_NAME: "sqs_name"
       MAPPS_QUEUE_ARN: "sqs_arn"
-      MAPPS_FILTER_POLICY_SECRET_ID: "mapps_filter_policy_secret_id"
+      MAPPS_FILTER_POLICY_SECRECT_ID: "mapps_filter_policy_secret_id"
     event-plp-queue:
       PLP_QUEUE_NAME: "sqs_name"
       PLP_QUEUE_ARN: "sqs_arn"
