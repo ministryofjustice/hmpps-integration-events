@@ -84,6 +84,7 @@ workflows:
             branches:
               only:
                 - main
+                - RR-1219-config-change-2
           requires:
             - validate
             - build_docker
