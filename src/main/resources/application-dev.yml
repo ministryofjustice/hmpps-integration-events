@@ -39,11 +39,6 @@ hmpps.secret:
       secretId: ${PLP_FILTER_POLICY_SECRET_ID}
       queueId: plpsubscriberqueue
 
-hmpps.s3:
-  buckets:
-    certificate-backup:
-      bucketName: ${CERTIFICATE_BUCKET_NAME}
-
 notifier:
   schedule:
     rate: 10000
