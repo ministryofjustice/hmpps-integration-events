@@ -10,6 +10,7 @@ generic-service:
     HMPPS_AUTH_URL: https://sign-in.hmpps.service.justice.gov.uk
     PROBATION_INTEGRATION_API_URL: https://external-api-and-delius.hmpps.service.justice.gov.uk
     SENTRY_ENVIRONMENT: prod
+    SPRING_PROFILES_ACTIVE: prod
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
