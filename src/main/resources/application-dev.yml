@@ -15,6 +15,10 @@ hmpps.sqs:
       queueName: ${PND_QUEUE_NAME}
       queueArn: ${PND_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    bmadleysubscriberqueue:
+      queueName: ${BMADLEY_QUEUE_NAME}
+      queueArn: ${BMADLEY_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
     testclientsubscriberqueue:
       queueName: ${TEST_CLIENT_QUEUE_NAME}
       queueArn: ${TEST_CLIENT_QUEUE_ARN}
@@ -38,7 +42,9 @@ hmpps.secret:
     MEGANEXUS:
       secretId: ${PLP_FILTER_POLICY_SECRET_ID}
       queueId: plpsubscriberqueue
-
+    BMADLEY:
+      secretId: ${BMADLEY_FILTER_POLICY_SECRET_ID}
+      queueId: bmadleysubscriberqueue
 notifier:
   schedule:
     rate: 10000
