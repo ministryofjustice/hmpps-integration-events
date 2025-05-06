@@ -105,7 +105,7 @@ workflows:
             - hmpps-integration-events-preprod
           requires:
             - request-preprod-approval
-          helm_timeout: 5m
+          helm_timeout: 15m
       - request-prod-approval:
           type: approval
           requires:
