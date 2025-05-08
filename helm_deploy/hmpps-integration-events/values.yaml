@@ -64,10 +64,6 @@ generic-service:
       PLP_QUEUE_NAME: "sqs_name"
       PLP_QUEUE_ARN: "sqs_arn"
       PLP_FILTER_POLICY_SECRET_ID: "plp_filter_policy_secret_id"
-    event-bmadley-queue:
-      BMADLEY_QUEUE_NAME: "sqs_name"
-      BMADLEY_QUEUE_ARN: "sqs_arn"
-      BMADLEY_FILTER_POLICY_SECRET_ID: "bmadley_filter_policy_secret_id"
     rds-postgresql-instance-output:
       DB_SERVER: "rds_instance_endpoint"
       DB_NAME: "database_name"

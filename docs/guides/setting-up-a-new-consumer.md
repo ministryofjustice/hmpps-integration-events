@@ -11,7 +11,9 @@ for each environment they want to access.
 
 To do this you will need the client name that you used when setting up the queue for the consumer in [Create new consumer subscriber queue for events](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md#create-new-consumer-subscriber-queue-for-events). In the following instructions, replace `<client>` with your client's name, and `<CLIENT>` with the client's name in upper case. It is important that `<CLIENT>` is a case-insensitive match for `<client>`.
 
-1. In `values.yml`, add a section like the following under `namespace_secrets`
+1. If you are creating your queue in **all** environments, add the following in `values.yaml`, otherwise add the following to the `values-<environment>.yaml` for each environment you are setting up a queue. 
+
+Add a section like the following under `namespace_secrets`
 ```
 event-<client>-queue:
    <CLIENT>_QUEUE_NAME: "sqs_name"
