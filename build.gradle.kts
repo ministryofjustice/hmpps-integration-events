@@ -38,7 +38,7 @@ dependencies {
   testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
   testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")
   testImplementation("com.h2database:h2:2.3.232")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.5.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.0")
   testImplementation("org.wiremock:wiremock-standalone:3.9.2")
   testImplementation("io.mockk:mockk:1.13.13")
   testImplementation("io.mockk:mockk-agent-jvm:1.13.13")
