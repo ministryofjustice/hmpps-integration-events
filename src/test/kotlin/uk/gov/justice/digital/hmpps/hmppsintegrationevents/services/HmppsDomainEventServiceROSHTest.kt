@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationInte
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.ASSESSMENT_SUMMARY_PRODUCED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -46,12 +46,12 @@ class HmppsDomainEventServiceROSHTest {
     val hmppsMessage = message.replace("\\", "")
     val event = generateHmppsDomainEvent("assessment.summary.produced", hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED)
+    hmppsDomainEventService.execute(event, IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED,
+          eventType = IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED,
           hmppsId = crn,
           url = "$baseUrl/v1/persons/X777776/risks/serious-harm",
           lastModifiedDateTime = currentTime,
