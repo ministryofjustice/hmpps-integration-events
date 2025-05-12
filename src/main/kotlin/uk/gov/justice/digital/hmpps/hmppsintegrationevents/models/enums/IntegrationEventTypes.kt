@@ -166,9 +166,9 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventTypes.MAPPA_DETAIL_CHANGED) {
       MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.RISK_SCORE_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventTypes.RISK_SCORE_CHANGED, {
       RISK_SCORE_TYPES.contains(it.eventType)
-    },
+    }),
     IntegrationEventTypesFilter(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE) {
       KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType)
     },
