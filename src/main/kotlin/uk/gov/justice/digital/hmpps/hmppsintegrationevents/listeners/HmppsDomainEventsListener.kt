@@ -45,10 +45,10 @@ class HmppsDomainEventsListener(
 
   private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
-    val matchingIntegrationEventTypes = IntegrationEventTypesFilters.filters.filter{ it.predicate.invoke(hmppsEvent) }.map { it.integrationEventType }
-      for (integrationEventType in matchingIntegrationEventTypes) {
-        hmppsDomainEventService.execute(hmppsDomainEvent, integrationEventType)
-      }
+    val matchingIntegrationEventTypes = IntegrationEventTypesFilters.filters.filter { it.predicate.invoke(hmppsEvent) }.map { it.integrationEventType }
+    for (integrationEventType in matchingIntegrationEventTypes) {
+      hmppsDomainEventService.execute(hmppsDomainEvent, integrationEventType)
+    }
   }
 
   fun unwrapSqsExceptions(e: Throwable): Throwable {
