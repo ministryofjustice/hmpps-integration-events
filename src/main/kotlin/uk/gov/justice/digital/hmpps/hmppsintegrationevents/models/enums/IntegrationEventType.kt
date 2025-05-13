@@ -75,6 +75,13 @@ val PND_ALERT_EVENTS = listOf(
   "person.alert.updated",
 )
 
+val ALERT_EVENTS = listOf(
+  "person.alert.created",
+  "person.alert.changed",
+  "person.alert.deleted",
+  "person.alert.updated",
+)
+
 val LICENCE_CONDITION_EVENTS =
   listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
 
@@ -137,6 +144,7 @@ enum class IntegrationEventType(val value: String, private val pathTemplate: Str
   ),
   PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
+  ALERTS_CHANGED("Alerts.Changed", "v1/persons/{hmppsId}/alerts"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
   PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule/history"),
@@ -177,6 +185,9 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventType.PND_ALERTS_CHANGED) {
       PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventType.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
