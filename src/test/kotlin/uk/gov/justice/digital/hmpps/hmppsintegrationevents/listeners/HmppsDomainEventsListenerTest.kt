@@ -210,13 +210,13 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime)
       .generateRawHmppsDomainEventWithAlertCode(
         eventType = "person.alert.created",
-        alertCode = "HA"
+        alertCode = "HA",
       )
 
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime)
       .createHmppsDomainEventWithAlertCode(
         eventType = "person.alert.created",
-        alertCode = "HA"
+        alertCode = "HA",
       )
 
     every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
@@ -227,5 +227,4 @@ class HmppsDomainEventsListenerTest {
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
   }
-
 }
