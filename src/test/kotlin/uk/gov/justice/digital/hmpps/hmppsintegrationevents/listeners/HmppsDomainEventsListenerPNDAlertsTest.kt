@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 
@@ -43,11 +43,14 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
+    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
   }
 
   @ParameterizedTest
@@ -68,11 +71,14 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
+    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
   }
 
   @ParameterizedTest
@@ -93,11 +99,14 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
+    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
   }
 
   @ParameterizedTest
@@ -118,10 +127,13 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventTypes.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
+    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
   }
 }

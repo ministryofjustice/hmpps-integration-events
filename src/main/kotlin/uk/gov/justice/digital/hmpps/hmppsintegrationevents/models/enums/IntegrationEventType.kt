@@ -75,6 +75,13 @@ val PND_ALERT_EVENTS = listOf(
   "person.alert.updated",
 )
 
+val ALERT_EVENTS = listOf(
+  "person.alert.created",
+  "person.alert.changed",
+  "person.alert.deleted",
+  "person.alert.updated",
+)
+
 val LICENCE_CONDITION_EVENTS =
   listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
 
@@ -126,7 +133,7 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class IntegrationEventTypes(val value: String, private val pathTemplate: String) {
+enum class IntegrationEventType(val value: String, private val pathTemplate: String) {
   DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", "v1/persons/{hmppsId}/risks/dynamic"),
   PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "v1/persons/{hmppsId}/status-information"),
   MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "v1/persons/{hmppsId}/risks/mappadetail"),
@@ -137,6 +144,7 @@ enum class IntegrationEventTypes(val value: String, private val pathTemplate: St
   ),
   PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
   PND_ALERTS_CHANGED("PNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
+  ALERTS_CHANGED("Alerts.Changed", "v1/persons/{hmppsId}/alerts"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
   PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule/history"),
@@ -148,8 +156,8 @@ enum class IntegrationEventTypes(val value: String, private val pathTemplate: St
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
 
   companion object {
-    fun from(eventType: IntegrationEventTypes): IntegrationEventTypes? =
-      IntegrationEventTypes.entries.firstOrNull {
+    fun from(eventType: IntegrationEventType): IntegrationEventType? =
+      IntegrationEventType.entries.firstOrNull {
         it.value == eventType.value
       }
   }
@@ -157,49 +165,52 @@ enum class IntegrationEventTypes(val value: String, private val pathTemplate: St
 
 object IntegrationEventTypesFilters {
   val filters: List<IntegrationEventTypesFilter> = listOf(
-    IntegrationEventTypesFilter(IntegrationEventTypes.DYNAMIC_RISKS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.DYNAMIC_RISKS_CHANGED) {
       DYNAMIC_RISK_EVENTS.contains(it.eventType) && DYNAMIC_RISKS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PROBATION_STATUS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PROBATION_STATUS_CHANGED) {
       PROBATION_STATUS_CHANGED_EVENTS.contains(it.eventType) && PROBATION_STATUS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.MAPPA_DETAIL_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.MAPPA_DETAIL_CHANGED) {
       MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.RISK_SCORE_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.RISK_SCORE_CHANGED, {
       RISK_SCORE_TYPES.contains(it.eventType)
-    },
-    IntegrationEventTypesFilter(IntegrationEventTypes.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE) {
+    }),
+    IntegrationEventTypesFilter(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE) {
       KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PERSON_STATUS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_STATUS_CHANGED) {
       PERSON_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PND_ALERTS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PND_ALERTS_CHANGED) {
       PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.LICENCE_CONDITION_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.RISK_OF_SERIOUS_HARM_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED) {
       ROSH_TYPES.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PLP_INDUCTION_SCHEDULE_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PLP_INDUCTION_SCHEDULE_CHANGED) {
       PLP_INDUCTION_SCHEDULE_EVENT.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PLP_REVIEW_SCHEDULE_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED) {
       PLP_REVIEW_SCHEDULE_EVENT.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.PERSON_ADDRESS_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_ADDRESS_CHANGED) {
       PERSON_ADDRESS_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventTypes.RESPONSIBLE_OFFICER_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED) {
       RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType)
     },
   )
 }
 
 data class IntegrationEventTypesFilter(
-  val integrationEventTypes: IntegrationEventTypes,
+  val integrationEventType: IntegrationEventType,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
 )

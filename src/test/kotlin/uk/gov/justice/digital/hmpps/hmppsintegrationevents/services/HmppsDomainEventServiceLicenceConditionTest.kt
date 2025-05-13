@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -55,12 +55,12 @@ class HmppsDomainEventServiceLicenceConditionTest {
     val hmppsMessage = message.replace("\\", "")
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventTypes.LICENCE_CONDITION_CHANGED)
+    hmppsDomainEventService.execute(event, IntegrationEventType.LICENCE_CONDITION_CHANGED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IntegrationEventTypes.LICENCE_CONDITION_CHANGED,
+          eventType = IntegrationEventType.LICENCE_CONDITION_CHANGED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/persons/X777776/licences/conditions",
           lastModifiedDateTime = currentTime,

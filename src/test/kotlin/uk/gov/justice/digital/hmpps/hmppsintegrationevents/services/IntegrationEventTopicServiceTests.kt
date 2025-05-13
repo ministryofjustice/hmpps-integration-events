@@ -23,7 +23,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
 import software.amazon.awssdk.services.sns.model.Subscription
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -52,7 +52,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Publish Event `() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventTypes.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
 
     val response = PublishResponse
       .builder()

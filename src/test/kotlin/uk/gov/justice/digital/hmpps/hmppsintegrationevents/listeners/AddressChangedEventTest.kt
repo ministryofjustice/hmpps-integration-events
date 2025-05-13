@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.crn
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 
@@ -40,7 +40,7 @@ class AddressChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventTypes.PERSON_ADDRESS_CHANGED,
+        IntegrationEventType.PERSON_ADDRESS_CHANGED,
       )
     } just runs
 
@@ -49,7 +49,7 @@ class AddressChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventTypes.PERSON_ADDRESS_CHANGED,
+        IntegrationEventType.PERSON_ADDRESS_CHANGED,
       )
     }
   }
