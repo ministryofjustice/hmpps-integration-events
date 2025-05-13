@@ -226,5 +226,6 @@ class HmppsDomainEventsListenerTest {
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
+    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
   }
 }
