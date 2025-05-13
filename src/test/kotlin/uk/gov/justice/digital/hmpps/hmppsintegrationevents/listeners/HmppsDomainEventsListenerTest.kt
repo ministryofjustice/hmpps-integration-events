@@ -206,14 +206,26 @@ class HmppsDomainEventsListenerTest {
   }
 
   @Test
-  fun `when multiple event filters match, should execute hmppsDomainEventService for each`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
+  fun `when alert event matches multiple filters using generator, both services should be called`() {
+    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime)
+      .generateRawHmppsDomainEventWithAlertCode(
+        eventType = "person.alert.created",
+        alertCode = "HA"
+      )
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_SCORE_CHANGED) } just runs
+    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime)
+      .createHmppsDomainEventWithAlertCode(
+        eventType = "person.alert.created",
+        alertCode = "HA"
+      )
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_SCORE_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.ALERTS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PND_ALERTS_CHANGED) }
   }
+
 }
