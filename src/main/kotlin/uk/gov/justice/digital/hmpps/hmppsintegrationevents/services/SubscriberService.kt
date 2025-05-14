@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
@@ -26,8 +27,11 @@ class SubscriberService(
       .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
   }
 
-  private fun refreshClientFilter(clientConfig: Map.Entry<String, List<String>>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
-    val events = clientConfig.value
+  private fun refreshClientFilter(
+    clientConfig: Map.Entry<String, ConfigAuthorisation>,
+    subscriber: HmppsSecretManagerProperties.SecretConfig,
+  ) {
+    val events = clientConfig.value.endpoints
       .flatMap { url ->
         listOfNotNull(
           url.takeIf { it.contains("/v1/persons/.*/risks/mappadetail") }?.let { IntegrationEventType.MAPPA_DETAIL_CHANGED.name },

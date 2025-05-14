@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
 
 @ActiveProfiles("test")
 @JsonTest
@@ -32,21 +33,42 @@ class SubscriberServiceTests {
   fun setUp() {
     `when`(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(
       mapOf(
-        "client1" to listOf("url1", "url2"),
-        "client2" to listOf("url3"),
+        "client1" to ConfigAuthorisation(listOf("url1", "url2"), null),
+        "client2" to ConfigAuthorisation(listOf("url3"), null),
       ),
     )
-    `when`(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
 
-    hmppsSecretManagerProperties = HmppsSecretManagerProperties(provider = "localstack", secrets = mapOf("client1" to SecretConfig("secret1", "queue1"), "client2" to SecretConfig("secret2", "queue2")))
-    subscriberService = SubscriberService(integrationApiGateway, hmppsSecretManagerProperties, secretsManagerService, integrationEventTopicService, objectMapper)
+    `when`(secretsManagerService.getSecretValue("secret1"))
+      .thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+
+    hmppsSecretManagerProperties = HmppsSecretManagerProperties(
+      provider = "localstack",
+      secrets = mapOf(
+        "client1" to SecretConfig("secret1", "queue1"),
+        "client2" to SecretConfig("secret2", "queue2"),
+      ),
+    )
+
+    subscriberService = SubscriberService(
+      integrationApiGateway,
+      hmppsSecretManagerProperties,
+      secretsManagerService,
+      integrationEventTopicService,
+      objectMapper,
+    )
   }
 
   @Test
   fun `does not update secret if client not have secrets setup`() {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client3" to listOf("/v1/persons/.*/risks/mappadetail"))
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client3" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = null,
+      ),
+    )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -59,7 +81,12 @@ class SubscriberServiceTests {
   @Test
   fun `does not update secret if events match filter`() {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/persons/.*/risks/mappadetail"))
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = null,
+      ),
+    )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
     // Act
@@ -73,7 +100,12 @@ class SubscriberServiceTests {
   @Test
   fun `updates secret and subscription if events mismatch filter`() {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/persons/.*/risks/mappadetail"))
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = null,
+      ),
+    )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
     // Act
@@ -85,12 +117,25 @@ class SubscriberServiceTests {
   }
 
   @ParameterizedTest
-  @CsvSource("/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED", "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED")
-  fun `grant access to risk score events if client has access to risk score endpoint`(clientConsumerPath: String, eventType: String) {
+  @CsvSource(
+    "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED",
+  )
+  fun `grant access to risk score events if client has access to risk score endpoint`(
+    clientConsumerPath: String,
+    eventType: String,
+  ) {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf(clientConsumerPath))
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf(clientConsumerPath),
+        filters = null,
+      ),
+    )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1"))
+      .thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -102,9 +147,16 @@ class SubscriberServiceTests {
   @Test
   fun `set filter list to be DEFAULT if client has no event access`() {
     // Arrange
-    val apiResponse: Map<String, List<String>> = mapOf("client1" to listOf("/v1/otherendpoints"))
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/otherendpoints"),
+        filters = null,
+      ),
+    )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1"))
+      .thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+
     // Act
     subscriberService.checkSubscriberFilterList()
 

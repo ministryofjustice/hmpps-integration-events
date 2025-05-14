@@ -54,7 +54,7 @@ class IntegrationApiGateway(
       .build()
   }
 
-  fun getApiAuthorizationConfig():  Map<String, ConfigAuthorisation> {
+  fun getApiAuthorizationConfig(): Map<String, ConfigAuthorisation> {
     return webClient.method(HttpMethod.GET)
       .uri("v2/config/authorisation")
       .retrieve()

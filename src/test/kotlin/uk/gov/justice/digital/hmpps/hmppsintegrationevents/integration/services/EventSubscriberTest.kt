@@ -96,20 +96,28 @@ class EventSubscriberTest() {
           WireMock.aResponse()
             .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
             .withBody(
-              """{
-                    "mockservice1": [
-                        "/v1/persons/.*/risks/mappadetail",
-                        "/v1/persons/.*/risks/scores",
-                         "/v1/persons/.*/risks"
-                    ],
-                    "mockservice2": [
-                         "/v1/persons/.*/risks"
-                    ]
-                }
+              """
+            {
+              "mockservice1": {
+                "endpoints": [
+                  "/v1/persons/.*/risks/mappadetail",
+                  "/v1/persons/.*/risks/scores",
+                  "/v1/persons/.*/risks"
+                ],
+                "filters": null
+              },
+              "mockservice2": {
+                "endpoints": [
+                  "/v1/persons/.*/risks"
+                ],
+                "filters": null
+              }
+            }
               """.trimIndent(),
             ),
         ),
     )
+
     wireMockServer.stubFor(
       WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.notMatching("mockApiKey"))
