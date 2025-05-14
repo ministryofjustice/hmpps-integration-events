@@ -66,9 +66,10 @@ class IntegrationApiGatewayTests {
   @Test
   fun `return client configs`() {
     stubApiResponse()
-
+    // Act
     val result = integrationApiGateway.getApiAuthorizationConfig()
 
+    // Assert
     result.keys.contains("mockservice1").shouldBeTrue()
     result["mockservice1"]!!.endpoints.contains("/v1/persons/.*/risks/mappadetail").shouldBeTrue()
     result["mockservice1"]!!.endpoints.contains("/v1/persons/.*/risks").shouldBeTrue()
