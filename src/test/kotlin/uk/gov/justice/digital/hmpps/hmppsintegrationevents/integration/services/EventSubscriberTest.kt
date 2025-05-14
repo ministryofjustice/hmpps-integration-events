@@ -66,7 +66,7 @@ class EventSubscriberTest() {
     integrationEventTopicService.updateSubscriptionAttributes("subscribertestqueue", "FilterPolicy", originalFilterPolicy)
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
-      wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v1/config/authorisation")))
+      wireMockServer.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v2/config/authorisation")))
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue("testSecret")
       updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"]}")
@@ -90,7 +90,7 @@ class EventSubscriberTest() {
 
   fun stubApiResponse() {
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.matching("mockApiKey"))
         .willReturn(
           WireMock.aResponse()
@@ -111,7 +111,7 @@ class EventSubscriberTest() {
         ),
     )
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.notMatching("mockApiKey"))
         .willReturn(
           WireMock.aResponse()

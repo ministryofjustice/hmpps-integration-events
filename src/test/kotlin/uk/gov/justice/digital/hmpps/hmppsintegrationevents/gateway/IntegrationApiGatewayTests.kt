@@ -78,7 +78,7 @@ class IntegrationApiGatewayTests {
   }
   fun stubApiResponse() {
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.matching("test-api-key"))
         .willReturn(
           WireMock.aResponse()
@@ -98,7 +98,7 @@ class IntegrationApiGatewayTests {
         ),
     )
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.notMatching("test-api-key"))
         .willReturn(
           WireMock.aResponse()

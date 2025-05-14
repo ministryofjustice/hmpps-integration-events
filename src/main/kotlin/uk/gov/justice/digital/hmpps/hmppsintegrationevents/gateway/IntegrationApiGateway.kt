@@ -55,7 +55,7 @@ class IntegrationApiGateway(
 
   fun getApiAuthorizationConfig(): Map<String, List<String>> {
     return webClient.method(HttpMethod.GET)
-      .uri("v1/config/authorisation")
+      .uri("v2/config/authorisation")
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
       .block()!!
