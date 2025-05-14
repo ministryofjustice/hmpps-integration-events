@@ -62,43 +62,46 @@ class IntegrationApiGatewayTests {
       it.request.headers.getHeader("x-api-key").firstValue().shouldBe("test-api-key")
     }
   }
-	
+
   @Test
   fun `return client configs`() {
     stubApiResponse()
     // Act
-    var result = integrationApiGateway.getApiAuthorizationConfig()
-		
+    val result = integrationApiGateway.getApiAuthorizationConfig()
+
     // Assert
     result.keys.contains("mockservice1").shouldBeTrue()
-    result["mockservice1"]!!.contains("/v1/persons/.*/risks/mappadetail").shouldBeTrue()
-    result["mockservice1"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
+    result["mockservice1"]!!.endpoints.contains("/v1/persons/.*/risks/mappadetail").shouldBeTrue()
+    result["mockservice1"]!!.endpoints.contains("/v1/persons/.*/risks").shouldBeTrue()
     result.keys.contains("mockservice2").shouldBeTrue()
-    result["mockservice2"]!!.contains("/v1/persons/.*/risks").shouldBeTrue()
+    result["mockservice2"]!!.endpoints.contains("/v1/persons/.*/risks").shouldBeTrue()
   }
+
   fun stubApiResponse() {
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.matching("test-api-key"))
         .willReturn(
           WireMock.aResponse()
             .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
             .withBody(
               """{
-                    "mockservice1": [
-                        "/v1/persons/.*/risks/mappadetail",
-                         "/v1/persons/.*/risks"
-                    ],
-                    "mockservice2": [
-                         "/v1/persons/.*/risks"
-                    ]
-                }
+              "mockservice1": {
+                "endpoints": ["/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/risks"],
+                "filters": null
+              },
+              "mockservice2": {
+                "endpoints": ["/v1/persons/.*/risks"],
+                "filters": null
+              }
+            }
               """.trimIndent(),
             ),
         ),
     )
+
     wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v1/config/authorisation"))
+      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
         .withHeader("x-api-key", WireMock.notMatching("test-api-key"))
         .willReturn(
           WireMock.aResponse()
