@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.IntegrationApiProperties
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.S3Service
 import java.security.KeyStore
 import javax.net.ssl.KeyManagerFactory
@@ -53,11 +54,11 @@ class IntegrationApiGateway(
       .build()
   }
 
-  fun getApiAuthorizationConfig(): Map<String, List<String>> {
+  fun getApiAuthorizationConfig():  Map<String, ConfigAuthorisation> {
     return webClient.method(HttpMethod.GET)
       .uri("v2/config/authorisation")
       .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<Map<String, List<String>>>() {})
+      .bodyToMono(object : ParameterizedTypeReference<Map<String, ConfigAuthorisation>>() {})
       .block()!!
       .mapKeys { (key, _) -> key.replace(".", "-") }
   }
