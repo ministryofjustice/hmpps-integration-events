@@ -10,15 +10,12 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 
-class IntegrationApiMockServer(httpPort: Int? = null, httpsPort: Int) : WireMockServer(
-  WireMockConfiguration.options().apply {
-    if (httpPort != null) port(httpPort)
-    httpsPort(httpsPort)
-  },
+class IntegrationApiMockServer(httpsPort: Int) : WireMockServer(
+  WireMockConfiguration.options().dynamicPort().httpsPort(httpsPort),
 ) {
   companion object {
-    fun create(httpsPort: Int, httpPort: Int? = null): IntegrationApiMockServer {
-      return IntegrationApiMockServer(httpPort, httpsPort)
+    fun create(httpsPort: Int): IntegrationApiMockServer {
+      return IntegrationApiMockServer(httpsPort)
     }
   }
 

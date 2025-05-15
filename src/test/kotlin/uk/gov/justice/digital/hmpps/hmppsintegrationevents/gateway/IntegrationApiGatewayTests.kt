@@ -1,10 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.http.HttpHeader
-import com.github.tomakehurst.wiremock.http.HttpHeaders
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterEach
@@ -14,6 +9,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.IntegrationApiProperties
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.mockServers.IntegrationApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.S3Service
 
 @Service
@@ -24,12 +20,25 @@ class IntegrationApiGatewayTests {
   private val s3Service: S3Service = mock()
 	
   lateinit var integrationApiGateway: IntegrationApiGateway
-  private lateinit var wireMockServer: WireMockServer
+
+  val server = IntegrationApiMockServer.create(8550)
+
+  val body = """
+      {
+        "mockservice1": {
+          "endpoints": ["/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/risks"],
+          "filters": null
+        },
+        "mockservice2": {
+          "endpoints": ["/v1/persons/.*/risks"],
+          "filters": null
+        }
+      }
+    """
 
   @BeforeEach
   fun setUp() {
-    wireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort().httpsPort(8550))
-    wireMockServer.start()
+    server.start()
     integrationApiProperties = IntegrationApiProperties(
       url = "https://localhost:8550/",
       apiKey = "test-api-key",
@@ -48,24 +57,24 @@ class IntegrationApiGatewayTests {
 
   @AfterEach
   fun tearDown() {
-    wireMockServer.stop()
+    server.stop()
   }
 
   @Test
   fun `getApiAuthorizationConfig should include x-api-key header`() {
-    stubApiResponse()
+    server.stubApiResponse("test-api-key", body)
     // Act
     integrationApiGateway.getApiAuthorizationConfig()
 		
     // Assert
-    wireMockServer.allServeEvents.forEach {
+    server.allServeEvents.forEach {
       it.request.headers.getHeader("x-api-key").firstValue().shouldBe("test-api-key")
     }
   }
 
   @Test
   fun `return client configs`() {
-    stubApiResponse()
+    server.stubApiResponse("test-api-key", body)
     // Act
     val result = integrationApiGateway.getApiAuthorizationConfig()
 
@@ -75,39 +84,5 @@ class IntegrationApiGatewayTests {
     result["mockservice1"]!!.endpoints.contains("/v1/persons/.*/risks").shouldBeTrue()
     result.keys.contains("mockservice2").shouldBeTrue()
     result["mockservice2"]!!.endpoints.contains("/v1/persons/.*/risks").shouldBeTrue()
-  }
-
-  fun stubApiResponse() {
-    wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
-        .withHeader("x-api-key", WireMock.matching("test-api-key"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-            .withBody(
-              """{
-              "mockservice1": {
-                "endpoints": ["/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/risks"],
-                "filters": null
-              },
-              "mockservice2": {
-                "endpoints": ["/v1/persons/.*/risks"],
-                "filters": null
-              }
-            }
-              """.trimIndent(),
-            ),
-        ),
-    )
-
-    wireMockServer.stubFor(
-      WireMock.get(WireMock.urlMatching("/v2/config/authorisation"))
-        .withHeader("x-api-key", WireMock.notMatching("test-api-key"))
-        .willReturn(
-          WireMock.aResponse()
-            .withStatus(401)
-            .withBody("Unauthorized"),
-        ),
-    )
   }
 }
