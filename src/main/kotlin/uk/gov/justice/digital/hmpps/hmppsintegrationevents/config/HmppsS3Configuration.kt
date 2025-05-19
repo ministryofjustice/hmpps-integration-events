@@ -26,56 +26,53 @@ class HmppsS3Configuration(
   }
 
   @Bean
-  fun s3Client(): S3Client =
-    with(hmppsS3Properties) {
-      when (findProvider(provider)) {
-        Provider.AWS -> awsS3Client()
-        Provider.LOCALSTACK -> localstackS3Client()
+  fun s3Client(): S3Client = with(hmppsS3Properties) {
+    when (findProvider(provider)) {
+      Provider.AWS -> awsS3Client()
+      Provider.LOCALSTACK -> localstackS3Client()
+    }
+  }
+
+  private fun awsS3Client() = with(hmppsS3Properties) {
+    log.info("Creating AWS S3Client with DefaultCredentialsProvider and region '$region'")
+
+    S3Client.builder()
+      .credentialsProvider(DefaultCredentialsProvider.builder().build())
+      .region(Region.of(region))
+      .build()
+  }
+
+  private fun localstackS3Client(): S3Client = with(hmppsS3Properties) {
+    log.info("Creating localstack S3Client with StaticCredentialsProvider, localstackUrl '$localstackUrl' and region '$region'")
+
+    val client = S3Client.builder()
+      .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("any", "any")))
+      .endpointOverride(URI.create(localstackUrl.replace("localhost", "127.0.0.1")))
+      .region(Region.of(region))
+      .build()
+
+    buckets.values.onEach {
+      try {
+        log.info("Checking for S3 bucket '${it.bucketName}'")
+
+        val headBucketRequest = HeadBucketRequest.builder()
+          .bucket(it.bucketName)
+          .build()
+
+        client.headBucket(headBucketRequest)
+
+        log.info("S3 bucket '${it.bucketName}' found")
+      } catch (e: NoSuchBucketException) {
+        log.info("Creating S3 bucket '${it.bucketName}' as it was not found")
+
+        val bucketRequest = CreateBucketRequest.builder()
+          .bucket(it.bucketName)
+          .build()
+
+        client.createBucket(bucketRequest)
       }
     }
 
-  private fun awsS3Client() =
-    with(hmppsS3Properties) {
-      log.info("Creating AWS S3Client with DefaultCredentialsProvider and region '$region'")
-
-      S3Client.builder()
-        .credentialsProvider(DefaultCredentialsProvider.builder().build())
-        .region(Region.of(region))
-        .build()
-    }
-
-  private fun localstackS3Client(): S3Client =
-    with(hmppsS3Properties) {
-      log.info("Creating localstack S3Client with StaticCredentialsProvider, localstackUrl '$localstackUrl' and region '$region'")
-
-      val client = S3Client.builder()
-        .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("any", "any")))
-        .endpointOverride(URI.create(localstackUrl.replace("localhost", "127.0.0.1")))
-        .region(Region.of(region))
-        .build()
-
-      buckets.values.onEach {
-        try {
-          log.info("Checking for S3 bucket '${it.bucketName}'")
-
-          val headBucketRequest = HeadBucketRequest.builder()
-            .bucket(it.bucketName)
-            .build()
-
-          client.headBucket(headBucketRequest)
-
-          log.info("S3 bucket '${it.bucketName}' found")
-        } catch (e: NoSuchBucketException) {
-          log.info("Creating S3 bucket '${it.bucketName}' as it was not found")
-
-          val bucketRequest = CreateBucketRequest.builder()
-            .bucket(it.bucketName)
-            .build()
-
-          client.createBucket(bucketRequest)
-        }
-      }
-
-      return client
-    }
+    return client
+  }
 }

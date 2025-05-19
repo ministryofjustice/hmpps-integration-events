@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @ActiveProfiles("test")
-class EventSubscriberTest() {
+class EventSubscriberTest {
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
 

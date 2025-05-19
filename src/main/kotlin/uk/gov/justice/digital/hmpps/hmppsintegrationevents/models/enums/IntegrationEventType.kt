@@ -156,10 +156,9 @@ enum class IntegrationEventType(val value: String, private val pathTemplate: Str
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
 
   companion object {
-    fun from(eventType: IntegrationEventType): IntegrationEventType? =
-      IntegrationEventType.entries.firstOrNull {
-        it.value == eventType.value
-      }
+    fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
+      it.value == eventType.value
+    }
   }
 }
 

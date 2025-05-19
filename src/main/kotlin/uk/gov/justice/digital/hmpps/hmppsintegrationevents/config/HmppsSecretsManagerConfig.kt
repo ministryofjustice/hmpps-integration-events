@@ -25,54 +25,51 @@ class HmppsSecretsManagerConfig(
   }
 
   @Bean
-  fun secretsManagerClient(): SecretsManagerClient =
-    with(hmppsSecretManagerProperties) {
-      when (findProvider(provider)) {
-        Provider.AWS -> awsSecretsManagerClient()
-        Provider.LOCALSTACK -> localstackSecretsClient()
+  fun secretsManagerClient(): SecretsManagerClient = with(hmppsSecretManagerProperties) {
+    when (findProvider(provider)) {
+      Provider.AWS -> awsSecretsManagerClient()
+      Provider.LOCALSTACK -> localstackSecretsClient()
+    }
+  }
+
+  private fun awsSecretsManagerClient() = with(hmppsSecretManagerProperties) {
+    log.info("Creating AWS SecretsManagerClient with DefaultCredentialsProvider and region '$region'")
+
+    SecretsManagerClient.builder()
+      .credentialsProvider(DefaultCredentialsProvider.builder().build())
+      .region(Region.of(region))
+      .build()
+  }
+
+  private fun localstackSecretsClient(): SecretsManagerClient = with(hmppsSecretManagerProperties) {
+    log.info("Creating localstack SecretsManagerClient with StaticCredentialsProvider, localstackUrl '$localstackUrl' and region '$region'")
+
+    val client = SecretsManagerClient.builder()
+      .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("any", "any")))
+      .endpointOverride(java.net.URI.create(localstackUrl.replace("localhost", "127.0.0.1")))
+      .region(Region.of(region))
+      .build()
+
+    secrets.values.onEach {
+      try {
+        log.info("Checking for Secret '${it.secretId}'")
+
+        val describeSecretRequest = DescribeSecretRequest.builder()
+          .secretId(it.secretId)
+          .build()
+        client.describeSecret(describeSecretRequest)
+        log.info("Secret  '${it.secretId}' found")
+      } catch (e: ResourceNotFoundException) {
+        log.info("Creating Secret '${it.secretId}' as it was not found")
+
+        val bucketRequest = CreateSecretRequest.builder()
+          .name(it.secretId)
+          .build()
+
+        client.createSecret(bucketRequest)
       }
     }
 
-  private fun awsSecretsManagerClient() =
-    with(hmppsSecretManagerProperties) {
-      log.info("Creating AWS SecretsManagerClient with DefaultCredentialsProvider and region '$region'")
-
-      SecretsManagerClient.builder()
-        .credentialsProvider(DefaultCredentialsProvider.builder().build())
-        .region(Region.of(region))
-        .build()
-    }
-
-  private fun localstackSecretsClient(): SecretsManagerClient =
-    with(hmppsSecretManagerProperties) {
-      log.info("Creating localstack SecretsManagerClient with StaticCredentialsProvider, localstackUrl '$localstackUrl' and region '$region'")
-
-      val client = SecretsManagerClient.builder()
-        .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("any", "any")))
-        .endpointOverride(java.net.URI.create(localstackUrl.replace("localhost", "127.0.0.1")))
-        .region(Region.of(region))
-        .build()
-
-      secrets.values.onEach {
-        try {
-          log.info("Checking for Secret '${it.secretId}'")
-
-          val describeSecretRequest = DescribeSecretRequest.builder()
-            .secretId(it.secretId)
-            .build()
-          client.describeSecret(describeSecretRequest)
-          log.info("Secret  '${it.secretId}' found")
-        } catch (e: ResourceNotFoundException) {
-          log.info("Creating Secret '${it.secretId}' as it was not found")
-
-          val bucketRequest = CreateSecretRequest.builder()
-            .name(it.secretId)
-            .build()
-
-          client.createSecret(bucketRequest)
-        }
-      }
-
-      return client
-    }
+    return client
+  }
 }
