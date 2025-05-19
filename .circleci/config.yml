@@ -13,13 +13,14 @@ orbs:
                 sudo apt-get update
                 sudo apt-get -y install awscli
                 aws --version
+
 parameters:
   alerts-slack-channel:
     type: string
-    default: PIPELINE_SECURITY_SLACK_CHANNEL
+    default: hmpps-integration-api-alerts
   releases-slack-channel:
     type: string
-    default: SLACK_RELEASES_CHANNEL
+    default: hmpps-integration-api-alerts
 
 jobs:
   validate:
