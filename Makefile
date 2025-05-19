@@ -13,3 +13,5 @@ format:
 check:
 	./gradlew check
 
+analyse-dependencies:
+	./gradlew dependencyCheckAnalyze --info
