@@ -98,7 +98,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
   }
 
   @Test
-  fun`Get subscription arn for given queue name`() {
+  fun `Get subscription arn for given queue name`() {
     val mockSubs = listOf(Subscription.builder().protocol("sqs").endpoint("mockARN").subscriptionArn("mockSubscriptionArn").build())
 
     whenever(hmppsEventSnsClient.listSubscriptionsByTopic(any<ListSubscriptionsByTopicRequest>()))

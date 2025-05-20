@@ -62,18 +62,14 @@ abstract class SqsIntegrationTestBase {
       .toList()
   }
 
-  protected fun geMessagesCurrentlyOnDomainEventsDeadLetterQueue(): ReceiveMessageResponse {
-    return domainEventsDeadLetterSqsClient.receiveMessage(
-      ReceiveMessageRequest.builder().queueUrl(domainEventsDeadLetterSqsUrl).messageAttributeNames("All").build(),
-    ).get()
-  }
+  protected fun geMessagesCurrentlyOnDomainEventsDeadLetterQueue(): ReceiveMessageResponse = domainEventsDeadLetterSqsClient.receiveMessage(
+    ReceiveMessageRequest.builder().queueUrl(domainEventsDeadLetterSqsUrl).messageAttributeNames("All").build(),
+  ).get()
 
-  internal fun toSQSMessage(message: String): IntegrationEventTest.SQSMessage {
-    return try {
-      objectMapper.readValue(message, IntegrationEventTest.SQSMessage::class.java)
-    } catch (e: JsonProcessingException) {
-      throw AssertionFailedError(String.format("Message %s is not parseable", message))
-    }
+  internal fun toSQSMessage(message: String): IntegrationEventTest.SQSMessage = try {
+    objectMapper.readValue(message, IntegrationEventTest.SQSMessage::class.java)
+  } catch (e: JsonProcessingException) {
+    throw AssertionFailedError(String.format("Message %s is not parseable", message))
   }
 
   protected fun sendDomainSqsMessage(rawMessage: String) {

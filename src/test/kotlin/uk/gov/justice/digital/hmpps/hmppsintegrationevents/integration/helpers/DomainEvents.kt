@@ -54,11 +54,10 @@ object DomainEvents {
     }    
   """.trimIndent()
 
-  fun generateHmppsDomainEvent(eventType: String, message: String) =
-    HmppsDomainEvent(
-      type = "Notification",
-      message = message,
-      messageId = "d4419bdd-2079-598c-b608-c4f2ddb1bcd1",
-      messageAttributes = DomainEventMessageAttributes(EventType(eventType)),
-    )
+  fun generateHmppsDomainEvent(eventType: String, message: String) = HmppsDomainEvent(
+    type = "Notification",
+    message = message,
+    messageId = "d4419bdd-2079-598c-b608-c4f2ddb1bcd1",
+    messageAttributes = DomainEventMessageAttributes(EventType(eventType)),
+  )
 }

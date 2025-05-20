@@ -72,12 +72,10 @@ class IntegrationEventTest {
       .map(SQSMessage::Message)
       .toList()
   }
-  private fun toSQSMessage(message: String): SQSMessage {
-    return try {
-      objectMapper.readValue(message, SQSMessage::class.java)
-    } catch (e: JsonProcessingException) {
-      throw AssertionFailedError(String.format("Message %s is not parseable", message))
-    }
+  private fun toSQSMessage(message: String): SQSMessage = try {
+    objectMapper.readValue(message, SQSMessage::class.java)
+  } catch (e: JsonProcessingException) {
+    throw AssertionFailedError(String.format("Message %s is not parseable", message))
   }
   fun getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue(): Int = integrationEventTestQueueSqsClient.countAllMessagesOnQueue(integrationEventTestQueueUrl).get()
 

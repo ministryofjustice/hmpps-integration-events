@@ -16,12 +16,8 @@ data class HmppsDomainEventMessage(
 data class PersonReference(
   @JsonProperty("identifiers") val identifiers: List<Identifier>,
 ) {
-  fun findCrnIdentifier(): String? {
-    return this.identifiers.firstOrNull { it.type == "CRN" }?.value
-  }
-  fun findNomsIdentifier(): String? {
-    return this.identifiers.firstOrNull { it.type == "nomsNumber" || it.type == "NOMS" }?.value
-  }
+  fun findCrnIdentifier(): String? = this.identifiers.firstOrNull { it.type == "CRN" }?.value
+  fun findNomsIdentifier(): String? = this.identifiers.firstOrNull { it.type == "nomsNumber" || it.type == "NOMS" }?.value
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

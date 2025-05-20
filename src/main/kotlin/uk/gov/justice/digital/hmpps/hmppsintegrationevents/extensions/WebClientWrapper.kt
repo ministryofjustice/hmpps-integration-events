@@ -39,17 +39,15 @@ class WebClientWrapper(
     upstreamApi: UpstreamApi,
     requestBody: Map<String, Any?>? = null,
     returnsEmpty: Boolean = false,
-  ): WebClientWrapperResponse<T> {
-    return try {
-      val responseData =
-        getResponseBodySpec(method, uri, headers, requestBody).retrieve()
-          .bodyToMono(T::class.java)
-          .block()!!
+  ): WebClientWrapperResponse<T> = try {
+    val responseData =
+      getResponseBodySpec(method, uri, headers, requestBody).retrieve()
+        .bodyToMono(T::class.java)
+        .block()!!
 
-      WebClientWrapperResponse.Success(responseData)
-    } catch (exception: WebClientResponseException) {
-      getErrorType(exception, upstreamApi, returnsEmpty)
-    }
+    WebClientWrapperResponse.Success(responseData)
+  } catch (exception: WebClientResponseException) {
+    getErrorType(exception, upstreamApi, returnsEmpty)
   }
 
   inline fun <reified T> requestList(
@@ -59,18 +57,16 @@ class WebClientWrapper(
     upstreamApi: UpstreamApi,
     requestBody: Map<String, Any?>? = null,
     returnsEmpty: Boolean = false,
-  ): WebClientWrapperResponse<List<T>> {
-    return try {
-      val responseData =
-        getResponseBodySpec(method, uri, headers, requestBody).retrieve()
-          .bodyToFlux(T::class.java)
-          .collectList()
-          .block() as List<T>
+  ): WebClientWrapperResponse<List<T>> = try {
+    val responseData =
+      getResponseBodySpec(method, uri, headers, requestBody).retrieve()
+        .bodyToFlux(T::class.java)
+        .collectList()
+        .block() as List<T>
 
-      WebClientWrapperResponse.Success(responseData)
-    } catch (exception: WebClientResponseException) {
-      getErrorType(exception, upstreamApi, returnsEmpty)
-    }
+    WebClientWrapperResponse.Success(responseData)
+  } catch (exception: WebClientResponseException) {
+    getErrorType(exception, upstreamApi, returnsEmpty)
   }
 
   fun getResponseBodySpec(

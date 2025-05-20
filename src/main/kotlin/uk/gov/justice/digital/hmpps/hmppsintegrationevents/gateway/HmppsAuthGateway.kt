@@ -28,24 +28,22 @@ class HmppsAuthGateway(
     }
   }
 
-  fun getClientToken(service: String): String {
-    return try {
-      val response =
-        webClient
-          .post()
-          .uri("/auth/oauth/token?grant_type=client_credentials")
-          .header("Authorization", Credentials.toBasicAuth(username, password))
-          .retrieve()
-          .bodyToMono(String::class.java)
-          .block()
+  fun getClientToken(service: String): String = try {
+    val response =
+      webClient
+        .post()
+        .uri("/auth/oauth/token?grant_type=client_credentials")
+        .header("Authorization", Credentials.toBasicAuth(username, password))
+        .retrieve()
+        .bodyToMono(String::class.java)
+        .block()
 
-      JSONParser(response).parseObject()["access_token"].toString()
-    } catch (exception: WebClientRequestException) {
-      throw AuthenticationFailedException("Connection to ${exception.uri.authority} failed for $service.")
-    } catch (exception: WebClientResponseException.ServiceUnavailable) {
-      throw AuthenticationFailedException("${exception.request?.uri?.authority} is unavailable for $service.")
-    } catch (exception: WebClientResponseException.Unauthorized) {
-      throw AuthenticationFailedException("Invalid credentials used for $service.")
-    }
+    JSONParser(response).parseObject()["access_token"].toString()
+  } catch (exception: WebClientRequestException) {
+    throw AuthenticationFailedException("Connection to ${exception.uri.authority} failed for $service.")
+  } catch (exception: WebClientResponseException.ServiceUnavailable) {
+    throw AuthenticationFailedException("${exception.request?.uri?.authority} is unavailable for $service.")
+  } catch (exception: WebClientResponseException.Unauthorized) {
+    throw AuthenticationFailedException("Invalid credentials used for $service.")
   }
 }
