@@ -62,6 +62,10 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
+      - hmpps/trivy_latest_scan:
+          slack_channel: << pipeline.parameters.alerts-slack-channel >>
+          context:
+            - hmpps-common-vars
       - validate:
           filters:
             tags:
