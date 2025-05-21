@@ -50,7 +50,7 @@ fabric.properties
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 Dockerrun.aws.json
@@ -68,12 +68,15 @@ dps-gradle-spring-boot-suppressions.xml
 .editorconfig
 sonar-project.properties
 
-#Helm
+# Helm
 **/Chart.lock
 
 # Localstack
 volume
 
-#Misc
+# Misc
 .DS_Store
+
+# Local development
+.env
 
