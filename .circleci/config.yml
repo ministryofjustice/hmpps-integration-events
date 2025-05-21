@@ -40,14 +40,14 @@ jobs:
     #      POSTGRES_PASSWORD: "$DB_PASSW"
     docker:
       - image: cimg/openjdk:21.0
-      - image: localstack/localstack:3
-        environment:
-          - SERVICES="sqs,sns,s3,secretsmanager"
-          - ES_PORT_EXTERNAL=4571
-          - DEBUG=${DEBUG- }
-          - DOCKER_HOST=unix:///var/run/docker.sock
-          - AWS_EXECUTION_ENV=True
-          - PERSISTENCE=1
+#      - image: localstack/localstack:3
+#        environment:
+#          - SERVICES="sqs,sns,s3,secretsmanager"
+#          - ES_PORT_EXTERNAL=4571
+#          - DEBUG=${DEBUG- }
+#          - DOCKER_HOST=unix:///var/run/docker.sock
+#          - AWS_EXECUTION_ENV=True
+#          - PERSISTENCE=1
 #      - image: postgres:15
 #        environment:
 #          POSTGRES_DB: "$DB_NAME"
@@ -67,19 +67,18 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Create .env file for database
+          name: Create .env file for docker compose
           command: |
-            # Create a file for Postgres environment variables
-            echo "POSTGRES_DB=$DB_NAME" > ./.temp-db.env
-            echo "POSTGRES_USER=$DB_USER" >> ./.temp-db.env
-            echo "POSTGRES_PASSWORD=$DB_PASS" >> ./.temp-db.env # Securely reading the secret
-            echo "PGPORT=5432" >> ./.temp-db.env
-            echo "--- ./.temp-db.env contents (for debug) ---"
-            cat ./.temp-db.env
+            # Postgres
+            echo "POSTGRES_DB=$DB_NAME" > .env
+            echo "POSTGRES_USER=$DB_USER" >> .env
+            echo "POSTGRES_PASSWORD=$DB_PASS" >> .env # Securely reading the secret
+            echo "--- .env contents (for debug) ---"
+            cat .env
       - run:
-          name: Start PostgreSQL Docker Container
+          name: Start services with Docker Compose
           command: |
-            docker run -d --name my-postgres --env-file ./.temp-db.env -p 5432:5432 postgres:15
+            docker-compose up -d --wait
       - hmpps/wait_till_ready_postgres
       - service-adapter/aws_cli_install
       - run:
