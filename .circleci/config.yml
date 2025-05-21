@@ -52,7 +52,7 @@ jobs:
           name: Start services with Docker Compose
           command: |
             docker-compose up -d --wait
-      - hmpps/wait_till_ready_postgres
+#      - hmpps/wait_till_ready_postgres
       - service-adapter/aws_cli_install
       - run:
           name: setup local stack
