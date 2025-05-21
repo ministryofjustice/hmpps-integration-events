@@ -52,9 +52,6 @@ jobs:
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" > .env
             echo "TEST_CLIENT_SECRET_NAME=$TEST_CLIENT_SECRET_NAME" > .env
             echo "TEST_CLIENT_SECRET_VALUE=$TEST_CLIENT_SECRET_VALUE" > .env
-            
-            echo "--- .env contents (for debug) ---"
-            cat .env
       - run:
           name: Start services with Docker Compose
           command: |
