@@ -73,7 +73,6 @@ using IntelliJ but other IDEs will prove similar.
 3. Create a `.env` file in the root of the project and set the following values:
 
     ```
-    DB_NAME=  
     DB_USER=  
     DB_PASSWORD=  
     AWS_ACCESS_KEY_ID=  

@@ -7,7 +7,7 @@ management.endpoint:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:5432/${DB_NAME}?sslmode=prefer"
+    url: "jdbc:postgresql://localhost:5432/event_store?sslmode=prefer"
     username: ${DB_USER}
     password: ${DB_PASS}
   jpa:
