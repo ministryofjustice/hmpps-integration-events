@@ -1,7 +1,7 @@
 include .env
 
 serve:
-	docker-compose up --build -d
+	docker-compose up --build -d --wait
 
 unit-test:
 	DB_USER=${DB_USER} DB_PASS=${DB_PASS} API_KEY=${API_KEY} ./gradlew test
@@ -17,4 +17,3 @@ check:
 
 analyse-dependencies:
 	./gradlew dependencyCheckAnalyze --info
-T
