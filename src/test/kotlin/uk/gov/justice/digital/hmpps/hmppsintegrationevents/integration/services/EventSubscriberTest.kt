@@ -31,9 +31,7 @@ import java.util.concurrent.TimeUnit
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @ActiveProfiles("test")
-class EventSubscriberTest(
-  @Value("\${services.integration-api.apikey}") private val hmppsQueueUrl: String,
-) {
+class EventSubscriberTest {
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
 
