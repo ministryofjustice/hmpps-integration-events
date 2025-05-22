@@ -77,7 +77,7 @@ class EventSubscriberTest {
 
   @Test
   fun `Subscriber Service should update client filter list in secret and subscription`() {
-    val clientId = "mockservice1"
+    val clientId = "MOCKSERVICE1"
     val secret = hmppsSecretManagerProperties.secrets[clientId]
     val secretId = secret?.secretId
     secretId.shouldNotBeNull()
