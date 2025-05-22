@@ -1,6 +1,7 @@
 #!/bin/bash
 AWS_REGION="eu-west-2"
 BACK_UP_BUCKET="certificate-backup"
+TOPIC_FILTER_KEY="testSecret"
 TOPIC_FILTER_VALUE="{\"eventType\":[\"default\"]}"
 
 echo "Checking environment variables are set"
@@ -17,4 +18,4 @@ aws --endpoint-url=http://localhost:4566 s3 mb s3://$BACK_UP_BUCKET
 
 echo "Copying client certificate to bucket"
 aws --endpoint-url=http://localhost:4566 s3 cp "./scripts/localstack/client.p12" "s3://certificate-backup/testclient/client.p12"
-aws --endpoint-url=http://localhost:4566 secretsmanager create-secret --region $AWS_REGION --name "testSecret" --description "Test Client Filter" --secret-string $TOPIC_FILTER_VALUE
+aws --endpoint-url=http://localhost:4566 secretsmanager create-secret --region $AWS_REGION --name $TOPIC_FILTER_KEY --description "Test Client Filter" --secret-string $TOPIC_FILTER_VALUE
