@@ -20,7 +20,7 @@ spring:
 services:
   integration-api:
     url: https://localhost:8443
-    apikey: "mockApiKey"
+    apikey: ${API_KEY}
     certificate-bucket-name: "certificate-backup"
     certificate-password: "client"
     certificate-path: "testclient/client.p12"
@@ -71,7 +71,7 @@ hmpps.secret:
   localstackUrl: http://localhost:4566
   secrets:
     MOCKSERVICE1:
-      secret-id: testSecret
+      secret-id: ${TEST_CLIENT_SECRET_NAME}
       queueId: subscribertestqueue
 
 notifier:
