@@ -42,7 +42,7 @@ jobs:
       - run:
           name: Start services
           command: |
-            make serve
+            docker-compose up --build -d --wait
       - service-adapter/aws_cli_install
       - run:
           name: Run Tests
