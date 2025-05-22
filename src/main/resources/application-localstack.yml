@@ -4,9 +4,9 @@ spring:
     hibernate:
       ddl-auto: create-drop
   datasource:
-    url: jdbc:postgresql://localhost:5432/event_store?sslmode=prefer
-    username: postgres
-    password: pa55word
+    url: "jdbc:postgresql://localhost:5432/event_store?sslmode=prefer"
+    username: ${DB_USER}
+    password: ${DB_PASS}
   flyway:
     enabled: true
     baselineOnMigrate: true
@@ -52,7 +52,7 @@ hmpps.secret:
   localstackUrl: http://localhost:4566
   secrets:
     mapps-client-org:
-      secretId: testSecret
+      secretId: test-client-id
       queueId: mappssubscriberqueue
 
 

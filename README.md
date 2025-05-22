@@ -64,21 +64,22 @@ using IntelliJ but other IDEs will prove similar.
 
 1. Clone the repo.
 
-```bash
-git clone git@github.com:ministryofjustice/hmpps-integration-events.git
-```
+    ```bash
+    git clone git@github.com:ministryofjustice/hmpps-integration-events.git
+    ```
 
 2. Launch IntelliJ and open the `hmpps-integration-events` project by navigating to the location of the repository. Upon opening the project, IntelliJ will begin downloading and installing necessary dependencies which may take a few
    minutes.
+3. Run `make create-env-file` to generate a `.env` file containing random values that will be set on the local dependencies and in the application config. Ensure that this file **does not** get commited.
 
-3. Ensuring that docker is running within the root folder of the codebase run the command.
 4. Obtain an API key for [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) and set in [application-localstack.yml](src%2Fmain%2Fresources%2Fapplication-localstack.yml)
+5. Ensuring that docker is running within the root folder of the codebase, run the following command.
 
-```bash
-make serve
-```
-
-This will spin up the Spring Boot events application, Postgres DB and Localstack containers within Docker. For ease of development it may be easier to run the Spring Boot events application in IntelliJ to avoid having to spin up and down containers when you make changes. This can be done by creating a configuration file in IntelliJ with an active profile set as `localstack` and clicking the run button in the IDE.
+    ```bash
+    make serve
+    ```
+    
+    This will spin up the Spring Boot events application, Postgres DB and Localstack containers within Docker. For ease of development it may be easier to run the Spring Boot events application in IntelliJ to avoid having to spin up and down containers when you make changes. This can be done by creating a configuration file in IntelliJ with an active profile set as `localstack` and clicking the run button in the IDE.
 
 ### Running the tests
 
@@ -109,7 +110,9 @@ To run all the tests and linting:
 ```bash
 make check
 ```
+
 ## Developer guides
+
 - [Setting up a new consumer](docs%2Fguides%2Fsetting-up-a-new-consumer.md)
 
 ## Further documentation
