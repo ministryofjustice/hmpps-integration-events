@@ -1,11 +1,11 @@
 #!/bin/bash
 AWS_REGION="eu-west-2"
 BACK_UP_BUCKET="certificate-backup"
+TEST_CLIENT_SECRET_NAME="testSecret"
 
 echo "Checking environment variables are set"
 echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID must be set}"
 echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY must be set}"
-echo "TEST_CLIENT_SECRET_NAME: ${TEST_CLIENT_SECRET_NAME:?TEST_CLIENT_SECRET_NAME must be set}"
 echo "TEST_CLIENT_SECRET_VALUE: ${TEST_CLIENT_SECRET_VALUE:?TEST_CLIENT_SECRET_VALUE must be set}"
 
 echo "Configuring AWS CLI"
