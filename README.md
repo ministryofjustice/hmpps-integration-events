@@ -73,11 +73,11 @@ using IntelliJ but other IDEs will prove similar.
 3. Create a `.env` file in the root of the project and set the following values:
 
     ```
-    DB_USER=  
-    DB_PASSWORD=  
-    AWS_ACCESS_KEY_ID=  
-    AWS_SECRET_ACCESS_KEY=  
-    TEST_CLIENT_SECRET_NAME=  
+    DB_USER=
+    DB_PASS=
+    API_KEY=
+    AWS_ACCESS_KEY_ID=
+    AWS_SECRET_ACCESS_KEY=
     TEST_CLIENT_SECRET_VALUE=
     ```
     
