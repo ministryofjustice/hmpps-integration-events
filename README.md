@@ -70,18 +70,7 @@ using IntelliJ but other IDEs will prove similar.
 
 2. Launch IntelliJ and open the `hmpps-integration-events` project by navigating to the location of the repository. Upon opening the project, IntelliJ will begin downloading and installing necessary dependencies which may take a few
    minutes.
-3. Create a `.env` file in the root of the project and set the following values:
-
-    ```
-    DB_USER=
-    DB_PASS=
-    API_KEY=
-    AWS_ACCESS_KEY_ID=
-    AWS_SECRET_ACCESS_KEY=
-    TEST_CLIENT_SECRET_VALUE=
-    ```
-    
-    These values are not real values, just ones that will be set on the local dependencies and in the application config. Ensure that this file **does not** get commited.
+3. Run `make create-env-file` to generate a `.env` file containing random values that will be set on the local dependencies and in the application config. Ensure that this file **does not** get commited.
 
 4. Obtain an API key for [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) and set in [application-localstack.yml](src%2Fmain%2Fresources%2Fapplication-localstack.yml)
 5. Ensuring that docker is running within the root folder of the codebase, run the following command.

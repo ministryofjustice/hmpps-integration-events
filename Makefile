@@ -1,5 +1,8 @@
 include .env
 
+create-env-file:
+	./scripts/create-env-file.sh
+
 serve:
 	docker-compose up --build -d --wait
 
