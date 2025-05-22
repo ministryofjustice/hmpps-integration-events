@@ -12,12 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockReset.BEFORE
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import software.amazon.awssdk.services.sns.model.GetSubscriptionAttributesRequest
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.IntegrationApiProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.mockServers.IntegrationApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SecretsManagerService
@@ -29,7 +31,9 @@ import java.util.concurrent.TimeUnit
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @ActiveProfiles("test")
-class EventSubscriberTest {
+class EventSubscriberTest(
+  @Value("\${services.integration-api.apikey}") private val hmppsQueueUrl: String,
+) {
   @Autowired
   lateinit var hmppsQueueService: HmppsQueueService
 
@@ -41,6 +45,9 @@ class EventSubscriberTest {
 
   @Autowired
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
+
+  @Autowired
+  private lateinit var integrationApiProperties: IntegrationApiProperties
 
   private final val eventTopic by lazy { hmppsQueueService.findByTopicId("integrationeventtopic") as HmppsTopic }
   private final val hmppsEventsTopicSnsClient by lazy { eventTopic.snsClient }
@@ -87,7 +94,7 @@ class EventSubscriberTest {
       }
     """
 
-    server.stubApiResponse("mockApiKey", body)
+    server.stubApiResponse(integrationApiProperties.apiKey, body)
 
     val originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
     secretService.setSecretValue("testSecret", originalFilterPolicy)
