@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
@@ -18,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset.BEFORE
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import software.amazon.awssdk.services.sns.model.GetSubscriptionAttributesRequest
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.IntegrationApiProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.mockServers.IntegrationApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
@@ -46,6 +48,9 @@ class EventSubscriberTest {
   @Autowired
   private lateinit var integrationApiProperties: IntegrationApiProperties
 
+  @Autowired
+  private lateinit var hmppsSecretManagerProperties: HmppsSecretManagerProperties
+
   private final val eventTopic by lazy { hmppsQueueService.findByTopicId("integrationeventtopic") as HmppsTopic }
   private final val hmppsEventsTopicSnsClient by lazy { eventTopic.snsClient }
   private final val subscriberArn by lazy { integrationEventTopicService.getSubscriptionArnByQueueName("subscribertestqueue") }
@@ -72,9 +77,14 @@ class EventSubscriberTest {
 
   @Test
   fun `Subscriber Service should update client filter list in secret and subscription`() {
+    val clientId = "mockservice1"
+    val secret = hmppsSecretManagerProperties.secrets[clientId]
+    val secretId = secret?.secretId
+    secretId.shouldNotBeNull()
+
     val body = """
       {
-        "mockservice1": {
+        "$clientId": {
           "endpoints": [
             "/v1/persons/.*/risks/mappadetail",
             "/v1/persons/.*/risks/scores",
@@ -94,13 +104,13 @@ class EventSubscriberTest {
     server.stubApiResponse(integrationApiProperties.apiKey, body)
 
     val originalFilterPolicy = "{\"eventType\":[\"DEFAULT\"]}"
-    secretService.setSecretValue("testSecret", originalFilterPolicy)
+    secretService.setSecretValue(secretId, originalFilterPolicy)
     integrationEventTopicService.updateSubscriptionAttributes("subscribertestqueue", "FilterPolicy", originalFilterPolicy)
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
       server.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v2/config/authorisation")))
       // secret value updated
-      val updatedSecretValue = secretService.getSecretValue("testSecret")
+      val updatedSecretValue = secretService.getSecretValue(secretId)
       updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"]}")
       // subscriber filter update
       val updatedFilterPolicy = getSubscriberFilterList()

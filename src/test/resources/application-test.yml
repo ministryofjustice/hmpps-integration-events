@@ -71,7 +71,7 @@ hmpps.secret:
   localstackUrl: http://localhost:4566
   secrets:
     MOCKSERVICE1:
-      secret-id: testSecret
+      secret-id: test-client-id
       queueId: subscribertestqueue
 
 notifier:

@@ -1,7 +1,7 @@
 #!/bin/bash
 AWS_REGION="eu-west-2"
 BACK_UP_BUCKET="certificate-backup"
-TOPIC_FILTER_KEY="testSecret"
+TOPIC_FILTER_KEY="test-client-id"
 TOPIC_FILTER_VALUE="{\"eventType\":[\"default\"]}"
 
 echo "Checking environment variables are set"
