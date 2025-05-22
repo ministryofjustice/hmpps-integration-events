@@ -40,9 +40,9 @@ jobs:
             sudo update-alternatives --set javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac
             java -version
       - run:
-          name: Start services with Docker Compose
+          name: Start services
           command: |
-            docker-compose up -d --wait
+            make serve
       - service-adapter/aws_cli_install
       - run:
           name: Run Tests
