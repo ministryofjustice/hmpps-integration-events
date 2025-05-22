@@ -52,7 +52,7 @@ hmpps.secret:
   localstackUrl: http://localhost:4566
   secrets:
     mapps-client-org:
-      secretId: ${TEST_CLIENT_SECRET_NAME}
+      secretId: testSecret
       queueId: mappssubscriberqueue
 
 
