@@ -60,7 +60,7 @@ class IntegrationEventTest {
   internal data class SQSMessage(val Message: String)
 
   @Throws(ExecutionException::class, InterruptedException::class)
-  private fun geMessagesCurrentlyOnTestQueue(): List<String> {
+  private fun getMessagesCurrentlyOnTestQueue(): List<String> {
     val messageResult = integrationEventTestQueueSqsClient.receiveMessage(
       ReceiveMessageRequest.builder().queueUrl(integrationEventTestQueueUrl).build(),
     ).get()
@@ -96,7 +96,7 @@ class IntegrationEventTest {
         ),
       )
       Mockito.verify(integrationEventTopicService, Mockito.atLeast(1)).sendEvent(any())
-      val prisonEventMessages = geMessagesCurrentlyOnTestQueue()
+      val prisonEventMessages = getMessagesCurrentlyOnTestQueue()
       Assertions.assertThat(prisonEventMessages)
         .singleElement()
         .satisfies(
