@@ -44,7 +44,7 @@ class EventNotifierServiceTest {
 
   @Test
   fun `Event published for event notification in database`() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -59,7 +59,7 @@ class EventNotifierServiceTest {
 
   @Test
   fun `Remove event notification after event processed`() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
 
     emitter.sentNotifications()
@@ -68,7 +68,7 @@ class EventNotifierServiceTest {
 
   @Test
   fun `on sns publish error do not delete event from db`() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
     whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
     whenever(integrationEventTopicService.sendEvent(event)).thenThrow(RuntimeException("error"))
     emitter.sentNotifications()

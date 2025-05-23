@@ -52,7 +52,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Publish Event `() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
 
     val response = PublishResponse
       .builder()
