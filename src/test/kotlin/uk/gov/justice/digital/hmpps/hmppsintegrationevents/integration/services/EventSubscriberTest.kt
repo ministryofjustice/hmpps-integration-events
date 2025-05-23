@@ -78,6 +78,7 @@ class EventSubscriberTest {
   @Test
   fun `Subscriber Service should update client filter list in secret and subscription`() {
     val clientId = "MOCKSERVICE1"
+    val prisonId = "MKI"
     val secret = hmppsSecretManagerProperties.secrets[clientId]
     val secretId = secret?.secretId
     secretId.shouldNotBeNull()
@@ -90,7 +91,11 @@ class EventSubscriberTest {
             "/v1/persons/.*/risks/scores",
             "/v1/persons/.*/risks"
           ],
-          "filters": null
+          "filters": {
+            "prisons": [
+              "$prisonId"
+            ]
+          }
         },
         "mockservice2": {
           "endpoints": [
@@ -111,10 +116,10 @@ class EventSubscriberTest {
       server.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v2/config/authorisation")))
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue(secretId)
-      updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"]}")
+      updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"], \"prisonId\":[\"$prisonId\"]}")
       // subscriber filter update
       val updatedFilterPolicy = getSubscriberFilterList()
-      updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"]}")
+      updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"], \"prisonId\":[\"$prisonId\"]}")
     }
   }
 }
