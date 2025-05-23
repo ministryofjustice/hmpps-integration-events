@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.kotest.matchers.maps.shouldNotHaveKey
 import io.kotest.matchers.shouldBe
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions

@@ -51,7 +51,7 @@ class EventNotifierServiceTest {
 
     argumentCaptor<EventNotification>().apply {
       verify(integrationEventTopicService, times(1)).sendEvent(capture())
-        Assertions.assertThat(firstValue).isEqualTo(event)
+      Assertions.assertThat(firstValue).isEqualTo(event)
     }
   }
 

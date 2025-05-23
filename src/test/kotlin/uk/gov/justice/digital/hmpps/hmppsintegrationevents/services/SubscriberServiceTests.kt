@@ -105,7 +105,7 @@ class SubscriberServiceTests {
       "client1" to ConfigAuthorisation(
         endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
         filters = ConsumerFilters(
-          prisons = listOf("MKI")
+          prisons = listOf("MKI"),
         ),
       ),
     )
@@ -147,7 +147,7 @@ class SubscriberServiceTests {
       "client1" to ConfigAuthorisation(
         endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
         filters = ConsumerFilters(
-          prisons = listOf("MKI")
+          prisons = listOf("MKI"),
         ),
       ),
     )
@@ -191,7 +191,7 @@ class SubscriberServiceTests {
       "client1" to ConfigAuthorisation(
         endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
         filters = ConsumerFilters(
-          prisons = null
+          prisons = null,
         ),
       ),
     )

@@ -38,8 +38,8 @@ class IntegrationEventTopicService(
         .messageAttributes(
           mapOf(
             "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build(),
-            "prisonId" to MessageAttributeValue.builder().dataType("String").stringValue(payload.prisonId).build()
-          )
+            "prisonId" to MessageAttributeValue.builder().dataType("String").stringValue(payload.prisonId).build(),
+          ),
         )
         .build(),
     ).get()
