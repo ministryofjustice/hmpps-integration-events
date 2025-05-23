@@ -58,7 +58,7 @@ abstract class SqsIntegrationTestBase {
       .stream()
       .map { obj: Message -> obj.body() }
       .map { message: String -> toSQSMessage(message) }
-      .map(IntegrationEventTest.SQSMessage::Message)
+      .map(IntegrationEventTest.SQSMessage::message)
       .toList()
   }
 
