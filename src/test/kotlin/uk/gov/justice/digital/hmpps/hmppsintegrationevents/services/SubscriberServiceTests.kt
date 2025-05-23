@@ -122,6 +122,69 @@ class SubscriberServiceTests {
   }
 
   @Test
+  fun `does not update secret if filters match filter`() {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = ConsumerFilters(prisons = listOf("MKI")),
+      ),
+    )
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}")
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    verify(secretsManagerService, times(0)).setSecretValue(any(), any())
+    verify(integrationEventTopicService, times(0)).updateSubscriptionAttributes(any(), any(), any())
+  }
+
+  @Test
+  fun `updates secret and subscription if prisonId mismatches filter`() {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = ConsumerFilters(
+          prisons = listOf("MKI")
+        ),
+      ),
+    )
+    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+  }
+
+  @Test
+  fun `updates secret and subscription if prisonId mismatches filter and filter list is empty`() {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = null,
+      ),
+    )
+    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+  }
+
+  @Test
   fun `should exclude prisonId from filter policy if not set`() {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
