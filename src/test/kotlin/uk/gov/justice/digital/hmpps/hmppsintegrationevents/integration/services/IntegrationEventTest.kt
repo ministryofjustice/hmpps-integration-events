@@ -9,7 +9,9 @@ import org.assertj.core.api.ThrowingConsumer
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +28,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import java.time.LocalDateTime
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -48,16 +49,16 @@ class IntegrationEventTest {
 
   internal val integrationEventTestQueue by lazy { hmppsQueueService.findByQueueId("integrationeventtestqueue") as HmppsQueue }
   internal val integrationEventTestQueueSqsClient by lazy { integrationEventTestQueue.sqsClient }
-  protected val integrationEventTestQueueUrl: String by lazy { integrationEventTestQueue.queueUrl }
+  private val integrationEventTestQueueUrl: String by lazy { integrationEventTestQueue.queueUrl }
 
   @BeforeEach
   fun purgeQueues() {
+    Mockito.reset(integrationEventTopicService)
     integrationEventTestQueueSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(integrationEventTestQueueUrl).build()).get()
-    await.until { getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue() == 0 }
   }
 
   @JvmRecord
-  internal data class SQSMessage(val Message: String)
+  internal data class SQSMessage(val message: String)
 
   @Throws(ExecutionException::class, InterruptedException::class)
   private fun getMessagesCurrentlyOnTestQueue(): List<String> {
@@ -69,28 +70,31 @@ class IntegrationEventTest {
       .stream()
       .map { obj: Message -> obj.body() }
       .map { message: String -> toSQSMessage(message) }
-      .map(SQSMessage::Message)
+      .map(SQSMessage::message)
       .toList()
   }
+
   private fun toSQSMessage(message: String): SQSMessage = try {
     objectMapper.readValue(message, SQSMessage::class.java)
-  } catch (e: JsonProcessingException) {
+  } catch (_: JsonProcessingException) {
     throw AssertionFailedError(String.format("Message %s is not parseable", message))
   }
-  fun getNumberOfMessagesCurrentlyOnIntegrationEventTestQueue(): Int = integrationEventTestQueueSqsClient.countAllMessagesOnQueue(integrationEventTestQueueUrl).get()
 
-  @Test
-  @DisplayName("will publish Integration Event")
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = ["MKI"])
+  @DisplayName("will publish Integration Event with no prison Id")
   @Throws(
     ExecutionException::class,
     InterruptedException::class,
   )
-  fun willPublishPrisonEvent() {
+  fun willPublishPrisonEvent(prisonId: String?) {
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       eventRepository.save(
         EventNotification(
           eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "MockId",
+          prisonId = prisonId,
           url = "MockUrl",
           lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
         ),
@@ -104,6 +108,9 @@ class IntegrationEventTest {
             JsonAssertions.assertThatJson(event)
               .node("eventType")
               .isEqualTo(IntegrationEventType.MAPPA_DETAIL_CHANGED.name)
+            JsonAssertions.assertThatJson(event)
+              .node("prisonId")
+              .isEqualTo(prisonId)
           },
         )
     }

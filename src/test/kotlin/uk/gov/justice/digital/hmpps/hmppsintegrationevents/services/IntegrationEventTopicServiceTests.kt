@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.maps.shouldNotHaveKey
 import io.kotest.matchers.shouldBe
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions
@@ -74,6 +75,32 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
         .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
       Assertions.assertThat(messageAttributes["prisonId"])
         .isEqualTo(MessageAttributeValue.builder().stringValue(event.prisonId).dataType("String").build())
+    }
+  }
+
+  @Test
+  fun `Publish Event with no prison Id`() {
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
+
+    val response = PublishResponse
+      .builder()
+      .messageId("123")
+      .build()
+
+    whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(response))
+    integrationEventTopicService.sendEvent(event)
+
+    argumentCaptor<PublishRequest>().apply {
+      verify(hmppsEventSnsClient, times(1)).publish(capture())
+      val payload = firstValue.message()
+      val messageAttributes = firstValue.messageAttributes()
+      JsonAssertions.assertThatJson(payload).node("eventType").isEqualTo(event.eventType.name)
+      JsonAssertions.assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
+      JsonAssertions.assertThatJson(payload).node("prisonId").isEqualTo(event.prisonId)
+      JsonAssertions.assertThatJson(payload).node("url").isEqualTo(event.url)
+      Assertions.assertThat(messageAttributes["eventType"])
+        .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
+      messageAttributes.shouldNotHaveKey("prisonId")
     }
   }
 
