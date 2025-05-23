@@ -35,7 +35,12 @@ class IntegrationEventTopicService(
       PublishRequest.builder()
         .topicArn(topicArn)
         .message(objectMapper.writeValueAsString(payload))
-        .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
+        .messageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build(),
+            "prisonId" to MessageAttributeValue.builder().dataType("String").stringValue(payload.prisonId).build()
+          )
+        )
         .build(),
     ).get()
     log.info("successfully published event ${payload.eventType.name} to integrationeventtopic. $payload")
