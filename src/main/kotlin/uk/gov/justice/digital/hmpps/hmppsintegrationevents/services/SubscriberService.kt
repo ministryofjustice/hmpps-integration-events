@@ -55,10 +55,11 @@ class SubscriberService(
     val prisonIds = clientConfig.value.filters?.prisons
 
     val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
-    val filterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+    val existingFilterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+    val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
 
-    if (filterList.eventType != events && filterList.eventType.isNotEmpty() || filterList.prisonId != prisonIds) {
-      val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(SubscriberFilterList(eventType = events, prisonId = prisonIds))
+    if (updatedFilterList != existingFilterList) {
+      val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
       secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
       integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
     }
