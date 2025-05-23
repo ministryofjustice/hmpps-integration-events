@@ -13,6 +13,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.ConsumerFilters
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
@@ -103,17 +104,44 @@ class SubscriberServiceTests {
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
         endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
-        filters = null,
+        filters = ConsumerFilters(
+          prisons = listOf("MKI")
+        ),
       ),
     )
+    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+  }
+
+  @Test
+  fun `should exclude prisonId from filter policy if not set`() {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      "client1" to ConfigAuthorisation(
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        filters = ConsumerFilters(
+          prisons = null
+        ),
+      ),
+    )
+    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
   }
 
   @ParameterizedTest
