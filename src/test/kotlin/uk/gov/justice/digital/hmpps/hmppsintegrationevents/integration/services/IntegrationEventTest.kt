@@ -58,7 +58,7 @@ class IntegrationEventTest {
   }
 
   @JvmRecord
-  internal data class SQSMessage(val message: String)
+  internal data class SQSMessage(val Message: String)
 
   @Throws(ExecutionException::class, InterruptedException::class)
   private fun getMessagesCurrentlyOnTestQueue(): List<String> {
@@ -70,7 +70,7 @@ class IntegrationEventTest {
       .stream()
       .map { obj: Message -> obj.body() }
       .map { message: String -> toSQSMessage(message) }
-      .map(SQSMessage::message)
+      .map(SQSMessage::Message)
       .toList()
   }
 

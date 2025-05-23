@@ -58,7 +58,7 @@ abstract class SqsIntegrationTestBase {
       .stream()
       .map { obj: Message -> obj.body() }
       .map { message: String -> toSQSMessage(message) }
-      .map(IntegrationEventTest.SQSMessage::message)
+      .map(IntegrationEventTest.SQSMessage::Message)
       .toList()
   }
 
@@ -68,7 +68,7 @@ abstract class SqsIntegrationTestBase {
 
   internal fun toSQSMessage(message: String): IntegrationEventTest.SQSMessage = try {
     objectMapper.readValue(message, IntegrationEventTest.SQSMessage::class.java)
-  } catch (e: JsonProcessingException) {
+  } catch (_: JsonProcessingException) {
     throw AssertionFailedError(String.format("Message %s is not parseable", message))
   }
 
