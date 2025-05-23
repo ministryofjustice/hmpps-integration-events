@@ -51,12 +51,13 @@ class SubscriberService(
         )
       }
       .ifEmpty { listOf("DEFAULT") }
+    val prisonIds = clientConfig.value.filters?.prisons
 
     val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
     val filterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
 
     if (filterList.eventType != events && filterList.eventType.isNotEmpty()) {
-      val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(events))
+      val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(eventType = events, prisonId = prisonIds))
       secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
       integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
     }
