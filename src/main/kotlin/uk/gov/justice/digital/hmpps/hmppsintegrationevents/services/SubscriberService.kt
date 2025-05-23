@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.scheduling.annotation.Scheduled
@@ -51,12 +52,14 @@ class SubscriberService(
         )
       }
       .ifEmpty { listOf("DEFAULT") }
+    val prisonIds = clientConfig.value.filters?.prisons
 
     val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
-    val filterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+    val existingFilterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+    val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
 
-    if (filterList.eventType != events && filterList.eventType.isNotEmpty()) {
-      val filterPolicy = objectMapper.writeValueAsString(SubscriberFilterList(events))
+    if (updatedFilterList != existingFilterList) {
+      val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
       secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
       integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
     }

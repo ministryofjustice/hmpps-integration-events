@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.maps.shouldNotHaveKey
 import io.kotest.matchers.shouldBe
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions
@@ -38,8 +39,8 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
   val hmppsQueueService: HmppsQueueService = mock()
   val hmppsEventSnsClient: SnsAsyncClient = mock()
   val mockQueue: HmppsQueue = mock()
-  private lateinit var service: IntegrationEventTopicService
-  val currentTime = LocalDateTime.now()
+  private lateinit var integrationEventTopicService: IntegrationEventTopicService
+  val currentTime: LocalDateTime = LocalDateTime.now()
 
   @BeforeEach
   fun setUp() {
@@ -47,12 +48,12 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       .thenReturn(HmppsTopic("integrationeventtopic", "sometopicarn", hmppsEventSnsClient))
     whenever(hmppsQueueService.findByQueueId("mockQueue")).thenReturn(mockQueue)
     whenever(mockQueue.queueArn).thenReturn("mockARN")
-    service = IntegrationEventTopicService(hmppsQueueService, objectMapper)
+    integrationEventTopicService = IntegrationEventTopicService(hmppsQueueService, objectMapper)
   }
 
   @Test
-  fun `Publish Event `() {
-    val event = EventNotification(123, "hmppsId", IntegrationEventType.MAPPA_DETAIL_CHANGED, "mockUrl", currentTime)
+  fun `Publish Event`() {
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = "MKI", url = "mockUrl", lastModifiedDateTime = currentTime)
 
     val response = PublishResponse
       .builder()
@@ -60,7 +61,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       .build()
 
     whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(response))
-    service.sendEvent(event)
+    integrationEventTopicService.sendEvent(event)
 
     argumentCaptor<PublishRequest>().apply {
       verify(hmppsEventSnsClient, times(1)).publish(capture())
@@ -68,9 +69,38 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       val messageAttributes = firstValue.messageAttributes()
       JsonAssertions.assertThatJson(payload).node("eventType").isEqualTo(event.eventType.name)
       JsonAssertions.assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
+      JsonAssertions.assertThatJson(payload).node("prisonId").isEqualTo(event.prisonId)
       JsonAssertions.assertThatJson(payload).node("url").isEqualTo(event.url)
       Assertions.assertThat(messageAttributes["eventType"])
         .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
+      Assertions.assertThat(messageAttributes["prisonId"])
+        .isEqualTo(MessageAttributeValue.builder().stringValue(event.prisonId).dataType("String").build())
+    }
+  }
+
+  @Test
+  fun `Publish Event with no prison Id`() {
+    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
+
+    val response = PublishResponse
+      .builder()
+      .messageId("123")
+      .build()
+
+    whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(response))
+    integrationEventTopicService.sendEvent(event)
+
+    argumentCaptor<PublishRequest>().apply {
+      verify(hmppsEventSnsClient, times(1)).publish(capture())
+      val payload = firstValue.message()
+      val messageAttributes = firstValue.messageAttributes()
+      JsonAssertions.assertThatJson(payload).node("eventType").isEqualTo(event.eventType.name)
+      JsonAssertions.assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
+      JsonAssertions.assertThatJson(payload).node("prisonId").isEqualTo(event.prisonId)
+      JsonAssertions.assertThatJson(payload).node("url").isEqualTo(event.url)
+      Assertions.assertThat(messageAttributes["eventType"])
+        .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
+      messageAttributes.shouldNotHaveKey("prisonId")
     }
   }
 
@@ -87,7 +117,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
         ),
       )
 
-    service.updateSubscriptionAttributes("mockQueue", "AttriName", "mockValue")
+    integrationEventTopicService.updateSubscriptionAttributes("mockQueue", "AttriName", "mockValue")
 
     argumentCaptor<SetSubscriptionAttributesRequest>().apply {
       verify(hmppsEventSnsClient, times(1)).setSubscriptionAttributes(capture())
@@ -111,7 +141,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
         ),
       )
 
-    val result = service.getSubscriptionArnByQueueName("mockQueue")
+    val result = integrationEventTopicService.getSubscriptionArnByQueueName("mockQueue")
 
     argumentCaptor<ListSubscriptionsByTopicRequest>().apply {
       verify(hmppsEventSnsClient, times(1)).listSubscriptionsByTopic(capture())

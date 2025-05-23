@@ -31,11 +31,17 @@ class IntegrationEventTopicService(
   }
 
   fun sendEvent(payload: EventNotification) {
+    val messageAttributes = mutableMapOf(
+      "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build(),
+    )
+    if (payload.prisonId != null) {
+      messageAttributes["prisonId"] = MessageAttributeValue.builder().dataType("String").stringValue(payload.prisonId).build()
+    }
     hmppsEventsTopicSnsClient.publish(
       PublishRequest.builder()
         .topicArn(topicArn)
         .message(objectMapper.writeValueAsString(payload))
-        .messageAttributes(mapOf("eventType" to MessageAttributeValue.builder().dataType("String").stringValue(payload.eventType.name).build()))
+        .messageAttributes(messageAttributes)
         .build(),
     ).get()
     log.info("successfully published event ${payload.eventType.name} to integrationeventtopic. $payload")

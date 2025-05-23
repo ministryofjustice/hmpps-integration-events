@@ -29,6 +29,9 @@ data class EventNotification(
   @Column(name = "EVENT_TYPE", nullable = false)
   val eventType: IntegrationEventType,
 
+  @Column(name = "PRISON_ID", nullable = true)
+  val prisonId: String? = null,
+
   @Column(name = "URL", nullable = false)
   val url: String,
 
