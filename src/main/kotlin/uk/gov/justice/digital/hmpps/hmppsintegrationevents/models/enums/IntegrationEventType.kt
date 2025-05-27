@@ -130,203 +130,203 @@ object RegisterTypes {
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
-  ) {
+) {
   DYNAMIC_RISKS_CHANGED(
     "v1/persons/{hmppsId}/risks/dynamic",
-    { DYNAMIC_RISK_EVENTS.contains(it.eventType) && DYNAMIC_RISKS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)}
+    { DYNAMIC_RISK_EVENTS.contains(it.eventType) && DYNAMIC_RISKS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode) },
   ),
   PROBATION_STATUS_CHANGED(
     "v1/persons/{hmppsId}/status-information",
-    { PROBATION_STATUS_CHANGED_EVENTS.contains(it.eventType) && PROBATION_STATUS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode) }
+    { PROBATION_STATUS_CHANGED_EVENTS.contains(it.eventType) && PROBATION_STATUS_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode) },
   ),
   MAPPA_DETAIL_CHANGED(
     "v1/persons/{hmppsId}/risks/mappadetail",
-    { MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode) }
+    { MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode) },
   ),
   RISK_SCORE_CHANGED(
     "v1/persons/{hmppsId}/risks/scores",
-    { RISK_SCORE_TYPES.contains(it.eventType) }
+    { RISK_SCORE_TYPES.contains(it.eventType) },
   ),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
     "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
-    { KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType) }
+    { KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType) },
   ),
   LICENCE_CONDITION_CHANGED(
     "v1/persons/{hmppsId}/licences/conditions",
-    { LICENCE_CONDITION_EVENTS.contains(it.eventType) }
+    { LICENCE_CONDITION_EVENTS.contains(it.eventType) },
   ),
   RISK_OF_SERIOUS_HARM_CHANGED(
     "v1/persons/{hmppsId}/risks/serious-harm",
-    { ROSH_TYPES.contains(it.eventType) }
+    { ROSH_TYPES.contains(it.eventType) },
   ),
   PLP_INDUCTION_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-induction-schedule/history",
-    { PLP_INDUCTION_SCHEDULE_EVENTS.contains(it.eventType) }
+    { PLP_INDUCTION_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PLP_REVIEW_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-review-schedule",
-    { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) }
+    { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
-    { PERSON_EVENTS.contains(it.eventType) }
+    { PERSON_EVENTS.contains(it.eventType) },
   ),
   PERSON_ADDRESS_CHANGED(
     "v1/persons/{hmppsId}/addresses",
-    { PERSON_ADDRESS_EVENTS.contains(it.eventType) }
+    { PERSON_ADDRESS_EVENTS.contains(it.eventType) },
   ),
   PERSON_CONTACTS_CHANGED(
     "v1/persons/{hmppsId}/contacts",
-    { false }
+    { false },
   ),
   PERSON_IEP_LEVEL_CHANGED(
     "v1/persons/{hmppsId}/iep-level",
-    { false }
+    { false },
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
     "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
-    { false }
+    { false },
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",
-    { false }
+    { false },
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",
-    { false }
+    { false },
   ),
   PERSON_FUTURE_VISITS_CHANGED(
     "v1/persons/{hmppsId}/visits/future",
-    { false }
+    { false },
   ),
   PERSON_ALERTS_CHANGED(
     "v1/persons/{hmppsId}/alerts",
-    { ALERT_EVENTS.contains(it.eventType) }
+    { ALERT_EVENTS.contains(it.eventType) },
   ),
   PERSON_PND_ALERTS_CHANGED(
     "v1/pnd/persons/{hmppsId}/alerts",
-    { ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode) }
+    { ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode) },
   ),
   PERSON_CASE_NOTES_CHANGED(
     "v1/persons/{hmppsId}/case-notes",
-    { false }
+    { false },
   ),
   PERSON_NAME_CHANGED(
     "v1/persons/{hmppsId}/name",
-    { false }
+    { false },
   ),
   PERSON_CELL_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/cell-location",
-    { false }
+    { false },
   ),
   PERSON_RISK_CATEGORIES_CHANGED(
     "v1/persons/{hmppsId}/risks/categories",
-    { false }
+    { false },
   ),
   PERSON_SENTENCES_CHANGED(
     "v1/persons/{hmppsId}/sentences",
-    { false }
+    { false },
   ),
   PERSON_OFFENCES_CHANGED(
     "v1/persons/{hmppsId}/offences",
-    { false }
+    { false },
   ),
   PERSON_RESPONSIBLE_OFFICER_CHANGED(
     "/v1/persons/{hmppsId}/person-responsible-officer",
-    { RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) }
+    { RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) },
   ),
   PERSON_PROTECTED_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/protected-characteristics",
-    { false }
+    { false },
   ),
   PERSON_REPORTED_ADJUDICATIONS_CHANGED(
     "v1/persons/{hmppsId}/reported-adjudications",
-    { false }
+    { false },
   ),
   PERSON_NUMBER_OF_CHILDREN_CHANGED(
     "v1/persons/{hmppsId}/number-of-children",
-    { false }
+    { false },
   ),
   PERSON_PHYSICAL_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/physical-characteristics",
-    { false }
+    { false },
   ),
   PERSON_IMAGES_CHANGED(
     "v1/persons/{hmppsId}/images",
-    { false }
+    { false },
   ),
   PERSON_IMAGE_CHANGED(
     "v1/persons/{hmppsId}/images/{imageId}",
-    { false }
+    { false },
   ),
   PRISONERS_CHANGED(
     "v1/prison/prisoners",
-    { false }
+    { false },
   ),
   PRISONER_CHANGED(
     "v1/prison/prisoners/{hmppsId}",
-    { false }
+    { false },
   ),
   PRISONER_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/balances",
-    { false }
+    { false },
   ),
   PRISONER_ACCOUNT_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/balances",
-    { false }
+    { false },
   ),
   PRISONER_ACCOUNT_TRANSACTIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/transactions",
-    { false }
+    { false },
   ),
   PRISONER_NON_ASSOCIATIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/non-associations",
-    { false }
+    { false },
   ),
   PRISON_VISITS_CHANGED(
     "v1/prison/{prisonId}/visit/search",
-    { false }
+    { false },
   ),
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
-    { false }
+    { false },
   ),
   PRISON_LOCATION_CHANGED(
     "v1/prison/{prisonId}/location/{locationKey}",
-    { false }
+    { false },
   ),
   PRISON_RESIDENTIAL_DETAILS_CHANGED(
     "v1/prison/{prisonId}/residential-details",
-    { false }
+    { false },
   ),
   PRISON_CAPACITY_CHANGED(
     "v1/prison/{prisonId}/capacity",
-    { false }
+    { false },
   ),
   VISIT_CHANGED(
     "v1/visit/{visitReference}",
-    { false }
+    { false },
   ),
   VISIT_FROM_EXTERNAL_SYSTEM_CREATED(
     "v1/visit/id/by-client-ref/{clientVisitReference}",
-    { false }
+    { false },
   ),
   CONTACT_CHANGED(
     "v1/contacts/{contactId}",
-    { false }
+    { false },
   ),
   PERSON_HEALTH_AND_DIET_CHANGED(
     "v1/persons/{hmppsId}/health-and-diet",
-    { false }
+    { false },
   ),
   PERSON_CARE_NEEDS_CHANGED(
     "v1/persons/{hmppsId}/care-needs",
-    { false }
+    { false },
   ),
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
-    { false }
-  )
+    { false },
+  ),
   ;
 
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
