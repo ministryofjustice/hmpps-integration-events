@@ -68,18 +68,17 @@ val RESPONSIBLE_OFFICER_EVENTS = listOf(
   "probation.staff.updated",
 )
 
-val PND_ALERT_EVENTS = listOf(
+val ALERT_EVENTS = listOf(
   "person.alert.created",
   "person.alert.changed",
   "person.alert.deleted",
   "person.alert.updated",
 )
 
-val ALERT_EVENTS = listOf(
-  "person.alert.created",
-  "person.alert.changed",
-  "person.alert.deleted",
-  "person.alert.updated",
+val PND_ALERT_TYPES = listOf(
+  "BECTER", "HA", "XA", "XCA", "XEL", "XELH", "XER", "XHT", "XILLENT",
+  "XIS", "XR", "XRF", "XSA", "HA2", "RCS", "RDV", "RKC", "RPB", "RPC",
+  "RSS", "RST", "RDP", "REG", "RLG", "ROP", "RRV", "RTP", "RYP", "HS", "SC",
 )
 
 val LICENCE_CONDITION_EVENTS =
@@ -96,12 +95,6 @@ val RISK_SCORE_TYPES = listOf(
 val ROSH_TYPES = listOf("assessment.summary.produced")
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
-
-val PND_ALERT_TYPES = listOf(
-  "BECTER", "HA", "XA", "XCA", "XEL", "XELH", "XER", "XHT", "XILLENT",
-  "XIS", "XR", "XRF", "XSA", "HA2", "RCS", "RDV", "RKC", "RPB", "RPC",
-  "RSS", "RST", "RDP", "REG", "RLG", "ROP", "RRV", "RTP", "RYP", "HS", "SC",
-)
 
 val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
   CHILD_CONCERNS_CODE,
@@ -139,15 +132,50 @@ enum class IntegrationEventType(private val pathTemplate: String) {
   MAPPA_DETAIL_CHANGED("v1/persons/{hmppsId}/risks/mappadetail"),
   RISK_SCORE_CHANGED("v1/persons/{hmppsId}/risks/scores"),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments"),
-  PERSON_STATUS_CHANGED("v1/persons/{hmppsId}"),
-  PND_ALERTS_CHANGED("v1/pnd/persons/{hmppsId}/alerts"),
-  ALERTS_CHANGED("v1/persons/{hmppsId}/alerts"),
   LICENCE_CONDITION_CHANGED("v1/persons/{hmppsId}/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("v1/persons/{hmppsId}/risks/serious-harm"),
   PLP_INDUCTION_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-induction-schedule/history"),
   PLP_REVIEW_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-review-schedule"),
+  PERSON_STATUS_CHANGED("v1/persons/{hmppsId}"),
   PERSON_ADDRESS_CHANGED("v1/persons/{hmppsId}/addresses"),
-  RESPONSIBLE_OFFICER_CHANGED("/v1/persons/{hmppsId}/person-responsible-officer"),
+  PERSON_CONTACTS_CHANGED("v1/persons/{hmppsId}/contacts"),
+  PERSON_IEP_LEVEL_CHANGED("v1/persons/{hmppsId}/iep-level"),
+  PERSON_VISITOR_RESTRICTIONS_CHANGED("/v1/persons/{hmppsId}/visitor/{contactId}/restrictions"),
+  PERSON_VISIT_RESTRICTIONS_CHANGED("v1/persons/{hmppsId}/visit-restrictions"),
+  PERSON_VISIT_ORDERS_CHANGED("v1/persons/{hmppsId}/visit-orders"),
+  PERSON_FUTURE_VISITS_CHANGED("v1/persons/{hmppsId}/visits/future"),
+  PERSON_ALERTS_CHANGED("v1/persons/{hmppsId}/alerts"),
+  PERSON_PND_ALERTS_CHANGED("v1/pnd/persons/{hmppsId}/alerts"),
+  PERSON_CASE_NOTES_CHANGED("v1/persons/{hmppsId}/case-notes"),
+  PERSON_NAME_CHANGED("v1/persons/{hmppsId}/name"),
+  PERSON_CELL_LOCATION_CHANGED("v1/persons/{hmppsId}/cell-location"),
+  PERSON_RISK_CATEGORIES_CHANGED("v1/persons/{hmppsId}/risks/categories"),
+  PERSON_SENTENCES_CHANGED("v1/persons/{hmppsId}/sentences"),
+  PERSON_OFFENCES_CHANGED("v1/persons/{hmppsId}/offences"),
+  PERSON_RESPONSIBLE_OFFICER_CHANGED("/v1/persons/{hmppsId}/person-responsible-officer"),
+  PERSON_PROTECTED_CHARACTERISTICS_CHANGED("v1/persons/{hmppsId}/protected-characteristics"),
+  PERSON_REPORTED_ADJUDICATIONS_CHANGED("v1/persons/{hmppsId}/reported-adjudications"),
+  PERSON_NUMBER_OF_CHILDREN_CHANGED("v1/persons/{hmppsId}/number-of-children"),
+  PERSON_PHYSICAL_CHARACTERISTICS_CHANGED("v1/persons/{hmppsId}/physical-characteristics"),
+  PERSON_IMAGES_CHANGED("v1/persons/{hmppsId}/images"),
+  PERSON_IMAGE_CHANGED("v1/persons/{hmppsId}/images/{imageId}"),
+  PRISONERS_CHANGED("v1/prison/prisoners"),
+  PRISONER_CHANGED("v1/prison/prisoners/{hmppsId}"),
+  PRISONER_BALANCES_CHANGED("v1/prison/{prisonId}/prisoners/{hmppsId}/balances"),
+  PRISONER_ACCOUNT_BALANCES_CHANGED("v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/balances"),
+  PRISONER_ACCOUNT_TRANSACTIONS_CHANGED("v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/transactions"),
+  PRISONER_NON_ASSOCIATIONS_CHANGED("v1/prison/{prisonId}/prisoners/{hmppsId}/non-associations"),
+  PRISON_VISITS_CHANGED("v1/prison/{prisonId}/visit/search"),
+  PRISON_RESIDENTIAL_HIERARCHY_CHANGED("v1/prison/{prisonId}/residential-hierarchy"),
+  PRISON_LOCATION_CHANGED("v1/prison/{prisonId}/location/{locationKey}"),
+  PRISON_RESIDENTIAL_DETAILS_CHANGED("v1/prison/{prisonId}/residential-details"),
+  PRISON_CAPACITY_CHANGED("v1/prison/{prisonId}/capacity"),
+  VISIT_CHANGED("v1/visit/{visitReference}"),
+  VISIT_FROM_EXTERNAL_SYSTEM_CREATED("v1/visit/id/by-client-ref/{clientVisitReference}"),
+  CONTACT_CHANGED("v1/contacts/{contactId}"),
+  PERSON_HEALTH_AND_DIET_CHANGED("v1/persons/{hmppsId}/health-and-diet"),
+  PERSON_CARE_NEEDS_CHANGED("v1/persons/{hmppsId}/care-needs"),
+  PERSON_LANGUAGES_CHANGED("v1/persons/{hmppsId}/languages"),
   ;
 
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
@@ -170,20 +198,14 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventType.MAPPA_DETAIL_CHANGED) {
       MAPPA_DETAIL_REGISTER_EVENTS.contains(it.eventType) && MAPPA_DETAIL_REGISTER_TYPES.contains(it.additionalInformation!!.registerTypeCode)
     },
-    IntegrationEventTypesFilter(IntegrationEventType.RISK_SCORE_CHANGED, {
+    IntegrationEventTypesFilter(IntegrationEventType.RISK_SCORE_CHANGED) {
       RISK_SCORE_TYPES.contains(it.eventType)
-    }),
+    },
     IntegrationEventTypesFilter(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE) {
       KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventType.PERSON_STATUS_CHANGED) {
       PERSON_EVENTS.contains(it.eventType)
-    },
-    IntegrationEventTypesFilter(IntegrationEventType.PND_ALERTS_CHANGED) {
-      PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
-    },
-    IntegrationEventTypesFilter(IntegrationEventType.ALERTS_CHANGED) {
-      ALERT_EVENTS.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventType.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
@@ -200,7 +222,13 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventType.PERSON_ADDRESS_CHANGED) {
       PERSON_ADDRESS_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_PND_ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED) {
       RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType)
     },
   )
