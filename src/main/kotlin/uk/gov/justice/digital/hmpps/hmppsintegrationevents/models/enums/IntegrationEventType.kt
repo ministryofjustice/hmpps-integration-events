@@ -109,8 +109,8 @@ val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
   HIGH_ROSH_CODE,
 )
 
-val PLP_INDUCTION_SCHEDULE_EVENTS = listOf("plp.induction-schedule.updated")
-val PLP_REVIEW_SCHEDULE_EVENTS = listOf("plp.review-schedule.updated")
+val PLP_INDUCTION_SCHEDULE_EVENT = listOf("plp.induction-schedule.updated")
+val PLP_REVIEW_SCHEDULE_EVENT = listOf("plp.review-schedule.updated")
 
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
@@ -161,11 +161,11 @@ enum class IntegrationEventType(
   ),
   PLP_INDUCTION_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-induction-schedule/history",
-    { PLP_INDUCTION_SCHEDULE_EVENTS.contains(it.eventType) },
+    { PLP_INDUCTION_SCHEDULE_EVENT.contains(it.eventType) },
   ),
   PLP_REVIEW_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-review-schedule",
-    { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
+    { PLP_REVIEW_SCHEDULE_EVENT.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
