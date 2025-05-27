@@ -133,31 +133,28 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class IntegrationEventType(val value: String, private val pathTemplate: String) {
-  DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", "v1/persons/{hmppsId}/risks/dynamic"),
-  PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "v1/persons/{hmppsId}/status-information"),
-  MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "v1/persons/{hmppsId}/risks/mappadetail"),
-  RISK_SCORE_CHANGED("RiskScore.Changed", "v1/persons/{hmppsId}/risks/scores"),
-  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
-    "KeyDatesAndAdjustments.PrisonerReleased",
-    "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
-  ),
-  PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
-  PND_ALERTS_CHANGED("PNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
-  ALERTS_CHANGED("Alerts.Changed", "v1/persons/{hmppsId}/alerts"),
-  LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
-  RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
-  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule/history"),
-  PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "v1/persons/{hmppsId}/plp-review-schedule"),
-  PERSON_ADDRESS_CHANGED("PersonAddress.Changed", "v1/persons/{hmppsId}/addresses"),
-  RESPONSIBLE_OFFICER_CHANGED("ResponsibleOfficer.Changed", "/v1/persons/{hmppsId}/person-responsible-officer"),
+enum class IntegrationEventType(private val pathTemplate: String) {
+  DYNAMIC_RISKS_CHANGED("v1/persons/{hmppsId}/risks/dynamic"),
+  PROBATION_STATUS_CHANGED("v1/persons/{hmppsId}/status-information"),
+  MAPPA_DETAIL_CHANGED("v1/persons/{hmppsId}/risks/mappadetail"),
+  RISK_SCORE_CHANGED("v1/persons/{hmppsId}/risks/scores"),
+  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments"),
+  PERSON_STATUS_CHANGED("v1/persons/{hmppsId}"),
+  PND_ALERTS_CHANGED("v1/pnd/persons/{hmppsId}/alerts"),
+  ALERTS_CHANGED("v1/persons/{hmppsId}/alerts"),
+  LICENCE_CONDITION_CHANGED("v1/persons/{hmppsId}/licences/conditions"),
+  RISK_OF_SERIOUS_HARM_CHANGED("v1/persons/{hmppsId}/risks/serious-harm"),
+  PLP_INDUCTION_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-induction-schedule/history"),
+  PLP_REVIEW_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-review-schedule"),
+  PERSON_ADDRESS_CHANGED("v1/persons/{hmppsId}/addresses"),
+  RESPONSIBLE_OFFICER_CHANGED("/v1/persons/{hmppsId}/person-responsible-officer"),
   ;
 
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
 
   companion object {
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
-      it.value == eventType.value
+      it.ordinal == eventType.ordinal
     }
   }
 }
