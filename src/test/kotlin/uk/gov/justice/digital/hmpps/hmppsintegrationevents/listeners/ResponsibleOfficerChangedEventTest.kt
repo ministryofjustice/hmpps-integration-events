@@ -40,7 +40,7 @@ class ResponsibleOfficerChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED,
+        IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
       )
     } just runs
 
@@ -49,7 +49,7 @@ class ResponsibleOfficerChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED,
+        IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
       )
     }
   }
