@@ -126,37 +126,43 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
-enum class IntegrationEventType(val value: String, private val pathTemplate: String) {
-  DYNAMIC_RISKS_CHANGED("DynamicRisks.Changed", "v1/persons/{hmppsId}/risks/dynamic"),
-  PROBATION_STATUS_CHANGED("ProbationStatus.Changed", "v1/persons/{hmppsId}/status-information"),
-  MAPPA_DETAIL_CHANGED("MappaDetail.Changed", "v1/persons/{hmppsId}/risks/mappadetail"),
-  RISK_SCORE_CHANGED("RiskScore.Changed", "v1/persons/{hmppsId}/risks/scores"),
-  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
-    "KeyDatesAndAdjustments.PrisonerReleased",
-    "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
-  ),
-  LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
-  RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
-  PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule/history"),
-  PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "v1/persons/{hmppsId}/plp-review-schedule"),
-  PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
-  PERSON_ADDRESS_CHANGED("PersonAddress.Changed", "v1/persons/{hmppsId}/addresses"),
-  PERSON_CONTACTS_CHANGED("PersonContacts.Changed", "v1/persons/{hmppsId}/contacts"),
-  PERSON_IEP_LEVEL_CHANGED("PersonIEPLevel.Changed", "v1/persons/{hmppsId}/iep-level"),
-  PERSON_VISITOR_RESTRICTIONS_CHANGED("PersonVisitorRestrictions.Changed", "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions"),
-  PERSON_VISIT_RESTRICTIONS_CHANGED("PersonVisitRestrictions.Changed", "v1/persons/{hmppsId}/visit-restrictions"),
-  PERSON_VISIT_ORDERS_CHANGED("PersonVisitOrders.Changed", "v1/persons/{hmppsId}/visit-orders"),
-  PERSON_FUTURE_VISITS_CHANGED("PersonFutureVisits.Changed", "v1/persons/{hmppsId}/visits/future"),
-  PERSON_ALERTS_CHANGED("PersonAlerts.Changed", "v1/persons/{hmppsId}/alerts"),
-  PERSON_PND_ALERTS_CHANGED("PersonPNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
-  RESPONSIBLE_OFFICER_CHANGED("ResponsibleOfficer.Changed", "/v1/persons/{hmppsId}/person-responsible-officer"),
+enum class IntegrationEventType(private val pathTemplate: String) {
+  DYNAMIC_RISKS_CHANGED("v1/persons/{hmppsId}/risks/dynamic"),
+  PROBATION_STATUS_CHANGED("v1/persons/{hmppsId}/status-information"),
+  MAPPA_DETAIL_CHANGED("v1/persons/{hmppsId}/risks/mappadetail"),
+  RISK_SCORE_CHANGED( "v1/persons/{hmppsId}/risks/scores"),
+  KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE("v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments"),
+  LICENCE_CONDITION_CHANGED("v1/persons/{hmppsId}/licences/conditions"),
+  RISK_OF_SERIOUS_HARM_CHANGED("v1/persons/{hmppsId}/risks/serious-harm"),
+  PLP_INDUCTION_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-induction-schedule/history"),
+  PLP_REVIEW_SCHEDULE_CHANGED("v1/persons/{hmppsId}/plp-review-schedule"),
+  PERSON_STATUS_CHANGED("v1/persons/{hmppsId}"),
+  PERSON_ADDRESS_CHANGED("v1/persons/{hmppsId}/addresses"),
+  PERSON_CONTACTS_CHANGED("v1/persons/{hmppsId}/contacts"),
+  PERSON_IEP_LEVEL_CHANGED("v1/persons/{hmppsId}/iep-level"),
+  PERSON_VISITOR_RESTRICTIONS_CHANGED("/v1/persons/{hmppsId}/visitor/{contactId}/restrictions"),
+  PERSON_VISIT_RESTRICTIONS_CHANGED("v1/persons/{hmppsId}/visit-restrictions"),
+  PERSON_VISIT_ORDERS_CHANGED("v1/persons/{hmppsId}/visit-orders"),
+  PERSON_FUTURE_VISITS_CHANGED("v1/persons/{hmppsId}/visits/future"),
+  PERSON_ALERTS_CHANGED("v1/persons/{hmppsId}/alerts"),
+  PERSON_PND_ALERTS_CHANGED("v1/pnd/persons/{hmppsId}/alerts"),
+  PERSON_CASE_NOTES_CHANGED("v1/persons/{hmppsId}/case-notes"),
+  PERSON_NAME_CHANGED("v1/persons/{hmppsId}/name"),
+  PERSON_CELL_LOCATION_CHANGED("v1/persons/{hmppsId}/cell-location"),
+  PERSON_RISK_CATEGORIES_CHANGED("v1/persons/{hmppsId}/risks/categories"),
+  PERSON_SENTENCES_CHANGED("v1/persons/{hmppsId}/sentences"),
+  PERSON_OFFENCES_CHANGED( "v1/persons/{hmppsId}/offences"),
+  PERSON_RESPONSIBLE_OFFICER_CHANGED("/v1/persons/{hmppsId}/person-responsible-officer"),
+  PERSON_PROTECTED_CHARACTERISTICS_CHANGED("v1/persons/{hmppsId}/protected-characteristics"),
+  PERSON_REPORTED_ADJUDICATIONS_CHANGED( "v1/persons/{hmppsId}/reported-adjudications"),
+  PERSON_NUMBER_OF_CHILDREN_CHANGED("v1/persons/{hmppsId}/number-of-children"),
   ;
 
   fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
 
   companion object {
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
-      it.value == eventType.value
+      it.ordinal == eventType.ordinal
     }
   }
 }
@@ -202,7 +208,7 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventType.PERSON_ALERTS_CHANGED) {
       ALERT_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED) {
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED) {
       RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType)
     },
   )
