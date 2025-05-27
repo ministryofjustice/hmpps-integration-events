@@ -289,12 +289,12 @@ class HmppsDomainEventServiceTest {
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
-    hmppsDomainEventService.execute(event, IntegrationEventType.PND_ALERTS_CHANGED)
+    hmppsDomainEventService.execute(event, IntegrationEventType.PERSON_PND_ALERTS_CHANGED)
 
     verify(exactly = 1) {
       repo.save(
         EventNotification(
-          eventType = IntegrationEventType.PND_ALERTS_CHANGED,
+          eventType = IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
           hmppsId = "X777776",
           url = "$baseUrl/v1/pnd/persons/X777776/alerts",
           lastModifiedDateTime = currentTime,

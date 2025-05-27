@@ -68,18 +68,17 @@ val RESPONSIBLE_OFFICER_EVENTS = listOf(
   "probation.staff.updated",
 )
 
-val PND_ALERT_EVENTS = listOf(
+val ALERT_EVENTS = listOf(
   "person.alert.created",
   "person.alert.changed",
   "person.alert.deleted",
   "person.alert.updated",
 )
 
-val ALERT_EVENTS = listOf(
-  "person.alert.created",
-  "person.alert.changed",
-  "person.alert.deleted",
-  "person.alert.updated",
+val PND_ALERT_TYPES = listOf(
+  "BECTER", "HA", "XA", "XCA", "XEL", "XELH", "XER", "XHT", "XILLENT",
+  "XIS", "XR", "XRF", "XSA", "HA2", "RCS", "RDV", "RKC", "RPB", "RPC",
+  "RSS", "RST", "RDP", "REG", "RLG", "ROP", "RRV", "RTP", "RYP", "HS", "SC",
 )
 
 val LICENCE_CONDITION_EVENTS =
@@ -96,12 +95,6 @@ val RISK_SCORE_TYPES = listOf(
 val ROSH_TYPES = listOf("assessment.summary.produced")
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
-
-val PND_ALERT_TYPES = listOf(
-  "BECTER", "HA", "XA", "XCA", "XEL", "XELH", "XER", "XHT", "XILLENT",
-  "XIS", "XR", "XRF", "XSA", "HA2", "RCS", "RDV", "RKC", "RPB", "RPC",
-  "RSS", "RST", "RDP", "REG", "RLG", "ROP", "RRV", "RTP", "RYP", "HS", "SC",
-)
 
 val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
   CHILD_CONCERNS_CODE,
@@ -142,14 +135,20 @@ enum class IntegrationEventType(val value: String, private val pathTemplate: Str
     "KeyDatesAndAdjustments.PrisonerReleased",
     "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
   ),
-  PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
-  PND_ALERTS_CHANGED("PNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
-  ALERTS_CHANGED("Alerts.Changed", "v1/persons/{hmppsId}/alerts"),
   LICENCE_CONDITION_CHANGED("LicenceCondition.Changed", "v1/persons/{hmppsId}/licences/conditions"),
   RISK_OF_SERIOUS_HARM_CHANGED("RiskOfSeriousHarm.Changed", "v1/persons/{hmppsId}/risks/serious-harm"),
   PLP_INDUCTION_SCHEDULE_CHANGED("PLPInductionSchedule.Changed", "v1/persons/{hmppsId}/plp-induction-schedule/history"),
   PLP_REVIEW_SCHEDULE_CHANGED("PLPReviewSchedule.Changed", "v1/persons/{hmppsId}/plp-review-schedule"),
+  PERSON_STATUS_CHANGED("PersonStatus.Changed", "v1/persons/{hmppsId}"),
   PERSON_ADDRESS_CHANGED("PersonAddress.Changed", "v1/persons/{hmppsId}/addresses"),
+  PERSON_CONTACTS_CHANGED("PersonContacts.Changed", "v1/persons/{hmppsId}/contacts"),
+  PERSON_IEP_LEVEL_CHANGED("PersonIEPLevel.Changed", "v1/persons/{hmppsId}/iep-level"),
+  PERSON_VISITOR_RESTRICTIONS_CHANGED("PersonVisitorRestrictions.Changed", "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions"),
+  PERSON_VISIT_RESTRICTIONS_CHANGED("PersonVisitRestrictions.Changed", "v1/persons/{hmppsId}/visit-restrictions"),
+  PERSON_VISIT_ORDERS_CHANGED("PersonVisitOrders.Changed", "v1/persons/{hmppsId}/visit-orders"),
+  PERSON_FUTURE_VISITS_CHANGED("PersonFutureVisits.Changed", "v1/persons/{hmppsId}/visits/future"),
+  PERSON_ALERTS_CHANGED("PersonAlerts.Changed", "v1/persons/{hmppsId}/alerts"),
+  PERSON_PND_ALERTS_CHANGED("PersonPNDAlerts.Changed", "v1/pnd/persons/{hmppsId}/alerts"),
   RESPONSIBLE_OFFICER_CHANGED("ResponsibleOfficer.Changed", "/v1/persons/{hmppsId}/person-responsible-officer"),
   ;
 
@@ -182,12 +181,6 @@ object IntegrationEventTypesFilters {
     IntegrationEventTypesFilter(IntegrationEventType.PERSON_STATUS_CHANGED) {
       PERSON_EVENTS.contains(it.eventType)
     },
-    IntegrationEventTypesFilter(IntegrationEventType.PND_ALERTS_CHANGED) {
-      PND_ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
-    },
-    IntegrationEventTypesFilter(IntegrationEventType.ALERTS_CHANGED) {
-      ALERT_EVENTS.contains(it.eventType)
-    },
     IntegrationEventTypesFilter(IntegrationEventType.LICENCE_CONDITION_CHANGED) {
       LICENCE_CONDITION_EVENTS.contains(it.eventType)
     },
@@ -202,6 +195,12 @@ object IntegrationEventTypesFilters {
     },
     IntegrationEventTypesFilter(IntegrationEventType.PERSON_ADDRESS_CHANGED) {
       PERSON_ADDRESS_EVENTS.contains(it.eventType)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_PND_ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode)
+    },
+    IntegrationEventTypesFilter(IntegrationEventType.PERSON_ALERTS_CHANGED) {
+      ALERT_EVENTS.contains(it.eventType)
     },
     IntegrationEventTypesFilter(IntegrationEventType.RESPONSIBLE_OFFICER_CHANGED) {
       RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType)
