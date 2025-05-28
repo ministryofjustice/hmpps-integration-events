@@ -52,6 +52,25 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
 )
 
+val NEW_PERSON_EVENTS = listOf(
+  HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
+  HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+)
+
+enum class PrisonerChangedCategory {
+  IDENTIFIERS,
+  PERSONAL_DETAILS,
+  ALERTS,
+  STATUS,
+  LOCATION,
+  SENTENCE,
+  RESTRICTED_PATIENT,
+  INCENTIVE_LEVEL,
+  PHYSICAL_DETAILS
+}
+
 val PERSON_ADDRESS_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Address.CREATED,
   HmppsDomainEventName.ProbabtionCase.Address.UPDATED,
@@ -234,7 +253,13 @@ enum class IntegrationEventType(
   ),
   PERSON_NAME_CHANGED(
     "v1/persons/{hmppsId}/name",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType)
+        || (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+            && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name) ?: false)
+          )
+    },
   ),
   PERSON_CELL_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/cell-location",
