@@ -1,10 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
+import io.kotest.core.annotation.DisplayName
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,20 +45,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldNotBeNull()
-  }
-
-  @Test
-  fun `will process and save a prisoner released event SQS message`() {
-    ProbationIntegrationApiExtension.server.stubGetPersonIdentifier("mockNomsNumber", "mockCrn")
-    val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
-    sendDomainSqsMessage(rawMessage)
-
-    Awaitility.await().until { repo.findAll().isNotEmpty() }
-    val savedEvent = repo.findAll().firstOrNull()
-    savedEvent.shouldNotBeNull()
-    savedEvent.eventType.shouldBe(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
-    savedEvent.hmppsId.shouldBe("mockCrn")
-    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockCrn/sentences/latest-key-dates-and-adjustments")
   }
 
   @Test
@@ -106,5 +94,23 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     payload.shouldBe(rawMessage)
     val savedEvent = repo.findAll().firstOrNull()
     savedEvent.shouldBeNull()
+  }
+
+  @Nested
+  @DisplayName("Will process specific events")
+  inner class SpecificEvents() {
+    @Test
+    fun `will process and save a prisoner released event SQS message`() {
+      ProbationIntegrationApiExtension.server.stubGetPersonIdentifier("mockNomsNumber", "mockCrn")
+      val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
+      sendDomainSqsMessage(rawMessage)
+
+      Awaitility.await().until { repo.findAll().isNotEmpty() }
+      val savedEvent = repo.findAll().firstOrNull()
+      savedEvent.shouldNotBeNull()
+      savedEvent.eventType.shouldBe(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+      savedEvent.hmppsId.shouldBe("mockCrn")
+      savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockCrn/sentences/latest-key-dates-and-adjustments")
+    }
   }
 }
