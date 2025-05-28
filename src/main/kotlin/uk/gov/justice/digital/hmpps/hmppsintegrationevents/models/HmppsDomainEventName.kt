@@ -68,6 +68,10 @@ object HmppsDomainEventName {
       const val CREATED = "prisoner-offender-search.prisoner.created"
       const val UPDATED = "prisoner-offender-search.prisoner.updated"
       const val RELEASED = "prisoner-offender-search.prisoner.released"
+      const val CONTACT_ADDED = "prison-offender-events.prisoner.contact-added"
+      const val CONTACT_APPROVED = "prison-offender-events.prisoner.contact-approved"
+      const val CONTACT_UNAPPROVED = "prison-offender-events.prisoner.contact-unapproved"
+      const val CONTACT_REMOVED = "prison-offender-events.prisoner.contact-removed"
     }
   }
 
