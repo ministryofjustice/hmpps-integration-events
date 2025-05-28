@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.VISOR_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WARRANT_SUMMONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import kotlin.collections.contains
 
@@ -342,7 +343,13 @@ enum class IntegrationEventType(
   ),
   ;
 
-  fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
+  fun path(hmppsId: String, additionalInformation: AdditionalInformation?): String {
+    var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
+    additionalInformation?.let {
+      if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
+    }
+    return replacedPath
+  }
 
   companion object {
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
