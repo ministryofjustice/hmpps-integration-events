@@ -40,14 +40,14 @@ val MAPPA_DETAIL_REGISTER_EVENTS = listOf(
 val KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RELEASED,
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.RELEASED,
-  HmppsDomainEventName.CalculateReleaseDates.Prisoner.CHANGED
+  HmppsDomainEventName.CalculateReleaseDates.Prisoner.CHANGED,
 )
 
 val PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
 )
 
 val PERSON_ADDRESS_EVENTS = listOf(
@@ -59,7 +59,7 @@ val PERSON_ADDRESS_EVENTS = listOf(
 val RESPONSIBLE_OFFICER_EVENTS = listOf(
   HmppsDomainEventName.Person.Community.Manager.ALLOCATED,
   HmppsDomainEventName.Person.Community.Manager.TRANSFERRED,
-  HmppsDomainEventName.Probation.Staff.UPDATED
+  HmppsDomainEventName.Probation.Staff.UPDATED,
 )
 
 val ALERT_EVENTS = listOf(
@@ -85,7 +85,7 @@ val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
 val RISK_SCORE_TYPES = listOf(
   HmppsDomainEventName.ProbabtionCase.RiskScores.OGRS.MANUAL_CALCULATION,
   HmppsDomainEventName.RiskAssessment.Scores.OGRS.DETERMINED,
-  HmppsDomainEventName.RiskAssessment.Scores.RSR.DETERMINED
+  HmppsDomainEventName.RiskAssessment.Scores.RSR.DETERMINED,
 )
 
 val ROSH_TYPES = listOf(HmppsDomainEventName.Assessment.Summary.PRODUCED)
