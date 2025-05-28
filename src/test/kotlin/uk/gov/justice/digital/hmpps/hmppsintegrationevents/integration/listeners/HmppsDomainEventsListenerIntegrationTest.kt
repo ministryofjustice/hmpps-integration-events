@@ -369,4 +369,40 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/sentences")
   }
+
+  @Test
+  fun `will process and save a prisoner physical details changed event SQS message`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a prisoner index record has been updated.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": ["SENTENCE"]
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(2)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
+    savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED)
+    savedEvents[1].hmppsId.shouldBe(crn)
+    savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/physical-characteristics")
+  }
 }

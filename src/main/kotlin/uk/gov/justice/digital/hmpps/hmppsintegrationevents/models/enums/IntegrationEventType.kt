@@ -301,7 +301,13 @@ enum class IntegrationEventType(
   ),
   PERSON_PHYSICAL_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/physical-characteristics",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType)
+        || (
+        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name) ?: false)
+        )
+    },
   ),
   PERSON_IMAGES_CHANGED(
     "v1/persons/{hmppsId}/images",
