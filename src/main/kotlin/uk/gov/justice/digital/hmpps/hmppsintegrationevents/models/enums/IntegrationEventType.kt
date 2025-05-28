@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_PROTECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.HIGH_ROSH_CODE
@@ -15,30 +16,25 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import kotlin.collections.contains
 
-const val PROBATION_CASE_REGISTRATION_ADDED = "probation-case.registration.added"
-const val PROBATION_CASE_REGISTRATION_DELETED = "probation-case.registration.deleted"
-const val PROBATION_CASE_REGISTRATION_DEREGISTERED = "probation-case.registration.deregistered"
-const val PROBATION_CASE_REGISTRATION_UPDATED = "probation-case.registration.updated"
-
 val DYNAMIC_RISK_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_ADDED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DELETED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DEREGISTERED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_UPDATED.name,
 )
 
 val PROBATION_STATUS_CHANGED_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_ADDED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DELETED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DEREGISTERED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_UPDATED.name,
 )
 
 val MAPPA_DETAIL_REGISTER_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_ADDED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DELETED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_DEREGISTERED.name,
+  HmppsDomainEventName.PROBATION_CASE_REGISTRATION_UPDATED.name,
 )
 
 val RISK_SCORE_CHANGED_EVENTS =
