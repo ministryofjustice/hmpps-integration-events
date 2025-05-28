@@ -103,4 +103,12 @@ object HmppsDomainEventName {
       const val PRODUCED = "assessment.summary.produced"
     }
   }
+
+  object Incentives {
+    object IEPReview {
+      const val INSERTED = "incentives.iep-review.inserted"
+      const val UPDATED = "incentives.iep-review.updated"
+      const val DELETED = "incentives.iep-review.deleted"
+    }
+  }
 }
