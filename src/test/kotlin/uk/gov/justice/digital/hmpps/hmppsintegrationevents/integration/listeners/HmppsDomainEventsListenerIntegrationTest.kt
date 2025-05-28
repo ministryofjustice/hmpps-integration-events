@@ -380,7 +380,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "description": "This is when a prisoner index record has been updated.",
       "occurredAt": "2024-08-14T12:33:34+01:00",
       "additionalInformation": {
-        "categoriesChanged": ["SENTENCE"]
+        "categoriesChanged": ["PHYSICAL_DETAILS"]
       },
       "personReference": {
         "identifiers": [
