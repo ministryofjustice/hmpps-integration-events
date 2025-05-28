@@ -271,7 +271,13 @@ enum class IntegrationEventType(
   ),
   PERSON_SENTENCES_CHANGED(
     "v1/persons/{hmppsId}/sentences",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType)
+        || (
+        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.SENTENCE.name) ?: false)
+        )
+    },
   ),
   PERSON_OFFENCES_CHANGED(
     "v1/persons/{hmppsId}/offences",
