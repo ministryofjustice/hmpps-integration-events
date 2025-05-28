@@ -12,7 +12,7 @@ object HmppsDomainEventName {
       const val CREATED = "probation-case.engagement.created"
     }
     object PrisonIdentifier {
-      const val ADDED = "probation-case.prison.prison-identifier.added"
+      const val ADDED = "probation-case.prison-identifier.added"
     }
     object Address {
       const val CREATED = "probation-case.address.created"
@@ -44,7 +44,7 @@ object HmppsDomainEventName {
   object CreateAndVaryALicence {
     object Licence {
       const val ACTIVATED = "create-and-vary-a-licence.licence.activated"
-      const val INACTIVATED = "create-and-vary-a-licence.licence.inactived"
+      const val INACTIVATED = "create-and-vary-a-licence.licence.inactivated"
     }
   }
 
