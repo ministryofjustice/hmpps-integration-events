@@ -197,7 +197,7 @@ enum class IntegrationEventType(
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",
-    { false },
+    { it.eventType == HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",

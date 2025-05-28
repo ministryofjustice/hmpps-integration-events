@@ -78,6 +78,9 @@ object HmppsDomainEventName {
       const val CONTACT_APPROVED = "prison-offender-events.prisoner.contact-approved"
       const val CONTACT_UNAPPROVED = "prison-offender-events.prisoner.contact-unapproved"
       const val CONTACT_REMOVED = "prison-offender-events.prisoner.contact-removed"
+      object Restriction {
+        const val CHANGED = "prison-offender-events.prisoner.restriction.changed"
+      }
     }
   }
 
