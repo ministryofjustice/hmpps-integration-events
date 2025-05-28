@@ -119,6 +119,74 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   @ParameterizedTest
   @ValueSource(
     strings = [
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
+    ],
+  )
+  fun `will process and save a person contacts event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": 1,
+      "description": "A contact has been added to a prisoner",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_CONTACTS_CHANGED)
+    savedEvent.hmppsId.shouldBe(crn)
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/contacts")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.Incentives.IEPReview.INSERTED,
+      HmppsDomainEventName.Incentives.IEPReview.UPDATED,
+      HmppsDomainEventName.Incentives.IEPReview.DELETED,
+    ],
+  )
+  fun `will process and save a person iep event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "An IEP review has been changed",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "nomsNumber": "$nomsNumber"
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_IEP_LEVEL_CHANGED)
+    savedEvent.hmppsId.shouldBe(crn)
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/iep-level")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
     ],
