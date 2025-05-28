@@ -222,4 +222,38 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvent.hmppsId.shouldBe(crn)
     savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/visitor/$contactId/restrictions")
   }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED,
+    ],
+  )
+  fun `will process and save a visit restriction event SQS message`(eventType: String) {
+    val message = """
+    {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "This event is raised when a prisoner visits restriction is created/updated/deleted",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
+        }
+      }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED)
+    savedEvent.hmppsId.shouldBe(crn)
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/visit-restrictions")
+  }
 }
