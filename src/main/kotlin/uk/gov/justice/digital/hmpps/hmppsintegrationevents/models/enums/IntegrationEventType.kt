@@ -198,7 +198,7 @@ enum class IntegrationEventType(
     { PERSON_IEP_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
-    "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
+    "v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
     { PERSON_VISITOR_RESTRICTION_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
@@ -246,7 +246,7 @@ enum class IntegrationEventType(
     { false },
   ),
   PERSON_RESPONSIBLE_OFFICER_CHANGED(
-    "/v1/persons/{hmppsId}/person-responsible-officer",
+    "v1/persons/{hmppsId}/person-responsible-officer",
     { RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) },
   ),
   PERSON_PROTECTED_CHARACTERISTICS_CHANGED(
