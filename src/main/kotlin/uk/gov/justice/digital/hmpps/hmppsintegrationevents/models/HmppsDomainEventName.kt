@@ -66,6 +66,7 @@ object HmppsDomainEventName {
   object PrisonerOffenderSearch {
     object Prisoner {
       const val CREATED = "prisoner-offender-search.prisoner.created"
+      const val RECIEVED = "prisoner-offender-search.prisoner.received"
       const val UPDATED = "prisoner-offender-search.prisoner.updated"
       const val RELEASED = "prisoner-offender-search.prisoner.released"
     }

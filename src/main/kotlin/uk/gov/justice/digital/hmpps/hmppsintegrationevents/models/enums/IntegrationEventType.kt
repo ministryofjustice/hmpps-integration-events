@@ -49,6 +49,7 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
 )
 
 val PERSON_ADDRESS_EVENTS = listOf(
