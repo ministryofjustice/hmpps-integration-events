@@ -1,20 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import io.kotest.core.annotation.DisplayName
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
@@ -31,9 +32,13 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   @Autowired
   lateinit var repo: EventNotificationRepository
 
+  val nomsNumber = "mockNomsNumber"
+  val crn = "mockCrn"
+
   @BeforeEach
   fun setup() {
     repo.deleteAll()
+    ProbationIntegrationApiExtension.server.stubGetPersonIdentifier(nomsNumber, crn)
   }
 
   @Test
@@ -96,21 +101,57 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvent.shouldBeNull()
   }
 
-  @Nested
-  @DisplayName("Will process specific events")
-  inner class SpecificEvents() {
-    @Test
-    fun `will process and save a prisoner released event SQS message`() {
-      ProbationIntegrationApiExtension.server.stubGetPersonIdentifier("mockNomsNumber", "mockCrn")
-      val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
-      sendDomainSqsMessage(rawMessage)
+  // Specific event tests
 
-      Awaitility.await().until { repo.findAll().isNotEmpty() }
-      val savedEvent = repo.findAll().firstOrNull()
-      savedEvent.shouldNotBeNull()
-      savedEvent.eventType.shouldBe(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
-      savedEvent.hmppsId.shouldBe("mockCrn")
-      savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockCrn/sentences/latest-key-dates-and-adjustments")
+  @Test
+  fun `will process and save a prisoner released event SQS message`() {
+    val rawMessage = SqsNotificationGeneratingHelper().generatePrisonerReleasedEvent()
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+    savedEvent.hmppsId.shouldBe("mockCrn")
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockCrn/sentences/latest-key-dates-and-adjustments")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
+    ],
+  )
+  fun `will process and save a visitor restriction event SQS message`(eventType: String) {
+    val contactId = "7551236"
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This event is raised when a global visitor restriction is created or updated.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "contactPersonId": "$contactId"
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
     }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvent = repo.findAll().firstOrNull()
+    savedEvent.shouldNotBeNull()
+    savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED)
+    savedEvent.hmppsId.shouldBe(crn)
+    savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/visitor/$contactId/restrictions")
   }
 }

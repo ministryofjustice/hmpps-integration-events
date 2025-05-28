@@ -129,6 +129,26 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     """
     )
 
+  fun generateRawDomainEvent(eventType: String, message: String) = """
+    {
+      "Type" : "Notification",
+      "MessageId" : "d4419bdd-2079-598c-b608-c4f2ddb1bcd1",
+      "TopicArn" : "arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-97e6567cf80881a8a52290ff2c269b08",
+      "Message" : "${message.trimIndent().replace("\n", "").replace("\"", "\\\"")}",
+      "Timestamp" : "2024-08-09T11:20:40.320Z",
+      "SignatureVersion" : "1",
+      "Signature" : "IMtmzxSgFYKD4fljhMOGSLVPyt0eCduKLN9Y8j9Zr3dbWHgjL9lM4qaMbLo/XPOdz8Cya2N50KGkFf4pAmp8yGAGM56gkJHQFCcIbdHGkW9w86woxjvHb0kh13BAiv7JWwrAvTIgJgPqtph6RCQY385eqGk4jU7JmPvtU+YeZoSv657Qa4LP6DPNjvdmnOYfrXnt+BVyzpVHBlWLnBi9dv+WMnRBxZ36IhppjTQw+hAnlU1yg98r93GRH43d2PLiINlIkyMP7TXH7rYX1RwPCceC9VAeXNJdzCLTteUDCI4trwKloZLYfqpZXgWRzhyB/ZaBJz/wmjA7iKBvtbIdUA==",
+      "SigningCertURL" : "https://sns.eu-west-2.amazonaws.com/SimpleNotificationService-60eadc530605d63b8e62a523676ef735.pem",
+      "UnsubscribeURL" : "https://sns.eu-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-97e6567cf80881a8a52290ff2c269b08:340b799a-084f-4027-a214-510087556d97",
+      "MessageAttributes" : {
+        "traceparent" : {"Type":"String","Value":"00-e46c152a1097400c9c5e8f9b53b26ca5-e1a16aff9e932bba-01"},
+        "eventType" : {"Type":"String","Value":"$eventType"},
+        "id" : {"Type":"String","Value":"51c928a9-4d16-5e97-1674-02ff2a616177"},
+        "timestamp" : {"Type":"Number.java.lang.Long","Value":"1723202440316"}
+      }
+    }    
+  """.trimIndent()
+
   fun createHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",

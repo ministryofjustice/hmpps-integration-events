@@ -30,7 +30,7 @@ class PersonVisitorRestrictionsChangedEventTest {
   @ValueSource(
     strings = [
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
     ],
   )
   fun `will process an visitor restriction notification`(eventType: String) {

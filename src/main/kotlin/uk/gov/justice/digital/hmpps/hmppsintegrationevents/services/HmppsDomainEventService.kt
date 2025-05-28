@@ -71,7 +71,7 @@ class HmppsDomainEventService(
   private fun getEventNotification(
     integrationEventType: IntegrationEventType,
     hmppsId: String,
-    additionalInformation: AdditionalInformation?
+    additionalInformation: AdditionalInformation?,
   ): EventNotification? {
     val eventType = IntegrationEventType.from(integrationEventType)
     if (eventType != null) {

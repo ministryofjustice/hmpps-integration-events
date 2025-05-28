@@ -29,7 +29,7 @@ class PersonVisitRestrictionsChangedEventTest {
   @ParameterizedTest
   @ValueSource(
     strings = [
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED,
     ],
   )
   fun `will process an visit restriction notification`(eventType: String) {

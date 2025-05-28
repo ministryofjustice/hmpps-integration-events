@@ -32,7 +32,7 @@ class PersonContactsChangedEventTest {
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
     ],
   )
   fun `will process an prisoner contact notification`(eventType: String) {

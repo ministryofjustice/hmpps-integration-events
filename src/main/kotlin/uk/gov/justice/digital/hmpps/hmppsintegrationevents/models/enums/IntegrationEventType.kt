@@ -127,18 +127,18 @@ val PERSON_CONTACT_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
-  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
 )
 
 val PERSON_IEP_EVENTS = listOf(
   HmppsDomainEventName.Incentives.IEPReview.INSERTED,
   HmppsDomainEventName.Incentives.IEPReview.UPDATED,
-  HmppsDomainEventName.Incentives.IEPReview.DELETED
+  HmppsDomainEventName.Incentives.IEPReview.DELETED,
 )
 
 val PERSON_VISITOR_RESTRICTION_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
-  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
 )
 
 enum class IntegrationEventType(

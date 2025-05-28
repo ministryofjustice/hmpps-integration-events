@@ -31,7 +31,7 @@ class PersonIEPLevelChangedEventTest {
     strings = [
       HmppsDomainEventName.Incentives.IEPReview.INSERTED,
       HmppsDomainEventName.Incentives.IEPReview.UPDATED,
-      HmppsDomainEventName.Incentives.IEPReview.DELETED
+      HmppsDomainEventName.Incentives.IEPReview.DELETED,
     ],
   )
   fun `will process an incentive review notification`(eventType: String) {
