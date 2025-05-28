@@ -122,6 +122,19 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
+val PERSON_CONTACT_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED
+)
+
+val PERSON_IEP_EVENTS = listOf(
+  HmppsDomainEventName.Incentives.IEPReview.INSERTED,
+  HmppsDomainEventName.Incentives.IEPReview.UPDATED,
+  HmppsDomainEventName.Incentives.IEPReview.DELETED
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -172,11 +185,11 @@ enum class IntegrationEventType(
   ),
   PERSON_CONTACTS_CHANGED(
     "v1/persons/{hmppsId}/contacts",
-    { false },
+    { PERSON_CONTACT_EVENTS.contains(it.eventType) },
   ),
   PERSON_IEP_LEVEL_CHANGED(
     "v1/persons/{hmppsId}/iep-level",
-    { false },
+    { PERSON_IEP_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
     "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
