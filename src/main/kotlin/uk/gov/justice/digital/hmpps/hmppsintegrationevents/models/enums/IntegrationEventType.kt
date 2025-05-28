@@ -135,6 +135,11 @@ val PERSON_IEP_EVENTS = listOf(
   HmppsDomainEventName.Incentives.IEPReview.DELETED
 )
 
+val PERSON_VISITOR_RESTRICTION_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -193,7 +198,7 @@ enum class IntegrationEventType(
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
     "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
-    { false },
+    { PERSON_VISITOR_RESTRICTION_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",

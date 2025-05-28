@@ -81,6 +81,10 @@ object HmppsDomainEventName {
       object Restriction {
         const val CHANGED = "prison-offender-events.prisoner.restriction.changed"
       }
+      object PersonRestriction {
+        const val UPSERTED = "prison-offender-events.prisoner.person-restriction.upserted"
+        const val DELETED = "prison-offender-events.prisoner.person-restriction.deleted"
+      }
     }
   }
 
