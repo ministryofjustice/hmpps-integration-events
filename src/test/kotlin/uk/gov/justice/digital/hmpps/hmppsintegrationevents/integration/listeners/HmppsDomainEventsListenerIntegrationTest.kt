@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -18,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
@@ -255,5 +257,44 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED)
     savedEvent.hmppsId.shouldBe(crn)
     savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/visit-restrictions")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonVisit.BOOKED,
+      HmppsDomainEventName.PrisonVisit.CHANGED,
+      HmppsDomainEventName.PrisonVisit.CANCELLED,
+    ],
+  )
+  fun `will process and save a visit changed event SQS message`(eventType: String) {
+    val visitReference = "nx-ce-vq-ry"
+    val message = """
+    {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "Prison visit changed",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "prisonerId": "$nomsNumber",
+        "additionalInformation": {
+          "reference": "$visitReference"
+        }
+      }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(3)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/visits/future")
+    savedEvents[1].eventType.shouldBe(IntegrationEventType.PRISON_VISITS_CHANGED)
+    savedEvents[1].hmppsId.shouldBe(crn)
+    savedEvents[1].url.shouldBe("https://localhost:8443/v1/prison/{prisonId}/visit/search")
+    savedEvents[2].eventType.shouldBe(IntegrationEventType.VISIT_CHANGED)
+    savedEvents[2].hmppsId.shouldBe(crn)
+    savedEvents[2].url.shouldBe("https://localhost:8443/v1/visit/$visitReference")
   }
 }

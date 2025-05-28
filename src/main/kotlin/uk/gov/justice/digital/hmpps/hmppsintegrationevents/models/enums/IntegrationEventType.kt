@@ -141,6 +141,12 @@ val PERSON_VISITOR_RESTRICTION_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
 )
 
+val VISIT_CHANGED_EVENTS = listOf(
+  HmppsDomainEventName.PrisonVisit.BOOKED,
+  HmppsDomainEventName.PrisonVisit.CHANGED,
+  HmppsDomainEventName.PrisonVisit.CANCELLED,
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -211,7 +217,7 @@ enum class IntegrationEventType(
   ),
   PERSON_FUTURE_VISITS_CHANGED(
     "v1/persons/{hmppsId}/visits/future",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   PERSON_ALERTS_CHANGED(
     "v1/persons/{hmppsId}/alerts",
@@ -299,7 +305,7 @@ enum class IntegrationEventType(
   ),
   PRISON_VISITS_CHANGED(
     "v1/prison/{prisonId}/visit/search",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
@@ -319,7 +325,7 @@ enum class IntegrationEventType(
   ),
   VISIT_CHANGED(
     "v1/visit/{visitReference}",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   VISIT_FROM_EXTERNAL_SYSTEM_CREATED(
     "v1/visit/id/by-client-ref/{clientVisitReference}",
@@ -347,6 +353,7 @@ enum class IntegrationEventType(
     var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
+      if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)
     }
     return replacedPath
   }

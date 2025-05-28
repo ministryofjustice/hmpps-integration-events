@@ -118,4 +118,10 @@ object HmppsDomainEventName {
       const val DELETED = "incentives.iep-review.deleted"
     }
   }
+
+  object PrisonVisit {
+    const val BOOKED = "prison-visit.booked"
+    const val CHANGED = "prison-visit.changed"
+    const val CANCELLED = "prison-visit.cancelled"
+  }
 }
