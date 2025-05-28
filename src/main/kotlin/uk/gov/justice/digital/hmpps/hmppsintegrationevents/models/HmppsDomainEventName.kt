@@ -44,7 +44,7 @@ object HmppsDomainEventName {
   object CreateAndVaryALicence {
     object Licence {
       const val ACTIVATED = "create-and-vary-a-licence.licence.activated"
-      const val INACTIVATED = "create-and-vary-a-licence.licence.inactived"
+      const val INACTIVATED = "create-and-vary-a-licence.licence.inactivated"
     }
   }
 
