@@ -253,7 +253,7 @@ enum class IntegrationEventType(
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_FUTURE_VISITS_CHANGED(
     "v1/persons/{hmppsId}/visits/future",
@@ -315,7 +315,7 @@ enum class IntegrationEventType(
   ),
   PERSON_PROTECTED_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/protected-characteristics",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_REPORTED_ADJUDICATIONS_CHANGED(
     "v1/persons/{hmppsId}/reported-adjudications",
@@ -323,7 +323,7 @@ enum class IntegrationEventType(
   ),
   PERSON_NUMBER_OF_CHILDREN_CHANGED(
     "v1/persons/{hmppsId}/number-of-children",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_PHYSICAL_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/physical-characteristics",
@@ -337,11 +337,11 @@ enum class IntegrationEventType(
   ),
   PERSON_IMAGES_CHANGED(
     "v1/persons/{hmppsId}/images",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_IMAGE_CHANGED(
     "v1/persons/{hmppsId}/images/{imageId}",
-    { false },
+    { false }, // Probably not needed
   ),
   PRISONERS_CHANGED(
     "v1/prison/prisoners",
@@ -401,15 +401,15 @@ enum class IntegrationEventType(
   ),
   PERSON_HEALTH_AND_DIET_CHANGED(
     "v1/persons/{hmppsId}/health-and-diet",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_CARE_NEEDS_CHANGED(
     "v1/persons/{hmppsId}/care-needs",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   ;
 
