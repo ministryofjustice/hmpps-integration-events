@@ -215,4 +215,39 @@ class PrisonerEventTest {
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_CELL_LOCATION_CHANGED) }
   }
+
+  @Test
+  fun `will process an prisoner physical details changed notification`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message =
+      """
+      {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "This is when a prisoner index record has been updated.",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "additionalInformation": {
+          "categoriesChanged": ["PHYSICAL_DETAILS"]
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
+        }
+      }
+      """.trimIndent().replace("\n", "")
+
+    val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED) }
+  }
 }
