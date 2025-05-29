@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_PROTECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.HIGH_ROSH_CODE
@@ -15,65 +16,57 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import kotlin.collections.contains
 
-const val PROBATION_CASE_REGISTRATION_ADDED = "probation-case.registration.added"
-const val PROBATION_CASE_REGISTRATION_DELETED = "probation-case.registration.deleted"
-const val PROBATION_CASE_REGISTRATION_DEREGISTERED = "probation-case.registration.deregistered"
-const val PROBATION_CASE_REGISTRATION_UPDATED = "probation-case.registration.updated"
-
 val DYNAMIC_RISK_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.ADDED,
+  HmppsDomainEventName.ProbabtionCase.Registration.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DELETED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DEREGISTERED,
 )
 
 val PROBATION_STATUS_CHANGED_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.ADDED,
+  HmppsDomainEventName.ProbabtionCase.Registration.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DELETED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DEREGISTERED,
 )
 
 val MAPPA_DETAIL_REGISTER_EVENTS = listOf(
-  PROBATION_CASE_REGISTRATION_ADDED,
-  PROBATION_CASE_REGISTRATION_DELETED,
-  PROBATION_CASE_REGISTRATION_DEREGISTERED,
-  PROBATION_CASE_REGISTRATION_UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.ADDED,
+  HmppsDomainEventName.ProbabtionCase.Registration.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DELETED,
+  HmppsDomainEventName.ProbabtionCase.Registration.DEREGISTERED,
 )
 
-val RISK_SCORE_CHANGED_EVENTS =
-  listOf("risk-assessment.scores.determined", "probation-case.risk-scores.ogrs.manual-calculation")
-
 val KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS = listOf(
-  "prisoner-offender-search.prisoner.released",
-  "prison-offender-events.prisoner.released",
-  "calculate-release-dates.prisoner.changed",
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RELEASED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.RELEASED,
+  HmppsDomainEventName.CalculateReleaseDates.Prisoner.CHANGED,
 )
 
 val PERSON_EVENTS = listOf(
-  "probation-case.engagement.created",
-  "probation-case.prison-identifier.added",
-  "prisoner-offender-search.prisoner.created",
-  "prisoner-offender-search.prisoner.updated",
+  HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
+  HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
 )
 
 val PERSON_ADDRESS_EVENTS = listOf(
-  "probation-case.address.created",
-  "probation-case.address.updated",
-  "probation-case.address.deleted",
+  HmppsDomainEventName.ProbabtionCase.Address.CREATED,
+  HmppsDomainEventName.ProbabtionCase.Address.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Address.DELETED,
 )
 
 val RESPONSIBLE_OFFICER_EVENTS = listOf(
-  "person.community.manager.allocated",
-  "person.community.manager.transferred",
-  "probation.staff.updated",
+  HmppsDomainEventName.Person.Community.Manager.ALLOCATED,
+  HmppsDomainEventName.Person.Community.Manager.TRANSFERRED,
+  HmppsDomainEventName.Probation.Staff.UPDATED,
 )
 
 val ALERT_EVENTS = listOf(
-  "person.alert.created",
-  "person.alert.changed",
-  "person.alert.deleted",
-  "person.alert.updated",
+  HmppsDomainEventName.Person.Alert.CREATED,
+  HmppsDomainEventName.Person.Alert.CHANGED,
+  HmppsDomainEventName.Person.Alert.UPDATED,
+  HmppsDomainEventName.Person.Alert.DELETED,
 )
 
 val PND_ALERT_TYPES = listOf(
@@ -82,18 +75,20 @@ val PND_ALERT_TYPES = listOf(
   "RSS", "RST", "RDP", "REG", "RLG", "ROP", "RRV", "RTP", "RYP", "HS", "SC",
 )
 
-val LICENCE_CONDITION_EVENTS =
-  listOf("create-and-vary-a-licence.licence.activated", "create-and-vary-a-licence.licence.inactivated")
+val LICENCE_CONDITION_EVENTS = listOf(
+  HmppsDomainEventName.CreateAndVaryALicence.Licence.ACTIVATED,
+  HmppsDomainEventName.CreateAndVaryALicence.Licence.INACTIVATED,
+)
 
 val MAPPA_DETAIL_REGISTER_TYPES = listOf(MAPPA_CODE)
 
 val RISK_SCORE_TYPES = listOf(
-  "risk-assessment.scores.ogrs.determined",
-  "probation-case.risk-scores.ogrs.manual-calculation",
-  "risk-assessment.scores.rsr.determined",
+  HmppsDomainEventName.ProbabtionCase.RiskScores.OGRS.MANUAL_CALCULATION,
+  HmppsDomainEventName.RiskAssessment.Scores.OGRS.DETERMINED,
+  HmppsDomainEventName.RiskAssessment.Scores.RSR.DETERMINED,
 )
 
-val ROSH_TYPES = listOf("assessment.summary.produced")
+val ROSH_TYPES = listOf(HmppsDomainEventName.Assessment.Summary.PRODUCED)
 
 val PROBATION_STATUS_REGISTER_TYPES = listOf(SERIOUS_FURTHER_OFFENCE_CODE, WARRANT_SUMMONS_CODE)
 
@@ -109,8 +104,8 @@ val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
   HIGH_ROSH_CODE,
 )
 
-val PLP_INDUCTION_SCHEDULE_EVENT = listOf("plp.induction-schedule.updated")
-val PLP_REVIEW_SCHEDULE_EVENT = listOf("plp.review-schedule.updated")
+val PLP_INDUCTION_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.PLP.InductionSchedule.UPDATED)
+val PLP_REVIEW_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.PLP.ReviewSchedule.UPDATED)
 
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
@@ -161,11 +156,11 @@ enum class IntegrationEventType(
   ),
   PLP_INDUCTION_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-induction-schedule/history",
-    { PLP_INDUCTION_SCHEDULE_EVENT.contains(it.eventType) },
+    { PLP_INDUCTION_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PLP_REVIEW_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-review-schedule",
-    { PLP_REVIEW_SCHEDULE_EVENT.contains(it.eventType) },
+    { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
