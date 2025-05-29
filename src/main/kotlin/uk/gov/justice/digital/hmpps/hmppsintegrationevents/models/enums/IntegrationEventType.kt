@@ -269,7 +269,13 @@ enum class IntegrationEventType(
   ),
   PERSON_CELL_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/cell-location",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType)
+        || (
+        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.LOCATION.name) ?: false)
+        )
+    },
   ),
   PERSON_RISK_CATEGORIES_CHANGED(
     "v1/persons/{hmppsId}/risks/categories",

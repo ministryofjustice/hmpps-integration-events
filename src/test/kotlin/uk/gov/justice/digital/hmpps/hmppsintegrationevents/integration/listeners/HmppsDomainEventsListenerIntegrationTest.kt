@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -19,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
@@ -404,6 +402,48 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/physical-characteristics")
+  }
+
+  @Test
+  fun `will process and save a prisoner location changed event SQS message`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a prisoner index record has been updated.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": ["LOCATION"]
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(4)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
+    savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_CELL_LOCATION_CHANGED)
+    savedEvents[1].hmppsId.shouldBe(crn)
+    savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/cell-location")
+    savedEvents[2].eventType.shouldBe(IntegrationEventType.PRISONERS_CHANGED)
+    savedEvents[2].hmppsId.shouldBe(crn)
+    savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners")
+    savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
+    savedEvents[3].hmppsId.shouldBe(crn)
+    savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
   }
 
   @ParameterizedTest
