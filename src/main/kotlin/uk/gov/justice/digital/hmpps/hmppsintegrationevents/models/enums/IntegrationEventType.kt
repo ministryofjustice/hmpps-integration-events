@@ -52,6 +52,12 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
 )
 
+val PRISONER_EVENTS = listOf(
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+)
+
 val NEW_PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
@@ -319,11 +325,11 @@ enum class IntegrationEventType(
   ),
   PRISONERS_CHANGED(
     "v1/prison/prisoners",
-    { false },
+    { PRISONER_EVENTS.contains(it.eventType) },
   ),
   PRISONER_CHANGED(
     "v1/prison/prisoners/{hmppsId}",
-    { false },
+    { PRISONER_EVENTS.contains(it.eventType) },
   ),
   PRISONER_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/balances",
