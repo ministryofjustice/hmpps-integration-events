@@ -7,6 +7,7 @@ import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedExcepti
 import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import io.sentry.Sentry
 import io.sentry.spring.jakarta.tracing.SentryTransaction
+import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 import java.util.concurrent.CompletionException
 
 @Service
+@Transactional
 class HmppsDomainEventsListener(
   @Autowired val hmppsDomainEventService: HmppsDomainEventService,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
