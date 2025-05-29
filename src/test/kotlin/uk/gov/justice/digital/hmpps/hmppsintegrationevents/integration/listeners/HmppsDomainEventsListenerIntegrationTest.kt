@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -686,5 +687,80 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/{prisonId}/prisoners/$crn/non-associations")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.AMENDED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+    ],
+  )
+  fun `will process and save a location event SQS message`(eventType: String) {
+    val locationKey = "MDI-001-01"
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "Locations – a location inside prison has been amended",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "key": "$locationKey"
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    savedEvents.size.shouldBe(3)
+    eventTypes.shouldContainExactlyInAnyOrder(
+      IntegrationEventType.PRISON_LOCATION_CHANGED,
+      IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
+      IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
+    )
+    urls.shouldContainExactlyInAnyOrder(
+      "https://localhost:8443/v1/prison/{prisonId}/location/$locationKey",
+      "https://localhost:8443/v1/prison/{prisonId}/residential-hierarchy",
+      "https://localhost:8443/v1/prison/{prisonId}/residential-details",
+    )
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+      HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+      HmppsDomainEventName.LocationsInsidePrison.SignedOpCapacity.AMENDED,
+    ],
+  )
+  fun `will process and save a prison capacity event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "Locations – a location inside prison has been amended",
+      "occurredAt": "2024-08-14T12:33:34+01:00"
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.PRISON_CAPACITY_CHANGED)
+    urls.shouldContain("https://localhost:8443/v1/prison/{prisonId}/capacity")
   }
 }

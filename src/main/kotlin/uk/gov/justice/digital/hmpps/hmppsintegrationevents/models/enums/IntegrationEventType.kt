@@ -200,6 +200,22 @@ val VISIT_CHANGED_EVENTS = listOf(
   HmppsDomainEventName.PrisonVisit.CANCELLED,
 )
 
+val LOCATION_EVENTS = listOf(
+  HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.AMENDED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+)
+
+val PRISON_CAPACITY_EVENTS = listOf(
+  HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.SignedOpCapacity.AMENDED,
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -386,19 +402,19 @@ enum class IntegrationEventType(
   ),
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
-    { false },
+    { LOCATION_EVENTS.contains(it.eventType) },
   ),
   PRISON_LOCATION_CHANGED(
     "v1/prison/{prisonId}/location/{locationKey}",
-    { false },
+    { LOCATION_EVENTS.contains(it.eventType) },
   ),
   PRISON_RESIDENTIAL_DETAILS_CHANGED(
     "v1/prison/{prisonId}/residential-details",
-    { false },
+    { LOCATION_EVENTS.contains(it.eventType) },
   ),
   PRISON_CAPACITY_CHANGED(
     "v1/prison/{prisonId}/capacity",
-    { false },
+    { PRISON_CAPACITY_EVENTS.contains(it.eventType) },
   ),
   VISIT_CHANGED(
     "v1/visit/{visitReference}",
@@ -431,6 +447,7 @@ enum class IntegrationEventType(
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
       if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)
+      if (it.key != null) replacedPath = replacedPath.replace("{locationKey}", it.key)
     }
     return replacedPath
   }

@@ -154,4 +154,17 @@ object HmppsDomainEventName {
     const val CLOSED = "non-associations.closed"
     const val DELETED = "non-associations.deleted"
   }
+
+  object LocationsInsidePrison {
+    object Location {
+      const val CREATED = "location.inside.prison.created"
+      const val AMENDED = "location.inside.prison.amended"
+      const val DELETED = "location.inside.prison.deleted"
+      const val DEACTIVATED = "location.inside.prison.deactivated"
+      const val REACTIVATED = "location.inside.prison.reactivated"
+    }
+    object SignedOpCapacity {
+      const val AMENDED = "location.inside.prison.signed-op-cap.amended"
+    }
+  }
 }
