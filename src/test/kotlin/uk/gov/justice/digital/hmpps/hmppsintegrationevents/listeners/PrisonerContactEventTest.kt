@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class PrisonVisitChangedEventTest {
+class PrisonerContactEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -29,22 +29,27 @@ class PrisonVisitChangedEventTest {
   @ParameterizedTest
   @ValueSource(
     strings = [
-      HmppsDomainEventName.PrisonVisit.BOOKED,
-      HmppsDomainEventName.PrisonVisit.CHANGED,
-      HmppsDomainEventName.PrisonVisit.CANCELLED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
     ],
   )
-  fun `will process an visit changed notification`(eventType: String) {
+  fun `will process an prisoner contact notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
-        "version": "1.0",
-        "description": "Prison visit changed",
+        "version": 1,
+        "description": "A contact has been added to a prisoner",
         "occurredAt": "2024-08-14T12:33:34+01:00",
-        "prisonerId": "$nomsNumber",
-        "additionalInformation": {
-          "reference": "nx-ce-vq-ry"
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
         }
       }
       """.trimIndent().replace("\n", "")
@@ -55,7 +60,7 @@ class PrisonVisitChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        any(),
+        IntegrationEventType.PERSON_CONTACTS_CHANGED,
       )
     } just runs
 
@@ -64,19 +69,7 @@ class PrisonVisitChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
-      )
-    }
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PRISON_VISITS_CHANGED,
-      )
-    }
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.VISIT_CHANGED,
+        IntegrationEventType.PERSON_CONTACTS_CHANGED,
       )
     }
   }

@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class IEPLevelChangedEventTest {
+class PrisonerVisitorRestrictionEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -29,21 +29,28 @@ class IEPLevelChangedEventTest {
   @ParameterizedTest
   @ValueSource(
     strings = [
-      HmppsDomainEventName.Incentives.IEPReview.INSERTED,
-      HmppsDomainEventName.Incentives.IEPReview.UPDATED,
-      HmppsDomainEventName.Incentives.IEPReview.DELETED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
     ],
   )
-  fun `will process an incentive review notification`(eventType: String) {
+  fun `will process an prison visitor restriction notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
         "version": "1.0",
-        "description": "An IEP review has been changed",
+        "description": "This event is raised when a global visitor restriction is created or updated.",
         "occurredAt": "2024-08-14T12:33:34+01:00",
         "additionalInformation": {
-          "nomsNumber": "$nomsNumber"
+          "contactPersonId": "7551236"
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
         }
       }
       """.trimIndent().replace("\n", "")
@@ -54,7 +61,7 @@ class IEPLevelChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
+        IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED,
       )
     } just runs
 
@@ -63,7 +70,7 @@ class IEPLevelChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
+        IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED,
       )
     }
   }

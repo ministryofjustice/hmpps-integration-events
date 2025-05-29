@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class PrisonerContactsChangedEventTest {
+class IEPReviewEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -29,27 +29,21 @@ class PrisonerContactsChangedEventTest {
   @ParameterizedTest
   @ValueSource(
     strings = [
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
+      HmppsDomainEventName.Incentives.IEPReview.INSERTED,
+      HmppsDomainEventName.Incentives.IEPReview.UPDATED,
+      HmppsDomainEventName.Incentives.IEPReview.DELETED,
     ],
   )
-  fun `will process an prisoner contact notification`(eventType: String) {
+  fun `will process an incentive review notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
-        "version": 1,
-        "description": "A contact has been added to a prisoner",
+        "version": "1.0",
+        "description": "An IEP review has been changed",
         "occurredAt": "2024-08-14T12:33:34+01:00",
-        "personReference": {
-          "identifiers": [
-            {
-              "type": "NOMS", 
-              "value": "$nomsNumber"
-             }
-          ]
+        "additionalInformation": {
+          "nomsNumber": "$nomsNumber"
         }
       }
       """.trimIndent().replace("\n", "")
@@ -60,7 +54,7 @@ class PrisonerContactsChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
       )
     } just runs
 
@@ -69,7 +63,7 @@ class PrisonerContactsChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
       )
     }
   }
