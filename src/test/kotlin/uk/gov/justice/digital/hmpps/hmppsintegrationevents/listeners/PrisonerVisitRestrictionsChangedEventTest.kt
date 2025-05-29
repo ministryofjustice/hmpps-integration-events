@@ -5,7 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
@@ -17,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class PersonPersonalDetailsChangedEventTest {
+class PrisonerVisitRestrictionsChangedEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -25,19 +26,20 @@ class PersonPersonalDetailsChangedEventTest {
 
   private val nomsNumber = "A1234BC"
 
-  @Test
-  fun `will process an person details changed notification`() {
-    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED,
+    ],
+  )
+  fun `will process an visit restriction notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
         "version": "1.0",
-        "description": "This is when a prisoner index record has been updated.",
+        "description": "This event is raised when a prisoner visits restriction is created/updated/deleted",
         "occurredAt": "2024-08-14T12:33:34+01:00",
-        "additionalInformation": {
-          "categoriesChanged": ["PERSONAL_DETAILS"]
-        },
         "personReference": {
           "identifiers": [
             {
@@ -55,7 +57,7 @@ class PersonPersonalDetailsChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        any(),
+        IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
       )
     } just runs
 
@@ -64,13 +66,7 @@ class PersonPersonalDetailsChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_STATUS_CHANGED,
-      )
-    }
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PERSON_NAME_CHANGED,
+        IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
       )
     }
   }

@@ -5,7 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
@@ -17,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class PersonSentencesChangedEventTest {
+class PrisonVisitChangedEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -25,26 +26,25 @@ class PersonSentencesChangedEventTest {
 
   private val nomsNumber = "A1234BC"
 
-  @Test
-  fun `will process an person sentences changed notification`() {
-    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonVisit.BOOKED,
+      HmppsDomainEventName.PrisonVisit.CHANGED,
+      HmppsDomainEventName.PrisonVisit.CANCELLED,
+    ],
+  )
+  fun `will process an visit changed notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
         "version": "1.0",
-        "description": "This is when a prisoner index record has been updated.",
+        "description": "Prison visit changed",
         "occurredAt": "2024-08-14T12:33:34+01:00",
+        "prisonerId": "$nomsNumber",
         "additionalInformation": {
-          "categoriesChanged": ["SENTENCE"]
-        },
-        "personReference": {
-          "identifiers": [
-            {
-              "type": "NOMS", 
-              "value": "$nomsNumber"
-             }
-          ]
+          "reference": "nx-ce-vq-ry"
         }
       }
       """.trimIndent().replace("\n", "")
@@ -64,13 +64,19 @@ class PersonSentencesChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_STATUS_CHANGED,
+        IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
       )
     }
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_SENTENCES_CHANGED,
+        IntegrationEventType.PRISON_VISITS_CHANGED,
+      )
+    }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        IntegrationEventType.VISIT_CHANGED,
       )
     }
   }

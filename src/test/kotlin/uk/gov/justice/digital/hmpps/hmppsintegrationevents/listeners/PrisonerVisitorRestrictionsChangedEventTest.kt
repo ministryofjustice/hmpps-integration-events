@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 
 @ActiveProfiles("test")
 @JsonTest
-class PersonContactsChangedEventTest {
+class PrisonerVisitorRestrictionsChangedEventTest {
   private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
 
@@ -29,20 +29,21 @@ class PersonContactsChangedEventTest {
   @ParameterizedTest
   @ValueSource(
     strings = [
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
-      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
     ],
   )
-  fun `will process an prisoner contact notification`(eventType: String) {
+  fun `will process an visitor restriction notification`(eventType: String) {
     val message =
       """
       {
         "eventType": "$eventType",
-        "version": 1,
-        "description": "A contact has been added to a prisoner",
+        "version": "1.0",
+        "description": "This event is raised when a global visitor restriction is created or updated.",
         "occurredAt": "2024-08-14T12:33:34+01:00",
+        "additionalInformation": {
+          "contactPersonId": "7551236"
+        },
         "personReference": {
           "identifiers": [
             {
@@ -60,7 +61,7 @@ class PersonContactsChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED,
       )
     } just runs
 
@@ -69,7 +70,7 @@ class PersonContactsChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED,
       )
     }
   }
