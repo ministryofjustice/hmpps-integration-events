@@ -26,7 +26,7 @@ class PrisonerPersonalDetailsChangedEventTest {
   private val nomsNumber = "A1234BC"
 
   @Test
-  fun `will process an person details changed notification`() {
+  fun `will process an prisoner personal details changed notification`() {
     val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
     val message =
       """

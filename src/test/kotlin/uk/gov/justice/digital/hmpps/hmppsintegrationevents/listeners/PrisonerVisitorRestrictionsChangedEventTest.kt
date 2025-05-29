@@ -33,7 +33,7 @@ class PrisonerVisitorRestrictionsChangedEventTest {
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
     ],
   )
-  fun `will process an visitor restriction notification`(eventType: String) {
+  fun `will process an prison visitor restriction notification`(eventType: String) {
     val message =
       """
       {
