@@ -33,6 +33,7 @@ data class AdditionalInformation(
   @JsonProperty("registerTypeCode") val registerTypeCode: String? = null,
   @JsonProperty("nomsNumber") val nomsNumber: String? = null,
   @JsonProperty("prisonerId") val prisonerId: String? = null,
+  @JsonProperty("prisonerNumber") val prisonerNumber: String? = null,
   @JsonProperty("alertCode") val alertCode: String? = null,
   @JsonProperty("contactPersonId") val contactPersonId: String? = null,
   @JsonProperty("reference") val reference: String? = null,

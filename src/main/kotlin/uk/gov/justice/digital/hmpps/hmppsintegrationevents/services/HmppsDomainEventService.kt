@@ -62,6 +62,7 @@ class HmppsDomainEventService(
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
       ?: hmppsEvent.additionalInformation?.nomsNumber
       ?: hmppsEvent.additionalInformation?.prisonerId
+      ?: hmppsEvent.additionalInformation?.prisonerNumber
       ?: hmppsEvent.prisonerId
 
     return nomsNumber?.let { noms ->

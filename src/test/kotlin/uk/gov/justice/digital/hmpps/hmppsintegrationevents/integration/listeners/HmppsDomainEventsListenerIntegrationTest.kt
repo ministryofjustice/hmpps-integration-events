@@ -540,4 +540,35 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/case-notes")
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = [
+    HmppsDomainEventName.Adjudication.Hearing.CREATED,
+    HmppsDomainEventName.Adjudication.Hearing.DELETED,
+    HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
+    HmppsDomainEventName.Adjudication.Punishments.CREATED,
+    HmppsDomainEventName.Adjudication.Report.CREATED
+  ])
+  fun `will process and save a adjudication changed event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "An adjudication has been created:  MDI-000169",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "prisonerNumber": "$nomsNumber"
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(1)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/reported-adjudications")
+  }
 }

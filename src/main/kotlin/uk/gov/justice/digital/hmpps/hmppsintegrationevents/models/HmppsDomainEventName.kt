@@ -130,4 +130,19 @@ object HmppsDomainEventName {
     const val CHANGED = "prison-visit.changed"
     const val CANCELLED = "prison-visit.cancelled"
   }
+
+  object Adjudication {
+    object Hearing {
+      const val CREATED = "adjudication.hearing.created"
+      const val COMPLETED = "adjudication.hearingCompleted.created"
+      const val DELETED = "adjudication.hearing.deleted"
+    }
+    object Punishments {
+      const val CREATED = "adjudication.punishments.created"
+    }
+    object Report {
+      const val CREATED = "adjudication.report.created"
+    }
+  }
+
 }

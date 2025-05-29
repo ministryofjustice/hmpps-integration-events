@@ -173,6 +173,14 @@ val PERSON_CASE_NOTE_EVENTS = listOf(
   HmppsDomainEventName.Person.CaseNote.DELETED,
 )
 
+val PERSON_ADJUDICATION_EVENTS = listOf(
+  HmppsDomainEventName.Adjudication.Hearing.CREATED,
+  HmppsDomainEventName.Adjudication.Hearing.DELETED,
+  HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
+  HmppsDomainEventName.Adjudication.Punishments.CREATED,
+  HmppsDomainEventName.Adjudication.Report.CREATED
+)
+
 val VISIT_CHANGED_EVENTS = listOf(
   HmppsDomainEventName.PrisonVisit.BOOKED,
   HmppsDomainEventName.PrisonVisit.CHANGED,
@@ -311,7 +319,7 @@ enum class IntegrationEventType(
   ),
   PERSON_REPORTED_ADJUDICATIONS_CHANGED(
     "v1/persons/{hmppsId}/reported-adjudications",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_ADJUDICATION_EVENTS.contains(it.eventType) },
   ),
   PERSON_NUMBER_OF_CHILDREN_CHANGED(
     "v1/persons/{hmppsId}/number-of-children",
