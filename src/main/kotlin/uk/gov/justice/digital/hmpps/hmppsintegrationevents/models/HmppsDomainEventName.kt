@@ -91,6 +91,9 @@ object HmppsDomainEventName {
         const val UPSERTED = "prison-offender-events.prisoner.person-restriction.upserted"
         const val DELETED = "prison-offender-events.prisoner.person-restriction.deleted"
       }
+      object NonAssociationDetail {
+        const val CHANGED = "prison-offender-events.prisoner.non-association-detail.changed"
+      }
     }
   }
 
@@ -145,4 +148,10 @@ object HmppsDomainEventName {
     }
   }
 
+  object NonAssociations {
+    const val CREATED = "non-associations.created"
+    const val AMENDED = "non-associations.amended"
+    const val CLOSED = "non-associations.closed"
+    const val DELETED = "non-associations.deleted"
+  }
 }

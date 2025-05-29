@@ -65,6 +65,11 @@ val NEW_PERSON_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
 )
 
+val NEW_PRISONER_EVENTS = listOf(
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+)
+
 enum class PrisonerChangedCategory {
   IDENTIFIERS,
   PERSONAL_DETAILS,
@@ -179,6 +184,14 @@ val PERSON_ADJUDICATION_EVENTS = listOf(
   HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
   HmppsDomainEventName.Adjudication.Punishments.CREATED,
   HmppsDomainEventName.Adjudication.Report.CREATED
+)
+
+val PERSON_NON_ASSOCIATION_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
+  HmppsDomainEventName.NonAssociations.CREATED,
+  HmppsDomainEventName.NonAssociations.AMENDED,
+  HmppsDomainEventName.NonAssociations.CLOSED,
+  HmppsDomainEventName.NonAssociations.DELETED,
 )
 
 val VISIT_CHANGED_EVENTS = listOf(
@@ -365,7 +378,7 @@ enum class IntegrationEventType(
   ),
   PRISONER_NON_ASSOCIATIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/non-associations",
-    { false },
+    { NEW_PRISONER_EVENTS.contains(it.eventType) || PERSON_NON_ASSOCIATION_EVENTS.contains(it.eventType) },
   ),
   PRISON_VISITS_CHANGED(
     "v1/prison/{prisonId}/visit/search",

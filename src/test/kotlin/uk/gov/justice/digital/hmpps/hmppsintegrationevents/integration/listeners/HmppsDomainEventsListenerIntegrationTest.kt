@@ -571,4 +571,40 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/reported-adjudications")
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = [
+    HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
+    HmppsDomainEventName.NonAssociations.CREATED,
+    HmppsDomainEventName.NonAssociations.AMENDED,
+    HmppsDomainEventName.NonAssociations.CLOSED,
+    HmppsDomainEventName.NonAssociations.DELETED,
+  ])
+  fun `will process and save a non-association event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "A prisoner non-association detail record has changed",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(1)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/{prisonId}/prisoners/$crn/non-associations")
+  }
 }
