@@ -49,25 +49,25 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
 
 val PRISONER_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
 
 val NEW_PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
 
 val NEW_PRISONER_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
 
 enum class PrisonerChangedCategory {

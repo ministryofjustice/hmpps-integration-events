@@ -31,7 +31,7 @@ class PrisonerChangedEventTest {
     strings = [
       HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
       HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
     ],
   )
   fun `will process an prisoner changed notification`(eventType: String) {
