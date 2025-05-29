@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -21,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotif
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
+import java.time.Duration
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -471,7 +474,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
     ],
   )
-  fun `will process and save a prisoner created event SQS message`(eventType: String) {
+  fun `will process and save a prisoner created + received event SQS messages`(eventType: String) {
     val message = """
     {
       "eventType": "$eventType",
@@ -496,16 +499,48 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(3)
-    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
-    savedEvents[0].hmppsId.shouldBe(crn)
-    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
-    savedEvents[1].eventType.shouldBe(IntegrationEventType.PRISONERS_CHANGED)
-    savedEvents[1].hmppsId.shouldBe(crn)
-    savedEvents[1].url.shouldBe("https://localhost:8443/v1/prison/prisoners")
-    savedEvents[2].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
-    savedEvents[2].hmppsId.shouldBe(crn)
-    savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
+    savedEvents.size.shouldBe(16)
+    val eventTypes = savedEvents.map { it.eventType }
+    val hmppsIds = savedEvents.map { it.hmppsId }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContainExactlyInAnyOrder(
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+        IntegrationEventType.PERSON_CASE_NOTES_CHANGED,
+        IntegrationEventType.PERSON_NAME_CHANGED,
+        IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
+        IntegrationEventType.PERSON_SENTENCES_CHANGED,
+        IntegrationEventType.PERSON_PROTECTED_CHARACTERISTICS_CHANGED,
+        IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED,
+        IntegrationEventType.PERSON_NUMBER_OF_CHILDREN_CHANGED,
+        IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
+        IntegrationEventType.PERSON_IMAGES_CHANGED,
+        IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
+        IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
+        IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+        IntegrationEventType.PRISONERS_CHANGED,
+        IntegrationEventType.PRISONER_CHANGED,
+        IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
+      )
+    hmppsIds.shouldContainOnly(crn)
+    urls.shouldContainExactlyInAnyOrder(
+      "https://localhost:8443/v1/persons/$crn",
+      "https://localhost:8443/v1/persons/$crn/case-notes",
+      "https://localhost:8443/v1/persons/$crn/name",
+      "https://localhost:8443/v1/persons/$crn/cell-location",
+      "https://localhost:8443/v1/persons/$crn/sentences",
+      "https://localhost:8443/v1/persons/$crn/protected-characteristics",
+      "https://localhost:8443/v1/persons/$crn/reported-adjudications",
+      "https://localhost:8443/v1/persons/$crn/number-of-children",
+      "https://localhost:8443/v1/persons/$crn/physical-characteristics",
+      "https://localhost:8443/v1/persons/$crn/images",
+      "https://localhost:8443/v1/persons/$crn/health-and-diet",
+      "https://localhost:8443/v1/persons/$crn/care-needs",
+      "https://localhost:8443/v1/persons/$crn/languages",
+      "https://localhost:8443/v1/prison/prisoners",
+      "https://localhost:8443/v1/prison/prisoners/$crn",
+      "https://localhost:8443/v1/prison/{prisonId}/prisoners/$crn/non-associations",
+    )
   }
 
   @Test
