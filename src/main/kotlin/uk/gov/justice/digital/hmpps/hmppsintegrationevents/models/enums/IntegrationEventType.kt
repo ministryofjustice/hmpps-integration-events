@@ -406,7 +406,7 @@ enum class IntegrationEventType(
   ),
   VISIT_FROM_EXTERNAL_SYSTEM_CREATED(
     "v1/visit/id/by-client-ref/{clientVisitReference}",
-    { false },
+    { false }, // Probably want to add clientVisitReference to visit created domain event
   ),
   CONTACT_CHANGED(
     "v1/contacts/{contactId}",
