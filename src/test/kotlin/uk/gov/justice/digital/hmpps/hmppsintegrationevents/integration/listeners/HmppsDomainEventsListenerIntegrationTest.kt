@@ -23,7 +23,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotif
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
-import java.time.Duration
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -506,22 +505,22 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     eventTypes.shouldContainExactlyInAnyOrder(
       IntegrationEventType.PERSON_STATUS_CHANGED,
-        IntegrationEventType.PERSON_CASE_NOTES_CHANGED,
-        IntegrationEventType.PERSON_NAME_CHANGED,
-        IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
-        IntegrationEventType.PERSON_SENTENCES_CHANGED,
-        IntegrationEventType.PERSON_PROTECTED_CHARACTERISTICS_CHANGED,
-        IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED,
-        IntegrationEventType.PERSON_NUMBER_OF_CHILDREN_CHANGED,
-        IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
-        IntegrationEventType.PERSON_IMAGES_CHANGED,
-        IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
-        IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
-        IntegrationEventType.PERSON_LANGUAGES_CHANGED,
-        IntegrationEventType.PRISONERS_CHANGED,
-        IntegrationEventType.PRISONER_CHANGED,
-        IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
-      )
+      IntegrationEventType.PERSON_CASE_NOTES_CHANGED,
+      IntegrationEventType.PERSON_NAME_CHANGED,
+      IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
+      IntegrationEventType.PERSON_SENTENCES_CHANGED,
+      IntegrationEventType.PERSON_PROTECTED_CHARACTERISTICS_CHANGED,
+      IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED,
+      IntegrationEventType.PERSON_NUMBER_OF_CHILDREN_CHANGED,
+      IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
+      IntegrationEventType.PERSON_IMAGES_CHANGED,
+      IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
+      IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
+      IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+      IntegrationEventType.PRISONERS_CHANGED,
+      IntegrationEventType.PRISONER_CHANGED,
+      IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
+    )
     hmppsIds.shouldContainOnly(crn)
     urls.shouldContainExactlyInAnyOrder(
       "https://localhost:8443/v1/persons/$crn",
