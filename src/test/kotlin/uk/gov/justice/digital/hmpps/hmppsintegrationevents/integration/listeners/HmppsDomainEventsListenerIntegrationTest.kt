@@ -465,11 +465,13 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
-  ])
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+    ],
+  )
   fun `will process and save a prisoner changed event SQS message`(eventType: String) {
     val message = """
     {
@@ -508,11 +510,13 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    HmppsDomainEventName.Person.CaseNote.CREATED,
-    HmppsDomainEventName.Person.CaseNote.UPDATED,
-    HmppsDomainEventName.Person.CaseNote.DELETED
-  ])
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.Person.CaseNote.CREATED,
+      HmppsDomainEventName.Person.CaseNote.UPDATED,
+      HmppsDomainEventName.Person.CaseNote.DELETED,
+    ],
+  )
   fun `will process and save a case note changed event SQS message`(eventType: String) {
     val message = """
     {
@@ -542,13 +546,15 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    HmppsDomainEventName.Adjudication.Hearing.CREATED,
-    HmppsDomainEventName.Adjudication.Hearing.DELETED,
-    HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
-    HmppsDomainEventName.Adjudication.Punishments.CREATED,
-    HmppsDomainEventName.Adjudication.Report.CREATED
-  ])
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.Adjudication.Hearing.CREATED,
+      HmppsDomainEventName.Adjudication.Hearing.DELETED,
+      HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
+      HmppsDomainEventName.Adjudication.Punishments.CREATED,
+      HmppsDomainEventName.Adjudication.Report.CREATED,
+    ],
+  )
   fun `will process and save a adjudication changed event SQS message`(eventType: String) {
     val message = """
     {
@@ -573,13 +579,15 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
-    HmppsDomainEventName.NonAssociations.CREATED,
-    HmppsDomainEventName.NonAssociations.AMENDED,
-    HmppsDomainEventName.NonAssociations.CLOSED,
-    HmppsDomainEventName.NonAssociations.DELETED,
-  ])
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
+      HmppsDomainEventName.NonAssociations.CREATED,
+      HmppsDomainEventName.NonAssociations.AMENDED,
+      HmppsDomainEventName.NonAssociations.CLOSED,
+      HmppsDomainEventName.NonAssociations.DELETED,
+    ],
+  )
   fun `will process and save a non-association event SQS message`(eventType: String) {
     val message = """
     {

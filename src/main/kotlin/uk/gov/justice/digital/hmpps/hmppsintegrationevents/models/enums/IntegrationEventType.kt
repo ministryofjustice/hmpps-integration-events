@@ -49,25 +49,25 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
 )
 
 val PRISONER_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
 )
 
 val NEW_PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
 )
 
 val NEW_PRISONER_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
 )
 
 enum class PrisonerChangedCategory {
@@ -79,7 +79,7 @@ enum class PrisonerChangedCategory {
   SENTENCE,
   RESTRICTED_PATIENT,
   INCENTIVE_LEVEL,
-  PHYSICAL_DETAILS
+  PHYSICAL_DETAILS,
 }
 
 val PERSON_ADDRESS_EVENTS = listOf(
@@ -183,7 +183,7 @@ val PERSON_ADJUDICATION_EVENTS = listOf(
   HmppsDomainEventName.Adjudication.Hearing.DELETED,
   HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
   HmppsDomainEventName.Adjudication.Punishments.CREATED,
-  HmppsDomainEventName.Adjudication.Report.CREATED
+  HmppsDomainEventName.Adjudication.Report.CREATED,
 )
 
 val PERSON_NON_ASSOCIATION_EVENTS = listOf(
@@ -287,21 +287,21 @@ enum class IntegrationEventType(
   PERSON_NAME_CHANGED(
     "v1/persons/{hmppsId}/name",
     {
-      NEW_PERSON_EVENTS.contains(it.eventType)
-        || (
-          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
-            && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name) ?: false)
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name) ?: false)
           )
     },
   ),
   PERSON_CELL_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/cell-location",
     {
-      NEW_PERSON_EVENTS.contains(it.eventType)
-        || (
-        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
-          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.LOCATION.name) ?: false)
-        )
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.LOCATION.name) ?: false)
+          )
     },
   ),
   PERSON_RISK_CATEGORIES_CHANGED(
@@ -311,11 +311,11 @@ enum class IntegrationEventType(
   PERSON_SENTENCES_CHANGED(
     "v1/persons/{hmppsId}/sentences",
     {
-      NEW_PERSON_EVENTS.contains(it.eventType)
-        || (
-        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
-          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.SENTENCE.name) ?: false)
-        )
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.SENTENCE.name) ?: false)
+          )
     },
   ),
   PERSON_OFFENCES_CHANGED(
@@ -341,11 +341,11 @@ enum class IntegrationEventType(
   PERSON_PHYSICAL_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/physical-characteristics",
     {
-      NEW_PERSON_EVENTS.contains(it.eventType)
-        || (
-        it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
-          && (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name) ?: false)
-        )
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name) ?: false)
+          )
     },
   ),
   PERSON_IMAGES_CHANGED(

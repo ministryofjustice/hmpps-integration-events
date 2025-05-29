@@ -33,7 +33,7 @@ class AdjudicationEventTest {
       HmppsDomainEventName.Adjudication.Hearing.DELETED,
       HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
       HmppsDomainEventName.Adjudication.Punishments.CREATED,
-      HmppsDomainEventName.Adjudication.Report.CREATED
+      HmppsDomainEventName.Adjudication.Report.CREATED,
     ],
   )
   fun `will process an adjudication notification`(eventType: String) {

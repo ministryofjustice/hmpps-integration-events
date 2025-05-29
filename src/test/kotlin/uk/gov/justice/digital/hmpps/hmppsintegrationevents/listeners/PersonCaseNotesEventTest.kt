@@ -31,7 +31,7 @@ class PersonCaseNotesEventTest {
     strings = [
       HmppsDomainEventName.Person.CaseNote.CREATED,
       HmppsDomainEventName.Person.CaseNote.UPDATED,
-      HmppsDomainEventName.Person.CaseNote.DELETED
+      HmppsDomainEventName.Person.CaseNote.DELETED,
     ],
   )
   fun `will process an case note notification`(eventType: String) {

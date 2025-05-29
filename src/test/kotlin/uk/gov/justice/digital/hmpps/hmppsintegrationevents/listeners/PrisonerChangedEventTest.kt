@@ -27,11 +27,13 @@ class PrisonerChangedEventTest {
   private val nomsNumber = "A1234BC"
 
   @ParameterizedTest
-  @ValueSource(strings = [
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
-    HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
-  ])
+  @ValueSource(
+    strings = [
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED,
+    ],
+  )
   fun `will process an prisoner changed notification`(eventType: String) {
     val message =
       """
