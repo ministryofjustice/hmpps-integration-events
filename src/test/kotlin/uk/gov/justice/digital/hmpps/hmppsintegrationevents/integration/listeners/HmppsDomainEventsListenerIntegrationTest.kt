@@ -506,4 +506,38 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[2].hmppsId.shouldBe(crn)
     savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = [
+    HmppsDomainEventName.Person.CaseNote.CREATED,
+    HmppsDomainEventName.Person.CaseNote.UPDATED,
+    HmppsDomainEventName.Person.CaseNote.DELETED
+  ])
+  fun `will process and save a case note changed event SQS message`(eventType: String) {
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "A case note has been created for a person",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    savedEvents.size.shouldBe(1)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_CASE_NOTES_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/case-notes")
+  }
 }
