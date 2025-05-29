@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
@@ -108,5 +109,110 @@ class PrisonerEventTest {
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PRISONER_CHANGED) }
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PRISONERS_CHANGED) }
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED) }
+  }
+
+  @Test
+  fun `will process an prisoner personal details changed event`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message =
+      """
+      {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "This is when a prisoner index record has been updated.",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "additionalInformation": {
+          "categoriesChanged": ["PERSONAL_DETAILS"]
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
+        }
+      }
+      """.trimIndent().replace("\n", "")
+
+    val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_NAME_CHANGED) }
+  }
+
+  @Test
+  fun `will process an prisoner sentence changed event`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message =
+      """
+      {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "This is when a prisoner index record has been updated.",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "additionalInformation": {
+          "categoriesChanged": ["SENTENCE"]
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
+        }
+      }
+      """.trimIndent().replace("\n", "")
+
+    val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_SENTENCES_CHANGED) }
+  }
+
+  @Test
+  fun `will process an prisoner location changed notification`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message =
+      """
+      {
+        "eventType": "$eventType",
+        "version": "1.0",
+        "description": "This is when a prisoner index record has been updated.",
+        "occurredAt": "2024-08-14T12:33:34+01:00",
+        "additionalInformation": {
+          "categoriesChanged": ["LOCATION"]
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "NOMS", 
+              "value": "$nomsNumber"
+             }
+          ]
+        }
+      }
+      """.trimIndent().replace("\n", "")
+
+    val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
+    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
+
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
+
+    hmppsDomainEventsListener.onDomainEvent(payload)
+
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_CELL_LOCATION_CHANGED) }
   }
 }
