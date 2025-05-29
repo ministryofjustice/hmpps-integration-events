@@ -293,7 +293,7 @@ enum class IntegrationEventType(
   ),
   PERSON_RISK_CATEGORIES_CHANGED(
     "v1/persons/{hmppsId}/risks/categories",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_SENTENCES_CHANGED(
     "v1/persons/{hmppsId}/sentences",
@@ -307,7 +307,7 @@ enum class IntegrationEventType(
   ),
   PERSON_OFFENCES_CHANGED(
     "v1/persons/{hmppsId}/offences",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_RESPONSIBLE_OFFICER_CHANGED(
     "v1/persons/{hmppsId}/person-responsible-officer",
