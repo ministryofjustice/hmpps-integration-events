@@ -323,13 +323,19 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(2)
+    savedEvents.size.shouldBe(4)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_NAME_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/name")
+    savedEvents[2].eventType.shouldBe(IntegrationEventType.PRISONERS_CHANGED)
+    savedEvents[2].hmppsId.shouldBe(crn)
+    savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners")
+    savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
+    savedEvents[3].hmppsId.shouldBe(crn)
+    savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
   }
 
   @Test
@@ -359,13 +365,19 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(2)
+    savedEvents.size.shouldBe(4)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_SENTENCES_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/sentences")
+    savedEvents[2].eventType.shouldBe(IntegrationEventType.PRISONERS_CHANGED)
+    savedEvents[2].hmppsId.shouldBe(crn)
+    savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners")
+    savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
+    savedEvents[3].hmppsId.shouldBe(crn)
+    savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
   }
 
   @Test
@@ -395,13 +407,19 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(2)
+    savedEvents.size.shouldBe(4)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/persons/$crn/physical-characteristics")
+    savedEvents[2].eventType.shouldBe(IntegrationEventType.PRISONERS_CHANGED)
+    savedEvents[2].hmppsId.shouldBe(crn)
+    savedEvents[2].url.shouldBe("https://localhost:8443/v1/prison/prisoners")
+    savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
+    savedEvents[3].hmppsId.shouldBe(crn)
+    savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
   }
 
   @Test
