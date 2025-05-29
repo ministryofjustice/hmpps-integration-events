@@ -470,8 +470,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
     HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECIEVED
   ])
-  fun `will process and save a prisoner changed event SQS message`() {
-    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+  fun `will process and save a prisoner changed event SQS message`(eventType: String) {
     val message = """
     {
       "eventType": "$eventType",

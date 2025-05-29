@@ -61,6 +61,11 @@ object HmppsDomainEventName {
         const val TRANSFERRED = "person.community.manager.transferred"
       }
     }
+    object CaseNote {
+      const val CREATED = "person.case-note.created"
+      const val UPDATED = "person.case-note.updated"
+      const val DELETED = "person.case-note.deleted"
+    }
   }
 
   object PrisonerOffenderSearch {

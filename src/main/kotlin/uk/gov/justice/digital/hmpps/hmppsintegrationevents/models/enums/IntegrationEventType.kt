@@ -167,6 +167,12 @@ val PERSON_VISITOR_RESTRICTION_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
 )
 
+val PERSON_CASE_NOTE_EVENTS = listOf(
+  HmppsDomainEventName.Person.CaseNote.CREATED,
+  HmppsDomainEventName.Person.CaseNote.UPDATED,
+  HmppsDomainEventName.Person.CaseNote.DELETED,
+)
+
 val VISIT_CHANGED_EVENTS = listOf(
   HmppsDomainEventName.PrisonVisit.BOOKED,
   HmppsDomainEventName.PrisonVisit.CHANGED,
@@ -255,7 +261,7 @@ enum class IntegrationEventType(
   ),
   PERSON_CASE_NOTES_CHANGED(
     "v1/persons/{hmppsId}/case-notes",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_CASE_NOTE_EVENTS.contains(it.eventType) },
   ),
   PERSON_NAME_CHANGED(
     "v1/persons/{hmppsId}/name",
