@@ -54,7 +54,7 @@ class IEPReviewEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        any()
+        any(),
       )
     } just runs
 
@@ -63,7 +63,7 @@ class IEPReviewEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-          listOf(IntegrationEventType.PERSON_IEP_LEVEL_CHANGED),
+        listOf(IntegrationEventType.PERSON_IEP_LEVEL_CHANGED),
       )
     }
   }

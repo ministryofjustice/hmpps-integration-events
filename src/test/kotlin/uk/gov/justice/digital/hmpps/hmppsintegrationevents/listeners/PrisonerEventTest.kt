@@ -64,20 +64,20 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-      verify(exactly = 1) {
-          hmppsDomainEventService.execute(
-              hmppsDomainEvent,
-              match {
-                  it.containsAll(
-                      listOf(
-                          IntegrationEventType.PERSON_STATUS_CHANGED,
-                          IntegrationEventType.PRISONER_CHANGED,
-                          IntegrationEventType.PRISONERS_CHANGED
-                      )
-                  )
-              }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PRISONER_CHANGED,
+              IntegrationEventType.PRISONERS_CHANGED,
+            ),
           )
-      }
+        },
+      )
+    }
   }
 
   @ParameterizedTest
@@ -116,21 +116,21 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-   verify(exactly = 1) {
-          hmppsDomainEventService.execute(
-              hmppsDomainEvent,
-              match {
-                  it.containsAll(
-                      listOf(
-                          IntegrationEventType.PERSON_STATUS_CHANGED,
-                          IntegrationEventType.PRISONER_CHANGED,
-                          IntegrationEventType.PRISONERS_CHANGED,
-                          IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
-                      )
-                  )
-              }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PRISONER_CHANGED,
+              IntegrationEventType.PRISONERS_CHANGED,
+              IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
+            ),
           )
-      }
+        },
+      )
+    }
   }
 
   @Test
@@ -164,19 +164,19 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-      verify(exactly = 1) {
-          hmppsDomainEventService.execute(
-              hmppsDomainEvent,
-              match {
-                  it.containsAll(
-                      listOf(
-                          IntegrationEventType.PERSON_STATUS_CHANGED,
-                          IntegrationEventType.PERSON_NAME_CHANGED,
-                      )
-                  )
-              }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PERSON_NAME_CHANGED,
+            ),
           )
-      }
+        },
+      )
+    }
   }
 
   @Test
@@ -210,19 +210,19 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-  verify(exactly = 1) {
+    verify(exactly = 1) {
       hmppsDomainEventService.execute(
-          hmppsDomainEvent,
-          match {
-              it.containsAll(
-                  listOf(
-                      IntegrationEventType.PERSON_STATUS_CHANGED,
-                      IntegrationEventType.PERSON_SENTENCES_CHANGED,
-                  )
-              )
-          }
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PERSON_SENTENCES_CHANGED,
+            ),
+          )
+        },
       )
-  }
+    }
   }
 
   @Test
@@ -256,19 +256,19 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-      verify(exactly = 1) {
-          hmppsDomainEventService.execute(
-              hmppsDomainEvent,
-              match {
-                  it.containsAll(
-                      listOf(
-                          IntegrationEventType.PERSON_STATUS_CHANGED,
-                          IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
-                      )
-                  )
-              }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
+            ),
           )
-      }
+        },
+      )
+    }
   }
 
   @Test
@@ -302,18 +302,18 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-   verify(exactly = 1) {
+    verify(exactly = 1) {
       hmppsDomainEventService.execute(
-          hmppsDomainEvent,
-          match {
-              it.containsAll(
-                  listOf(
-                      IntegrationEventType.PERSON_STATUS_CHANGED,
-                      IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
-                  )
-              )
-          }
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
+            ),
+          )
+        },
       )
-  }
+    }
   }
 }

@@ -100,10 +100,10 @@ class PersonEventTest {
               IntegrationEventType.PERSON_IMAGES_CHANGED,
               IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
               IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
-              IntegrationEventType.PERSON_LANGUAGES_CHANGED
-            )
+              IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+            ),
           )
-        }
+        },
       )
     }
   }

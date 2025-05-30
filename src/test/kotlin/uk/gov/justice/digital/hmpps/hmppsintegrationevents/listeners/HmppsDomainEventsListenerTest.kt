@@ -194,10 +194,10 @@ class HmppsDomainEventsListenerTest {
           it.containsAll(
             listOf(
               IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
-              IntegrationEventType.PERSON_ALERTS_CHANGED
-            )
+              IntegrationEventType.PERSON_ALERTS_CHANGED,
+            ),
           )
-        }
+        },
       )
     }
   }

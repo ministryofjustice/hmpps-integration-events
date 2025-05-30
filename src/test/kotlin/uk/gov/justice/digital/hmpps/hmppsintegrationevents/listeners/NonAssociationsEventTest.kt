@@ -70,7 +70,7 @@ class NonAssociationsEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-          listOf(IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED),
+        listOf(IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED),
       )
     }
   }

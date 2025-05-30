@@ -59,20 +59,20 @@ class LocationEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-      verify(exactly = 1) {
-          hmppsDomainEventService.execute(
-              hmppsDomainEvent,
-              match {
-                  it.containsAll(
-                      listOf(
-                          IntegrationEventType.PRISON_LOCATION_CHANGED,
-                          IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
-                          IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED
-                      )
-                  )
-              }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PRISON_LOCATION_CHANGED,
+              IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
+              IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
+            ),
           )
-      }
+        },
+      )
+    }
   }
 
   @Disabled("This won't work until we handle missing hmppsIds")
