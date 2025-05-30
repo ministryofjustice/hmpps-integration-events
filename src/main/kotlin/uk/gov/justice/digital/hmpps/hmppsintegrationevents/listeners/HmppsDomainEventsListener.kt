@@ -38,18 +38,12 @@ class HmppsDomainEventsListener(
     log.info("Received message: $rawMessage")
     try {
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
-      determineEventProcess(hmppsDomainEvent)
+      val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
+      val matchingIntegrationEventTypes = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }
+      hmppsDomainEventService.execute(hmppsDomainEvent, matchingIntegrationEventTypes)
     } catch (e: Exception) {
       Sentry.captureException(unwrapSqsExceptions(e))
       throw e
-    }
-  }
-
-  private fun determineEventProcess(hmppsDomainEvent: HmppsDomainEvent) {
-    val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
-    val matchingIntegrationEventTypes = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }
-    for (integrationEventType in matchingIntegrationEventTypes) {
-      hmppsDomainEventService.execute(hmppsDomainEvent, integrationEventType)
     }
   }
 
