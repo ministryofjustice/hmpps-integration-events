@@ -40,7 +40,9 @@ class HmppsDomainEventsListener(
       val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
       val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
       val matchingIntegrationEventTypes = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }
-      hmppsDomainEventService.execute(hmppsDomainEvent, matchingIntegrationEventTypes)
+      if (matchingIntegrationEventTypes.isNotEmpty()) {
+        hmppsDomainEventService.execute(hmppsDomainEvent, matchingIntegrationEventTypes)
+      }
     } catch (e: Exception) {
       Sentry.captureException(unwrapSqsExceptions(e))
       throw e
