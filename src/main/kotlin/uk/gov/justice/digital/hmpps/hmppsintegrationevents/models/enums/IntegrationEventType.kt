@@ -188,10 +188,10 @@ val PERSON_ADJUDICATION_EVENTS = listOf(
 
 val PERSON_NON_ASSOCIATION_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
-  HmppsDomainEventName.NonAssociations.CREATED,
-  HmppsDomainEventName.NonAssociations.AMENDED,
-  HmppsDomainEventName.NonAssociations.CLOSED,
-  HmppsDomainEventName.NonAssociations.DELETED,
+//  HmppsDomainEventName.NonAssociations.CREATED,
+//  HmppsDomainEventName.NonAssociations.AMENDED,
+//  HmppsDomainEventName.NonAssociations.CLOSED,
+//  HmppsDomainEventName.NonAssociations.DELETED,
 )
 
 val VISIT_CHANGED_EVENTS = listOf(
