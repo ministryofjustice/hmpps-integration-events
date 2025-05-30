@@ -52,32 +52,23 @@ class PrisonVisitEventTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        any(),
-      )
-    } just runs
+      every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
-    hmppsDomainEventsListener.onDomainEvent(payload)
+      hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
-      )
-    }
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PRISON_VISITS_CHANGED,
-      )
-    }
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.VISIT_CHANGED,
-      )
-    }
+      verify(exactly = 1) {
+          hmppsDomainEventService.execute(
+              hmppsDomainEvent,
+              match {
+                  it.containsAll(
+                      listOf(
+                          IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
+                          IntegrationEventType.PRISON_VISITS_CHANGED,
+                          IntegrationEventType.VISIT_CHANGED
+                      )
+                  )
+              }
+          )
+      }
   }
 }

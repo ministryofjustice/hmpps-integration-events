@@ -40,6 +40,6 @@ class HmppsDomainEventsListenerPLPInductionUpdatedTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PLP_INDUCTION_SCHEDULE_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.PLP_INDUCTION_SCHEDULE_CHANGED)) }
   }
 }

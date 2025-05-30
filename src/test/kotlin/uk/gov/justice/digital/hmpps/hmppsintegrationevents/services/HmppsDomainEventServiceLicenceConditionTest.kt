@@ -23,10 +23,10 @@ class HmppsDomainEventServiceLicenceConditionTest {
 
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
-  private val repo = mockk<EventNotificationRepository>()
+  private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(repo = repo, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val crn = "X777776"
   private val nomsNumber = "A1234BC"
@@ -36,8 +36,8 @@ class HmppsDomainEventServiceLicenceConditionTest {
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
-    every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { repo.save(any()) } returnsArgument 0
+    every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
+    every { eventNotificationRepository.save(any()) } returnsArgument 0
   }
 
   @ParameterizedTest
@@ -55,10 +55,10 @@ class HmppsDomainEventServiceLicenceConditionTest {
     val hmppsMessage = message.replace("\\", "")
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.LICENCE_CONDITION_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.LICENCE_CONDITION_CHANGED))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.LICENCE_CONDITION_CHANGED,
           hmppsId = "X777776",

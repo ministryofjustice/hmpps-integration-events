@@ -54,7 +54,7 @@ class PersonEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, match { it.contains(IntegrationEventType.PERSON_STATUS_CHANGED) }) }
   }
 
   @ParameterizedTest

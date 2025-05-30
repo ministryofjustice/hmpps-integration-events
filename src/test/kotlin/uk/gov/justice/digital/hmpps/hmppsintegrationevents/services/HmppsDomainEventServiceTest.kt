@@ -38,10 +38,10 @@ class HmppsDomainEventServiceTest {
 
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 
-  private val repo = mockk<EventNotificationRepository>()
+  private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(repo = repo, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
   private val mockNomisId = "mockNomisId"
@@ -51,9 +51,9 @@ class HmppsDomainEventServiceTest {
   fun setup() {
     mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
-    every { repo.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), any()) } returns 1
-    every { repo.save(any()) } returnsArgument 0
+    every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
+    every { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), any()) } returns 1
+    every { eventNotificationRepository.save(any()) } returnsArgument 0
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
@@ -71,7 +71,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, IntegrationEventType.valueOf(integrationEvent))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.valueOf(integrationEvent),
           hmppsId = "X777776",
@@ -106,7 +106,7 @@ class HmppsDomainEventServiceTest {
 
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
 
-    verify { repo wasNot Called }
+    verify { eventNotificationRepository wasNot Called }
     assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
   }
 
@@ -191,7 +191,7 @@ class HmppsDomainEventServiceTest {
     every { probationIntegrationApiGateway.getPersonExists("X123456") } returns PersonExists(crn, false)
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
 
-    verify { repo wasNot Called }
+    verify { eventNotificationRepository wasNot Called }
     assertThat(exception.message, equalTo("Person with crn $crn not found"))
   }
 

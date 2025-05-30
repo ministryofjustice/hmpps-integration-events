@@ -37,20 +37,10 @@ class ResponsibleOfficerChangedEventTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
-      )
-    } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
-      )
-    }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED)) }
   }
 }

@@ -48,9 +48,19 @@ class HmppsDomainEventsListenerPNDAlertsTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) }
-    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED
+            )
+          )
+        }
+      )
+    }
   }
 
   @ParameterizedTest
@@ -71,14 +81,23 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) } just runs
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) }
-    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED
+            )
+          )
+        }
+      )
+    }
   }
 
   @ParameterizedTest
@@ -99,14 +118,23 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) } just runs
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) }
-    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED
+            )
+          )
+        }
+      )
+    }
   }
 
   @ParameterizedTest
@@ -127,13 +155,22 @@ class HmppsDomainEventsListenerPNDAlertsTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) } just runs
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) }
-    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED
+            )
+          )
+        }
+      )
+    }
   }
 }

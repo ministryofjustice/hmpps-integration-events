@@ -132,11 +132,11 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent("probation-case.registration.updated")
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent("probation-case.registration.updated")
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.MAPPA_DETAIL_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
   }
 
   @Test
@@ -183,13 +183,22 @@ class HmppsDomainEventsListenerTest {
         alertCode = "HA",
       )
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) } just runs
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_ALERTS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PND_ALERTS_CHANGED) }
-    verify(exactly = 2) { hmppsDomainEventService.execute(any(), any()) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED
+            )
+          )
+        }
+      )
+    }
   }
 }

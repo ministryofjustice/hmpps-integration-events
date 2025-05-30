@@ -46,6 +46,6 @@ class HmppsDomainEventsListenerLicenceConditionTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.LICENCE_CONDITION_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.LICENCE_CONDITION_CHANGED)) }
   }
 }
