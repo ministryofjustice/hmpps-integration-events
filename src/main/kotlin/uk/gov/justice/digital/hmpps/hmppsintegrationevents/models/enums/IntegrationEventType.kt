@@ -382,15 +382,15 @@ enum class IntegrationEventType(
   ),
   PRISONER_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/balances",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/balances",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_TRANSACTIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/transactions",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_NON_ASSOCIATIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/non-associations",
@@ -438,7 +438,7 @@ enum class IntegrationEventType(
   ),
   CONTACT_CHANGED(
     "v1/contacts/{contactId}",
-    { false },
+    { false }, // No specific event found
   ),
   PERSON_HEALTH_AND_DIET_CHANGED(
     "v1/persons/{hmppsId}/health-and-diet",
