@@ -35,10 +35,10 @@ class HmppsDomainEventsListenerROSHTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED)) }
   }
 }

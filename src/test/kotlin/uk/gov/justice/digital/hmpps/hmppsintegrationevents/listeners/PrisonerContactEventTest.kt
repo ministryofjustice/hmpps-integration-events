@@ -60,7 +60,7 @@ class PrisonerContactEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        any(),
       )
     } just runs
 
@@ -69,7 +69,7 @@ class PrisonerContactEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_CONTACTS_CHANGED,
+        listOf(IntegrationEventType.PERSON_CONTACTS_CHANGED),
       )
     }
   }

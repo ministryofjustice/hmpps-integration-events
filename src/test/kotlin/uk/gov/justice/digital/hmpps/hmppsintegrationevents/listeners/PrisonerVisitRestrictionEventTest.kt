@@ -57,7 +57,7 @@ class PrisonerVisitRestrictionEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
+        any(),
       )
     } just runs
 
@@ -66,7 +66,7 @@ class PrisonerVisitRestrictionEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
+        listOf(IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED),
       )
     }
   }

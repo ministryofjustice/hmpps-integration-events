@@ -54,7 +54,7 @@ class PersonEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, match { it.contains(IntegrationEventType.PERSON_STATUS_CHANGED) }) }
   }
 
   @ParameterizedTest
@@ -83,17 +83,28 @@ class PersonEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_CASE_NOTES_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_NAME_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_SENTENCES_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PROTECTED_CHARACTERISTICS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_NUMBER_OF_CHILDREN_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_IMAGES_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_CARE_NEEDS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_LANGUAGES_CHANGED) }
+    verify(exactly = 1) {
+      hmppsDomainEventService.execute(
+        hmppsDomainEvent,
+        match {
+          it.containsAll(
+            listOf(
+              IntegrationEventType.PERSON_STATUS_CHANGED,
+              IntegrationEventType.PERSON_CASE_NOTES_CHANGED,
+              IntegrationEventType.PERSON_NAME_CHANGED,
+              IntegrationEventType.PERSON_SENTENCES_CHANGED,
+              IntegrationEventType.PERSON_PROTECTED_CHARACTERISTICS_CHANGED,
+              IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED,
+              IntegrationEventType.PERSON_NUMBER_OF_CHILDREN_CHANGED,
+              IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
+              IntegrationEventType.PERSON_IMAGES_CHANGED,
+              IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
+              IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
+              IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+            ),
+          )
+        },
+      )
+    }
   }
 }

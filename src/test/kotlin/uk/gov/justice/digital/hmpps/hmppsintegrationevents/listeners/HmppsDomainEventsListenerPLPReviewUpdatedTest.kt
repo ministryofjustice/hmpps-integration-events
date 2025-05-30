@@ -36,10 +36,10 @@ class HmppsDomainEventsListenerPLPReviewUpdatedTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED)) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED)) }
   }
 }
