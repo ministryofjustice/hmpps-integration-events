@@ -40,7 +40,7 @@ class AddressChangedEventTest {
     every {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_ADDRESS_CHANGED,
+        listOf(IntegrationEventType.PERSON_ADDRESS_CHANGED),
       )
     } just runs
 
@@ -49,7 +49,7 @@ class AddressChangedEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_ADDRESS_CHANGED,
+        listOf(IntegrationEventType.PERSON_ADDRESS_CHANGED),
       )
     }
   }

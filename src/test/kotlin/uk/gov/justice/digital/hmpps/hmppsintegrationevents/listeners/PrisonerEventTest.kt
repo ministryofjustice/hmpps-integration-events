@@ -64,9 +64,20 @@ class PrisonerEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PERSON_STATUS_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PRISONER_CHANGED) }
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.PRISONERS_CHANGED) }
+      verify(exactly = 1) {
+          hmppsDomainEventService.execute(
+              hmppsDomainEvent,
+              match {
+                  it.containsAll(
+                      listOf(
+                          IntegrationEventType.PERSON_STATUS_CHANGED,
+                          IntegrationEventType.PRISONER_CHANGED,
+                          IntegrationEventType.PRISONERS_CHANGED
+                      )
+                  )
+              }
+          )
+      }
   }
 
   @ParameterizedTest

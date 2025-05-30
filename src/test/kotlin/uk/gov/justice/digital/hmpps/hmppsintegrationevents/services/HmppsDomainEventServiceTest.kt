@@ -68,7 +68,7 @@ class HmppsDomainEventServiceTest {
   fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String, path: String) {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType, registerTypeCode)
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.valueOf(integrationEvent))
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.valueOf(integrationEvent)))
 
     verify(exactly = 1) {
       eventNotificationRepository.save(
@@ -86,10 +86,10 @@ class HmppsDomainEventServiceTest {
   fun `will process and save a mapps domain registration event message`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent()
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "X777776",
@@ -104,7 +104,7 @@ class HmppsDomainEventServiceTest {
   fun `will not process and save a domain registration event message with no CRN or no Nomis Number`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
-    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
+    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
 
     verify { eventNotificationRepository wasNot Called }
     assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
@@ -112,14 +112,14 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will not insert or update db if a relevant event is already stored`() {
-    every { repo.existsByHmppsIdAndEventType("X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) } returns true
+    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent()
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED))
 
-    verify(exactly = 0) { repo.save(any()) }
-    verify(exactly = 0) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 0) { eventNotificationRepository.save(any()) }
+    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) }
   }
 
   @ParameterizedTest
@@ -133,10 +133,10 @@ class HmppsDomainEventServiceTest {
   fun `will process and save a risk changed domain event message`(eventType: String) {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = eventType)
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.RISK_SCORE_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
@@ -149,14 +149,14 @@ class HmppsDomainEventServiceTest {
 
   @Test
   fun `will not try to insert or update db if a relevant risk score changed event is already stored`() {
-    every { repo.existsByHmppsIdAndEventType("X777776", IntegrationEventType.RISK_SCORE_CHANGED) } returns true
+    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.RISK_SCORE_CHANGED) } returns true
 
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.RISK_SCORE_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
-    verify(exactly = 0) { repo.save(any()) }
-    verify(exactly = 0) { repo.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }
+    verify(exactly = 0) { eventNotificationRepository.save(any()) }
+    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }
   }
 
   @Test
@@ -169,10 +169,10 @@ class HmppsDomainEventServiceTest {
 
     val event = generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockNomisId,
@@ -189,7 +189,7 @@ class HmppsDomainEventServiceTest {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"CRN\",\"value\":\"$crn\"}]")
 
     every { probationIntegrationApiGateway.getPersonExists("X123456") } returns PersonExists(crn, false)
-    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
+    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
 
     verify { eventNotificationRepository wasNot Called }
     assertThat(exception.message, equalTo("Person with crn $crn not found"))
@@ -203,10 +203,10 @@ class HmppsDomainEventServiceTest {
 
     val event = generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", hmppsMessage)
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockCrn,
@@ -221,10 +221,10 @@ class HmppsDomainEventServiceTest {
   fun `will process and save a prisoner released domain event message for event with message with reason is RELEASED`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(eventType = "prison-offender-events.prisoner.released", reason = "RELEASED", identifiers = "[{\"type\":\"nomsNumber\",\"value\":\"$mockNomisId\"}]")
 
-    hmppsDomainEventService.execute(event, IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockCrn,
@@ -257,10 +257,10 @@ class HmppsDomainEventServiceTest {
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
-    hmppsDomainEventService.execute(event, IntegrationEventType.PERSON_STATUS_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_STATUS_CHANGED))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.PERSON_STATUS_CHANGED,
           hmppsId = "X777776",
@@ -289,10 +289,10 @@ class HmppsDomainEventServiceTest {
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
-    hmppsDomainEventService.execute(event, IntegrationEventType.PERSON_PND_ALERTS_CHANGED)
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_PND_ALERTS_CHANGED))
 
     verify(exactly = 1) {
-      repo.save(
+      eventNotificationRepository.save(
         EventNotification(
           eventType = IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
           hmppsId = "X777776",

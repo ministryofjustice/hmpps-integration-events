@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundEx
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -26,7 +25,7 @@ class HmppsDomainEventService(
 ) {
   private val objectMapper = ObjectMapper()
 
-  fun execute(hmppsDomainEvent: HmppsDomainEvent, eventType: IntegrationEventType) {
+  fun execute(hmppsDomainEvent: HmppsDomainEvent, integrationEventTypes: List<IntegrationEventType>) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
     val hmppsId = getHmppsId(hmppsEvent) ?: throw NotFoundException("Identifier could not be found in domain event message ${hmppsDomainEvent.messageId}")
 
@@ -69,29 +68,6 @@ class HmppsDomainEventService(
 
     return nomsNumber?.let { noms ->
       probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
-    }
-  }
-
-  private fun getEventNotification(
-    integrationEventType: IntegrationEventType,
-    hmppsId: String,
-    additionalInformation: AdditionalInformation?,
-  ): EventNotification? {
-    val eventType = IntegrationEventType.from(integrationEventType)
-    if (eventType != null) {
-      return EventNotification(
-        eventType = eventType,
-        hmppsId = hmppsId,
-        url = "$baseUrl/${eventType.path(hmppsId, additionalInformation)}",
-        lastModifiedDateTime = LocalDateTime.now(),
-      )
-    }
-    return null
-  }
-
-  private fun handleMessage(notification: EventNotification) {
-    if (!repo.existsByHmppsIdAndEventType(notification.hmppsId, notification.eventType)) {
-      repo.save(notification)
     }
   }
 }

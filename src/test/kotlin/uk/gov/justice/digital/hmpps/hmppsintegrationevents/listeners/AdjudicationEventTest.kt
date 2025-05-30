@@ -65,7 +65,7 @@ class AdjudicationEventTest {
     verify(exactly = 1) {
       hmppsDomainEventService.execute(
         hmppsDomainEvent,
-        IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED,
+        listOf(IntegrationEventType.PERSON_REPORTED_ADJUDICATIONS_CHANGED),
       )
     }
   }

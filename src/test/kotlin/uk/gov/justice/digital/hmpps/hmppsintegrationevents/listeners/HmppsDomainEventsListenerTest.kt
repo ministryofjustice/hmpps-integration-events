@@ -40,11 +40,11 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_SCORE_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.RISK_SCORE_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.RISK_SCORE_CHANGED)) }
   }
 
   @ParameterizedTest
@@ -108,11 +108,11 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.valueOf(integrationEvent)) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.valueOf(integrationEvent)) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.valueOf(integrationEvent))) }
   }
 
   @Test
@@ -120,11 +120,11 @@ class HmppsDomainEventsListenerTest {
     val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent()
     val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.MAPPA_DETAIL_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(rawMessage)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.MAPPA_DETAIL_CHANGED) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
   }
 
   @Test

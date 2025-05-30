@@ -42,7 +42,7 @@ class HmppsDomainEventsListenerLicenceConditionTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, IntegrationEventType.LICENCE_CONDITION_CHANGED) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.LICENCE_CONDITION_CHANGED)) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
