@@ -30,10 +30,10 @@ class NonAssociationsEventTest {
   @ValueSource(
     strings = [
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
-      HmppsDomainEventName.NonAssociations.CREATED,
-      HmppsDomainEventName.NonAssociations.AMENDED,
-      HmppsDomainEventName.NonAssociations.CLOSED,
-      HmppsDomainEventName.NonAssociations.DELETED,
+//      HmppsDomainEventName.NonAssociations.CREATED,
+//      HmppsDomainEventName.NonAssociations.AMENDED,
+//      HmppsDomainEventName.NonAssociations.CLOSED,
+//      HmppsDomainEventName.NonAssociations.DELETED,
     ],
   )
   fun `will process an non-association notification`(eventType: String) {

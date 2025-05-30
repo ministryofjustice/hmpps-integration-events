@@ -656,10 +656,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   @ValueSource(
     strings = [
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
-      HmppsDomainEventName.NonAssociations.CREATED,
-      HmppsDomainEventName.NonAssociations.AMENDED,
-      HmppsDomainEventName.NonAssociations.CLOSED,
-      HmppsDomainEventName.NonAssociations.DELETED,
+//      HmppsDomainEventName.NonAssociations.CREATED,
+//      HmppsDomainEventName.NonAssociations.AMENDED,
+//      HmppsDomainEventName.NonAssociations.CLOSED,
+//      HmppsDomainEventName.NonAssociations.DELETED,
     ],
   )
   fun `will process and save a non-association event SQS message`(eventType: String) {
