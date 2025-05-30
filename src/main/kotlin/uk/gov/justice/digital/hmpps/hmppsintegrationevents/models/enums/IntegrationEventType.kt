@@ -402,19 +402,31 @@ enum class IntegrationEventType(
   ),
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
-    { LOCATION_EVENTS.contains(it.eventType) },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_LOCATION_CHANGED(
     "v1/prison/{prisonId}/location/{locationKey}",
-    { LOCATION_EVENTS.contains(it.eventType) },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_RESIDENTIAL_DETAILS_CHANGED(
     "v1/prison/{prisonId}/residential-details",
-    { LOCATION_EVENTS.contains(it.eventType) },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_CAPACITY_CHANGED(
     "v1/prison/{prisonId}/capacity",
-    { PRISON_CAPACITY_EVENTS.contains(it.eventType) },
+    {
+      false
+      // PRISON_CAPACITY_EVENTS.contains(it.eventType)
+    },
   ),
   VISIT_CHANGED(
     "v1/visit/{visitReference}",
