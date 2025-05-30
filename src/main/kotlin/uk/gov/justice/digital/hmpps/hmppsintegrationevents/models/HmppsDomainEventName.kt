@@ -61,11 +61,17 @@ object HmppsDomainEventName {
         const val TRANSFERRED = "person.community.manager.transferred"
       }
     }
+    object CaseNote {
+      const val CREATED = "person.case-note.created"
+      const val UPDATED = "person.case-note.updated"
+      const val DELETED = "person.case-note.deleted"
+    }
   }
 
   object PrisonerOffenderSearch {
     object Prisoner {
       const val CREATED = "prisoner-offender-search.prisoner.created"
+      const val RECEIVED = "prisoner-offender-search.prisoner.received"
       const val UPDATED = "prisoner-offender-search.prisoner.updated"
       const val RELEASED = "prisoner-offender-search.prisoner.released"
     }
@@ -74,6 +80,20 @@ object HmppsDomainEventName {
   object PrisonOffenderEvents {
     object Prisoner {
       const val RELEASED = "prison-offender-events.prisoner.released"
+      const val CONTACT_ADDED = "prison-offender-events.prisoner.contact-added"
+      const val CONTACT_APPROVED = "prison-offender-events.prisoner.contact-approved"
+      const val CONTACT_UNAPPROVED = "prison-offender-events.prisoner.contact-unapproved"
+      const val CONTACT_REMOVED = "prison-offender-events.prisoner.contact-removed"
+      object Restriction {
+        const val CHANGED = "prison-offender-events.prisoner.restriction.changed"
+      }
+      object PersonRestriction {
+        const val UPSERTED = "prison-offender-events.prisoner.person-restriction.upserted"
+        const val DELETED = "prison-offender-events.prisoner.person-restriction.deleted"
+      }
+      object NonAssociationDetail {
+        const val CHANGED = "prison-offender-events.prisoner.non-association-detail.changed"
+      }
     }
   }
 
@@ -97,6 +117,54 @@ object HmppsDomainEventName {
   object Assessment {
     object Summary {
       const val PRODUCED = "assessment.summary.produced"
+    }
+  }
+
+  object Incentives {
+    object IEPReview {
+      const val INSERTED = "incentives.iep-review.inserted"
+      const val UPDATED = "incentives.iep-review.updated"
+      const val DELETED = "incentives.iep-review.deleted"
+    }
+  }
+
+  object PrisonVisit {
+    const val BOOKED = "prison-visit.booked"
+    const val CHANGED = "prison-visit.changed"
+    const val CANCELLED = "prison-visit.cancelled"
+  }
+
+  object Adjudication {
+    object Hearing {
+      const val CREATED = "adjudication.hearing.created"
+      const val COMPLETED = "adjudication.hearingCompleted.created"
+      const val DELETED = "adjudication.hearing.deleted"
+    }
+    object Punishments {
+      const val CREATED = "adjudication.punishments.created"
+    }
+    object Report {
+      const val CREATED = "adjudication.report.created"
+    }
+  }
+
+  object NonAssociations {
+    const val CREATED = "non-associations.created"
+    const val AMENDED = "non-associations.amended"
+    const val CLOSED = "non-associations.closed"
+    const val DELETED = "non-associations.deleted"
+  }
+
+  object LocationsInsidePrison {
+    object Location {
+      const val CREATED = "location.inside.prison.created"
+      const val AMENDED = "location.inside.prison.amended"
+      const val DELETED = "location.inside.prison.deleted"
+      const val DEACTIVATED = "location.inside.prison.deactivated"
+      const val REACTIVATED = "location.inside.prison.reactivated"
+    }
+    object SignedOpCapacity {
+      const val AMENDED = "location.inside.prison.signed-op-cap.amended"
     }
   }
 }

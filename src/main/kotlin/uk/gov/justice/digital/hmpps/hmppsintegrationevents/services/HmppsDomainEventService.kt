@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundEx
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -30,7 +31,7 @@ class HmppsDomainEventService(
     val hmppsId = getHmppsId(hmppsEvent)
 
     if (hmppsId != null) {
-      val notification = getEventNotification(eventType, hmppsId)
+      val notification = getEventNotification(eventType, hmppsId, hmppsEvent.additionalInformation)
 
       if (notification != null) {
         handleMessage(notification)
@@ -61,19 +62,25 @@ class HmppsDomainEventService(
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
       ?: hmppsEvent.additionalInformation?.nomsNumber
       ?: hmppsEvent.additionalInformation?.prisonerId
+      ?: hmppsEvent.additionalInformation?.prisonerNumber
+      ?: hmppsEvent.prisonerId
 
     return nomsNumber?.let { noms ->
       probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
     }
   }
 
-  private fun getEventNotification(integrationEventType: IntegrationEventType, hmppsId: String): EventNotification? {
+  private fun getEventNotification(
+    integrationEventType: IntegrationEventType,
+    hmppsId: String,
+    additionalInformation: AdditionalInformation?,
+  ): EventNotification? {
     val eventType = IntegrationEventType.from(integrationEventType)
     if (eventType != null) {
       return EventNotification(
         eventType = eventType,
         hmppsId = hmppsId,
-        url = "$baseUrl/${eventType.path(hmppsId)}",
+        url = "$baseUrl/${eventType.path(hmppsId, additionalInformation)}",
         lastModifiedDateTime = LocalDateTime.now(),
       )
     }

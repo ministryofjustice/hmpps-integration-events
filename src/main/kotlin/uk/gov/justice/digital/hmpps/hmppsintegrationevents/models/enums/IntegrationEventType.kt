@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.VISOR_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WARRANT_SUMMONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import kotlin.collections.contains
 
@@ -48,7 +49,38 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
+
+val PRISONER_EVENTS = listOf(
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
+)
+
+val NEW_PERSON_EVENTS = listOf(
+  HmppsDomainEventName.ProbabtionCase.Engagement.CREATED,
+  HmppsDomainEventName.ProbabtionCase.PrisonIdentifier.ADDED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
+)
+
+val NEW_PRISONER_EVENTS = listOf(
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
+  HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
+)
+
+enum class PrisonerChangedCategory {
+  IDENTIFIERS,
+  PERSONAL_DETAILS,
+  ALERTS,
+  STATUS,
+  LOCATION,
+  SENTENCE,
+  RESTRICTED_PATIENT,
+  INCENTIVE_LEVEL,
+  PHYSICAL_DETAILS,
+}
 
 val PERSON_ADDRESS_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Address.CREATED,
@@ -122,6 +154,68 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
+val PERSON_CONTACT_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_UNAPPROVED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_REMOVED,
+)
+
+val PERSON_IEP_EVENTS = listOf(
+  HmppsDomainEventName.Incentives.IEPReview.INSERTED,
+  HmppsDomainEventName.Incentives.IEPReview.UPDATED,
+  HmppsDomainEventName.Incentives.IEPReview.DELETED,
+)
+
+val PERSON_VISITOR_RESTRICTION_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.UPSERTED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.PersonRestriction.DELETED,
+)
+
+val PERSON_CASE_NOTE_EVENTS = listOf(
+  HmppsDomainEventName.Person.CaseNote.CREATED,
+  HmppsDomainEventName.Person.CaseNote.UPDATED,
+  HmppsDomainEventName.Person.CaseNote.DELETED,
+)
+
+val PERSON_ADJUDICATION_EVENTS = listOf(
+  HmppsDomainEventName.Adjudication.Hearing.CREATED,
+  HmppsDomainEventName.Adjudication.Hearing.DELETED,
+  HmppsDomainEventName.Adjudication.Hearing.COMPLETED,
+  HmppsDomainEventName.Adjudication.Punishments.CREATED,
+  HmppsDomainEventName.Adjudication.Report.CREATED,
+)
+
+val PERSON_NON_ASSOCIATION_EVENTS = listOf(
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
+  HmppsDomainEventName.NonAssociations.CREATED,
+  HmppsDomainEventName.NonAssociations.AMENDED,
+  HmppsDomainEventName.NonAssociations.CLOSED,
+  HmppsDomainEventName.NonAssociations.DELETED,
+)
+
+val VISIT_CHANGED_EVENTS = listOf(
+  HmppsDomainEventName.PrisonVisit.BOOKED,
+  HmppsDomainEventName.PrisonVisit.CHANGED,
+  HmppsDomainEventName.PrisonVisit.CANCELLED,
+)
+
+val LOCATION_EVENTS = listOf(
+  HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.AMENDED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+)
+
+val PRISON_CAPACITY_EVENTS = listOf(
+  HmppsDomainEventName.LocationsInsidePrison.Location.CREATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DELETED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.DEACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.Location.REACTIVATED,
+  HmppsDomainEventName.LocationsInsidePrison.SignedOpCapacity.AMENDED,
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -172,27 +266,27 @@ enum class IntegrationEventType(
   ),
   PERSON_CONTACTS_CHANGED(
     "v1/persons/{hmppsId}/contacts",
-    { false },
+    { PERSON_CONTACT_EVENTS.contains(it.eventType) },
   ),
   PERSON_IEP_LEVEL_CHANGED(
     "v1/persons/{hmppsId}/iep-level",
-    { false },
+    { PERSON_IEP_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
-    "/v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
-    { false },
+    "v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
+    { PERSON_VISITOR_RESTRICTION_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",
-    { false },
+    { it.eventType == HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_FUTURE_VISITS_CHANGED(
     "v1/persons/{hmppsId}/visits/future",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   PERSON_ALERTS_CHANGED(
     "v1/persons/{hmppsId}/alerts",
@@ -204,127 +298,171 @@ enum class IntegrationEventType(
   ),
   PERSON_CASE_NOTES_CHANGED(
     "v1/persons/{hmppsId}/case-notes",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_CASE_NOTE_EVENTS.contains(it.eventType) },
   ),
   PERSON_NAME_CHANGED(
     "v1/persons/{hmppsId}/name",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name) ?: false)
+          )
+    },
   ),
   PERSON_CELL_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/cell-location",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.LOCATION.name) ?: false)
+          )
+    },
   ),
   PERSON_RISK_CATEGORIES_CHANGED(
     "v1/persons/{hmppsId}/risks/categories",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_SENTENCES_CHANGED(
     "v1/persons/{hmppsId}/sentences",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.SENTENCE.name) ?: false)
+          )
+    },
   ),
   PERSON_OFFENCES_CHANGED(
     "v1/persons/{hmppsId}/offences",
-    { false },
+    { false }, // Probably not needed
   ),
   PERSON_RESPONSIBLE_OFFICER_CHANGED(
-    "/v1/persons/{hmppsId}/person-responsible-officer",
+    "v1/persons/{hmppsId}/person-responsible-officer",
     { RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) },
   ),
   PERSON_PROTECTED_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/protected-characteristics",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_REPORTED_ADJUDICATIONS_CHANGED(
     "v1/persons/{hmppsId}/reported-adjudications",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_ADJUDICATION_EVENTS.contains(it.eventType) },
   ),
   PERSON_NUMBER_OF_CHILDREN_CHANGED(
     "v1/persons/{hmppsId}/number-of-children",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_PHYSICAL_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/physical-characteristics",
-    { false },
+    {
+      NEW_PERSON_EVENTS.contains(it.eventType) ||
+        (
+          it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name) ?: false)
+          )
+    },
   ),
   PERSON_IMAGES_CHANGED(
     "v1/persons/{hmppsId}/images",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_IMAGE_CHANGED(
     "v1/persons/{hmppsId}/images/{imageId}",
-    { false },
+    { false }, // Probably not needed
   ),
   PRISONERS_CHANGED(
     "v1/prison/prisoners",
-    { false },
+    { PRISONER_EVENTS.contains(it.eventType) },
   ),
   PRISONER_CHANGED(
     "v1/prison/prisoners/{hmppsId}",
-    { false },
+    { PRISONER_EVENTS.contains(it.eventType) },
   ),
   PRISONER_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/balances",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/balances",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_TRANSACTIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/transactions",
-    { false },
+    { false }, // No specific event found
   ),
   PRISONER_NON_ASSOCIATIONS_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/non-associations",
-    { false },
+    { NEW_PRISONER_EVENTS.contains(it.eventType) || PERSON_NON_ASSOCIATION_EVENTS.contains(it.eventType) },
   ),
   PRISON_VISITS_CHANGED(
     "v1/prison/{prisonId}/visit/search",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
-    { false },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_LOCATION_CHANGED(
     "v1/prison/{prisonId}/location/{locationKey}",
-    { false },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_RESIDENTIAL_DETAILS_CHANGED(
     "v1/prison/{prisonId}/residential-details",
-    { false },
+    {
+      false
+      // LOCATION_EVENTS.contains(it.eventType)
+    },
   ),
   PRISON_CAPACITY_CHANGED(
     "v1/prison/{prisonId}/capacity",
-    { false },
+    {
+      false
+      // PRISON_CAPACITY_EVENTS.contains(it.eventType)
+    },
   ),
   VISIT_CHANGED(
     "v1/visit/{visitReference}",
-    { false },
+    { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   VISIT_FROM_EXTERNAL_SYSTEM_CREATED(
     "v1/visit/id/by-client-ref/{clientVisitReference}",
-    { false },
+    { false }, // Probably want to add clientVisitReference to visit created domain event
   ),
   CONTACT_CHANGED(
     "v1/contacts/{contactId}",
-    { false },
+    { false }, // No specific event found
   ),
   PERSON_HEALTH_AND_DIET_CHANGED(
     "v1/persons/{hmppsId}/health-and-diet",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_CARE_NEEDS_CHANGED(
     "v1/persons/{hmppsId}/care-needs",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
-    { false },
+    { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
   ;
 
-  fun path(hmppsId: String) = pathTemplate.replace("{hmppsId}", hmppsId)
+  fun path(hmppsId: String, additionalInformation: AdditionalInformation?): String {
+    var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
+    additionalInformation?.let {
+      if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
+      if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)
+      if (it.key != null) replacedPath = replacedPath.replace("{locationKey}", it.key)
+    }
+    return replacedPath
+  }
 
   companion object {
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
