@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @Service
 @Configuration
 class HmppsDomainEventService(
-  @Autowired val repo: EventNotificationRepository,
+  @Autowired val eventNotificationRepository: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
   @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
   @Value("\${services.integration-api.url}") val baseUrl: String,
@@ -28,25 +28,27 @@ class HmppsDomainEventService(
 
   fun execute(hmppsDomainEvent: HmppsDomainEvent, eventType: IntegrationEventType) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
-    val hmppsId = getHmppsId(hmppsEvent)
+    val hmppsId = getHmppsId(hmppsEvent) ?: throw NotFoundException("Identifier could not be found in domain event message ${hmppsDomainEvent.messageId}")
 
-    if (hmppsId != null) {
-      val notification = getEventNotification(eventType, hmppsId, hmppsEvent.additionalInformation)
-
-      if (notification != null) {
-        handleMessage(notification)
+    for (integrationEventType in integrationEventTypes) {
+      val eventNotification = EventNotification(
+        eventType = integrationEventType,
+        hmppsId = hmppsId,
+        url = "$baseUrl/${integrationEventType.path(hmppsId, hmppsEvent.additionalInformation)}",
+        lastModifiedDateTime = LocalDateTime.now(),
+      )
+      if (!eventNotificationRepository.existsByHmppsIdAndEventType(hmppsId, integrationEventType)) {
+        eventNotificationRepository.save(eventNotification)
       }
-    } else {
-      throw NotFoundException("Identifier could not be found in domain event message ${hmppsDomainEvent.messageId}")
     }
   }
 
   /**
-   * The hmpps id is an id that the end client will use in on going processing.
+   * The hmpps id is an id that the end client will use in ongoing processing.
    * In the future when we have a core person record it will be that id
    * for now the id will default to the crn but if there is no crn it will be the noms number.
    * The end client that receives the messages must treat it as a hmpps_id and NOT a crn/noms number.
-   * A look up service exist to decode the hmpps_id into a crn or noms number.
+   * A look-up service exist to decode the hmpps_id into a crn or noms number.
    */
   private fun getHmppsId(hmppsEvent: HmppsDomainEventMessage): String? {
     val crn: String? = hmppsEvent.personReference?.findCrnIdentifier()
