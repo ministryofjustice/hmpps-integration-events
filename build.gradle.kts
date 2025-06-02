@@ -31,7 +31,7 @@ dependencies {
     exclude("org.apache.common", "commons-compress")
   }
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
-  testImplementation("org.testcontainers:localstack:1.21.0")
+  testImplementation("org.testcontainers:localstack:1.21.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.27.1")
   testImplementation("io.kotest:kotest-assertions-json-jvm:5.9.1")
