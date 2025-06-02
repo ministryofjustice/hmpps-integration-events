@@ -21,6 +21,7 @@ class HmppsDomainEventService(
   @Autowired val eventNotificationRepository: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
   @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
+  @Autowired val getPrisonIdService: GetPrisonIdService,
   @Value("\${services.integration-api.url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
@@ -80,6 +81,14 @@ class HmppsDomainEventService(
 
   private fun getPrisonId(hmppsEvent: HmppsDomainEventMessage): String? {
     val prisonId = hmppsEvent.prisonId ?: hmppsEvent.additionalInformation?.prisonId
+    if (prisonId != null) {
+      return prisonId
+    }
+
+    val nomsNumber = getNomisNumber(hmppsEvent)
+    if (nomsNumber != null) {
+      return getPrisonIdService.execute(nomsNumber)
+    }
 
     return null
   }
