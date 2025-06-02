@@ -60,11 +60,7 @@ class HmppsDomainEventService(
       }
     }
 
-    val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
-      ?: hmppsEvent.additionalInformation?.nomsNumber
-      ?: hmppsEvent.additionalInformation?.prisonerId
-      ?: hmppsEvent.additionalInformation?.prisonerNumber
-      ?: hmppsEvent.prisonerId
+    val nomsNumber = getNomisNumber(hmppsEvent)
 
     return nomsNumber?.let { noms ->
       probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
