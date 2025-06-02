@@ -81,6 +81,6 @@ class HmppsDomainEventService(
   private fun getPrisonId(hmppsEvent: HmppsDomainEventMessage): String? {
     val prisonId = hmppsEvent.prisonId ?: hmppsEvent.additionalInformation?.prisonId
 
-    return prisonId
+    return null
   }
 }

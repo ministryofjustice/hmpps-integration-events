@@ -152,7 +152,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   fun createHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
-    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
+    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"},{\"type\":\"NOMS\",\"value\":\"A1234BC\"}]",
     attributeEventTypes: String = eventType,
   ): HmppsDomainEvent = (
     HmppsDomainEvent(

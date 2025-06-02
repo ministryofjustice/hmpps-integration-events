@@ -41,7 +41,8 @@ class HmppsDomainEventServiceTest {
   private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
+  private val getPrisonIdService = mockk<GetPrisonIdService>()
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, getPrisonIdService, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
   private val mockNomisId = "mockNomisId"
@@ -58,6 +59,8 @@ class HmppsDomainEventServiceTest {
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
     every { probationIntegrationApiGateway.getPersonExists("X777776") } returns PersonExists("X777776", true)
+
+    every { getPrisonIdService.execute(mockNomisId) } returns null
   }
 
   @ParameterizedTest
@@ -160,17 +163,38 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will use the prison ID if it is found`() {
-    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.RISK_SCORE_CHANGED) } returns true
-
+  fun `will use the prison ID if it is found on the domain event`() {
     val prisonId = "MDI"
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(eventType = "assessment.summary.produced", prisonId = prisonId)
 
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
-    verify(exactly = 0) {
+    verify(exactly = 1) {
       eventNotificationRepository.save(
       EventNotification(
+          eventType = IntegrationEventType.RISK_SCORE_CHANGED,
+          hmppsId = "X777776",
+          prisonId = prisonId,
+          url = "$baseUrl/v1/persons/X777776/risks/scores",
+          lastModifiedDateTime = currentTime,
+        )
+      )
+    }
+    verify(exactly = 0) { getPrisonIdService.execute(any()) }
+    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }
+  }
+
+  @Test
+  fun `will get the prison ID from the getPrisonIdService`() {
+    val prisonId = "MDI"
+    every { getPrisonIdService.execute("A1234BC") } returns prisonId
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
+
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
+
+    verify(exactly = 1) {
+      eventNotificationRepository.save(
+        EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
           prisonId = prisonId,
@@ -280,6 +304,7 @@ class HmppsDomainEventServiceTest {
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
+    every { getPrisonIdService.execute("A1234BC") } returns null
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_STATUS_CHANGED))
 
     verify(exactly = 1) {
@@ -312,6 +337,7 @@ class HmppsDomainEventServiceTest {
     val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     every { probationIntegrationApiGateway.getPersonIdentifier("A1234BC") } returns PersonIdentifier("X777776", "A1234BC")
+    every { getPrisonIdService.execute("A1234BC") } returns null
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_PND_ALERTS_CHANGED))
 
     verify(exactly = 1) {
