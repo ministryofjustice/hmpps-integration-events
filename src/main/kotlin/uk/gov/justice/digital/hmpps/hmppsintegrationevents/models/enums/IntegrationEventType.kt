@@ -454,8 +454,9 @@ enum class IntegrationEventType(
   ),
   ;
 
-  fun path(hmppsId: String, additionalInformation: AdditionalInformation?): String {
+  fun path(hmppsId: String, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
+    if (prisonId != null) replacedPath = replacedPath.replace("{prisonId}", prisonId)
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
       if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)

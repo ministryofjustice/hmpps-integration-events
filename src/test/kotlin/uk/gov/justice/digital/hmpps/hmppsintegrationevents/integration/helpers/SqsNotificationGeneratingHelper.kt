@@ -55,7 +55,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   fun generateRawHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
-    identifiers: String = "[{\\\"type\\\":\\\"CRN\\\",\\\"value\\\":\\\"X777776\\\"}]",
+    identifiers: String = "[{\\\"type\\\":\\\"CRN\\\",\\\"value\\\":\\\"X777776\\\"},{\\\"type\\\":\\\"NOMS\\\",\\\"value\\\":\\\"A1234BC\\\"}]",
     messageEventType: String = eventType,
   ): String = (
     """
@@ -152,7 +152,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   fun createHmppsDomainEvent(
     eventType: String = "probation-case.registration.added",
     registerTypeCode: String = "MAPP",
-    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
+    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"},{\"type\":\"NOMS\",\"value\":\"A1234BC\"}]",
     attributeEventTypes: String = eventType,
   ): HmppsDomainEvent = (
     HmppsDomainEvent(
@@ -162,6 +162,19 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
       messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
     )
     )
+
+  fun createHmppsDomainEventWithPrisonId(
+    eventType: String = "probation-case.registration.added",
+    registerTypeCode: String = "MAPP",
+    identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
+    attributeEventTypes: String = eventType,
+    prisonId: String = "MDI",
+  ): HmppsDomainEvent = HmppsDomainEvent(
+    type = "Notification",
+    message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"prisonId\":\"$prisonId\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
+    messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+    messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
+  )
 
   fun createHmppsDomainEventWithoutRegisterType(
     eventType: String,

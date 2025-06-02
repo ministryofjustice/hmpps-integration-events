@@ -21,6 +21,7 @@ class HmppsDomainEventService(
   @Autowired val eventNotificationRepository: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
   @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
+  @Autowired val getPrisonIdService: GetPrisonIdService,
   @Value("\${services.integration-api.url}") val baseUrl: String,
 ) {
   private val objectMapper = ObjectMapper()
@@ -31,10 +32,12 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       if (!eventNotificationRepository.existsByHmppsIdAndEventType(hmppsId, integrationEventType)) {
+        val prisonId = getPrisonId(hmppsEvent)
         val eventNotification = EventNotification(
           eventType = integrationEventType,
           hmppsId = hmppsId,
-          url = "$baseUrl/${integrationEventType.path(hmppsId, hmppsEvent.additionalInformation)}",
+          prisonId = prisonId,
+          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId,hmppsEvent.additionalInformation)}",
           lastModifiedDateTime = LocalDateTime.now(),
         )
         eventNotificationRepository.save(eventNotification)
@@ -60,14 +63,34 @@ class HmppsDomainEventService(
       }
     }
 
+    val nomsNumber = getNomisNumber(hmppsEvent)
+
+    return nomsNumber?.let { noms ->
+      probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
+    }
+  }
+
+  private fun getNomisNumber(hmppsEvent: HmppsDomainEventMessage): String? {
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
       ?: hmppsEvent.additionalInformation?.nomsNumber
       ?: hmppsEvent.additionalInformation?.prisonerId
       ?: hmppsEvent.additionalInformation?.prisonerNumber
       ?: hmppsEvent.prisonerId
 
-    return nomsNumber?.let { noms ->
-      probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
+    return nomsNumber
+  }
+
+  private fun getPrisonId(hmppsEvent: HmppsDomainEventMessage): String? {
+    val prisonId = hmppsEvent.prisonId ?: hmppsEvent.additionalInformation?.prisonId
+    if (prisonId != null) {
+      return prisonId
     }
+
+    val nomsNumber = getNomisNumber(hmppsEvent)
+    if (nomsNumber != null) {
+      return getPrisonIdService.execute(nomsNumber)
+    }
+
+    return null
   }
 }

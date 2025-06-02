@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -24,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,11 +40,21 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   val nomsNumber = "mockNomsNumber"
   val crn = "mockCrn"
+  val prisonId = "MDI"
+
+  val prisonerSearchMockServer = PrisonerSearchMockServer()
 
   @BeforeEach
   fun setup() {
     repo.deleteAll()
     ProbationIntegrationApiExtension.server.stubGetPersonIdentifier(nomsNumber, crn)
+    prisonerSearchMockServer.start()
+    prisonerSearchMockServer.stubGetPrisoner(nomsNumber, prisonId)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    prisonerSearchMockServer.stop()
   }
 
   @Test
@@ -294,7 +306,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/visits/future")
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PRISON_VISITS_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
-    savedEvents[1].url.shouldBe("https://localhost:8443/v1/prison/{prisonId}/visit/search")
+    savedEvents[1].url.shouldBe("https://localhost:8443/v1/prison/$prisonId/visit/search")
     savedEvents[2].eventType.shouldBe(IntegrationEventType.VISIT_CHANGED)
     savedEvents[2].hmppsId.shouldBe(crn)
     savedEvents[2].url.shouldBe("https://localhost:8443/v1/visit/$visitReference")
@@ -540,7 +552,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "https://localhost:8443/v1/persons/$crn/languages",
       "https://localhost:8443/v1/prison/prisoners",
       "https://localhost:8443/v1/prison/prisoners/$crn",
-      "https://localhost:8443/v1/prison/{prisonId}/prisoners/$crn/non-associations",
+      "https://localhost:8443/v1/prison/$prisonId/prisoners/$crn/non-associations",
     )
   }
 
@@ -687,7 +699,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents.size.shouldBe(1)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
-    savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/{prisonId}/prisoners/$crn/non-associations")
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/$prisonId/prisoners/$crn/non-associations")
   }
 
   @Disabled("This won't work until we handle missing hmppsIds")
@@ -729,9 +741,9 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
     )
     urls.shouldContainExactlyInAnyOrder(
-      "https://localhost:8443/v1/prison/{prisonId}/location/$locationKey",
-      "https://localhost:8443/v1/prison/{prisonId}/residential-hierarchy",
-      "https://localhost:8443/v1/prison/{prisonId}/residential-details",
+      "https://localhost:8443/v1/prison/$prisonId/location/$locationKey",
+      "https://localhost:8443/v1/prison/$prisonId/residential-hierarchy",
+      "https://localhost:8443/v1/prison/$prisonId/residential-details",
     )
   }
 
@@ -764,6 +776,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val urls = savedEvents.map { it.url }
 
     eventTypes.shouldContain(IntegrationEventType.PRISON_CAPACITY_CHANGED)
-    urls.shouldContain("https://localhost:8443/v1/prison/{prisonId}/capacity")
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/capacity")
   }
 }

@@ -11,6 +11,7 @@ data class HmppsDomainEventMessage(
   @JsonProperty("additionalInformation") val additionalInformation: AdditionalInformation?,
   @JsonProperty("reason") val reason: String? = null,
   @JsonProperty("prisonerId") val prisonerId: String? = null,
+  @JsonProperty("prisonId") val prisonId: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -39,6 +40,7 @@ data class AdditionalInformation(
   @JsonProperty("reference") val reference: String? = null,
   @JsonProperty("categoriesChanged") val categoriesChanged: List<String>? = emptyList(),
   @JsonProperty("key") val key: String? = null,
+  @JsonProperty("prisonId") val prisonId: String? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
     registerTypeCode.contains(this.registerTypeCode)

@@ -26,7 +26,8 @@ class HmppsDomainEventServiceLicenceConditionTest {
   private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, baseUrl)
+  private val getPrisonIdService = mockk<GetPrisonIdService>()
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, getPrisonIdService, baseUrl)
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val crn = "X777776"
   private val nomsNumber = "A1234BC"
@@ -38,6 +39,8 @@ class HmppsDomainEventServiceLicenceConditionTest {
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
     every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { eventNotificationRepository.save(any()) } returnsArgument 0
+
+    every { getPrisonIdService.execute(nomsNumber) } returns null
   }
 
   @ParameterizedTest
