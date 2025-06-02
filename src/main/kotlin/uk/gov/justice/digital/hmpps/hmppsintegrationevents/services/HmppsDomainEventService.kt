@@ -70,4 +70,14 @@ class HmppsDomainEventService(
       probationIntegrationApiGateway.getPersonIdentifier(noms)?.crn ?: noms
     }
   }
+
+  private fun getNomisNumber(hmppsEvent: HmppsDomainEventMessage): String? {
+    val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
+      ?: hmppsEvent.additionalInformation?.nomsNumber
+      ?: hmppsEvent.additionalInformation?.prisonerId
+      ?: hmppsEvent.additionalInformation?.prisonerNumber
+      ?: hmppsEvent.prisonerId
+
+    return nomsNumber
+  }
 }
