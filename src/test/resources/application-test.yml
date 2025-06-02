@@ -30,6 +30,8 @@ services:
     password: "TestSecret"
   probation-integration:
     base-url: http://localhost:8445/
+  prisoner-search:
+    base-url: http://localhost:8446/
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4566

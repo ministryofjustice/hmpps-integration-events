@@ -71,6 +71,8 @@ services:
     password: ${CLIENT_SECRET}
   probation-integration:
     base-url: ${PROBATION_INTEGRATION_API_URL}
+  prisoner-search:
+    base-url: ${PRISONER_SEARCH_URL}
 
 hmpps.s3:
   buckets:

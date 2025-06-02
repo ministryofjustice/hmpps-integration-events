@@ -12,6 +12,7 @@ generic-service:
     SERVICES_INTEGRATION-API_URL: https://dev.integration-api.hmpps.service.justice.gov.uk
     HMPPS_AUTH_URL: https://sign-in-dev.hmpps.service.justice.gov.uk
     PROBATION_INTEGRATION_API_URL: https://external-api-and-delius-dev.hmpps.service.justice.gov.uk
+    PRISONER_SEARCH_URL: https://prisoner-search-dev.prison.service.justice.gov.uk
     SPRING_PROFILES_ACTIVE: dev
     SENTRY_ENVIRONMENT: dev
 
