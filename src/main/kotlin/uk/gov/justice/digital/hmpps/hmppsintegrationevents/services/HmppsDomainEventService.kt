@@ -34,6 +34,7 @@ class HmppsDomainEventService(
         val eventNotification = EventNotification(
           eventType = integrationEventType,
           hmppsId = hmppsId,
+          prisonId = getPrisonId(hmppsEvent),
           url = "$baseUrl/${integrationEventType.path(hmppsId, hmppsEvent.additionalInformation)}",
           lastModifiedDateTime = LocalDateTime.now(),
         )
@@ -75,5 +76,11 @@ class HmppsDomainEventService(
       ?: hmppsEvent.prisonerId
 
     return nomsNumber
+  }
+
+  private fun getPrisonId(hmppsEvent: HmppsDomainEventMessage): String? {
+    val prisonId = hmppsEvent.prisonId ?: hmppsEvent.additionalInformation?.prisonId
+
+    return prisonId
   }
 }

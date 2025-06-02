@@ -160,6 +160,29 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
+  fun `will use the prison ID if it is found`() {
+    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.RISK_SCORE_CHANGED) } returns true
+
+    val prisonId = "MDI"
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(eventType = "assessment.summary.produced", prisonId = prisonId)
+
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
+
+    verify(exactly = 0) {
+      eventNotificationRepository.save(
+      EventNotification(
+          eventType = IntegrationEventType.RISK_SCORE_CHANGED,
+          hmppsId = "X777776",
+          prisonId = prisonId,
+          url = "$baseUrl/v1/persons/X777776/risks/scores",
+          lastModifiedDateTime = currentTime,
+        )
+      )
+    }
+    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }
+  }
+
+  @Test
   fun `will process and save event message with no CRN and cannot find CRN by nomis number`() {
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns null
 
