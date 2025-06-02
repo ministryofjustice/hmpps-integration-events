@@ -39,6 +39,8 @@ class HmppsDomainEventServiceLicenceConditionTest {
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
     every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { eventNotificationRepository.save(any()) } returnsArgument 0
+
+    every { getPrisonIdService.execute(nomsNumber) } returns null
   }
 
   @ParameterizedTest

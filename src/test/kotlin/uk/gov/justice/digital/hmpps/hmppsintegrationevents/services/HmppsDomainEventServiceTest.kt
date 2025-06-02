@@ -61,6 +61,7 @@ class HmppsDomainEventServiceTest {
     every { probationIntegrationApiGateway.getPersonExists("X777776") } returns PersonExists("X777776", true)
 
     every { getPrisonIdService.execute(mockNomisId) } returns null
+    every { getPrisonIdService.execute("A1234BC") } returns null
   }
 
   @ParameterizedTest
