@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.PrisonerSearc
 
 @Service
 class GetPrisonIdService(
-  @Autowired val prisonerSearchGateway: PrisonerSearchGateway
+  @Autowired val prisonerSearchGateway: PrisonerSearchGateway,
 ) {
   fun execute(nomsNumber: String): String? {
     val prisoner = prisonerSearchGateway.getPrisoner(nomsNumber)

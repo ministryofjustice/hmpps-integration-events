@@ -171,13 +171,13 @@ class HmppsDomainEventServiceTest {
 
     verify(exactly = 1) {
       eventNotificationRepository.save(
-      EventNotification(
+        EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
           prisonId = prisonId,
           url = "$baseUrl/v1/persons/X777776/risks/scores",
           lastModifiedDateTime = currentTime,
-        )
+        ),
       )
     }
     verify(exactly = 0) { getPrisonIdService.execute(any()) }
@@ -200,7 +200,7 @@ class HmppsDomainEventServiceTest {
           prisonId = prisonId,
           url = "$baseUrl/v1/persons/X777776/risks/scores",
           lastModifiedDateTime = currentTime,
-        )
+        ),
       )
     }
     verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }

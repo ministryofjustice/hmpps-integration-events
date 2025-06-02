@@ -20,7 +20,7 @@ class GetPrisonIdServiceTest {
   val prisoner = POSPrisoner(prisonerNumber = nomsNumber, prisonId = prisonId, firstName = "John", lastName = "Smith")
 
   @BeforeEach
-  fun setup(){
+  fun setup() {
     Mockito.reset(prisonerSearchGateway)
   }
 
