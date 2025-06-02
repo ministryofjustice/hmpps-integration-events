@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -24,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,11 +40,21 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   val nomsNumber = "mockNomsNumber"
   val crn = "mockCrn"
+  val prisonId = "MDI"
+
+  val prisonerSearchMockServer = PrisonerSearchMockServer()
 
   @BeforeEach
   fun setup() {
     repo.deleteAll()
     ProbationIntegrationApiExtension.server.stubGetPersonIdentifier(nomsNumber, crn)
+    prisonerSearchMockServer.start()
+    prisonerSearchMockServer.stubGetPrisoner(nomsNumber, prisonId)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    prisonerSearchMockServer.stop()
   }
 
   @Test

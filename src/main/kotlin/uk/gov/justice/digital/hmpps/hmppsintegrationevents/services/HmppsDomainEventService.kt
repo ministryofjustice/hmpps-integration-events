@@ -32,11 +32,12 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       if (!eventNotificationRepository.existsByHmppsIdAndEventType(hmppsId, integrationEventType)) {
+        val prisonId = getPrisonId(hmppsEvent)
         val eventNotification = EventNotification(
           eventType = integrationEventType,
           hmppsId = hmppsId,
-          prisonId = getPrisonId(hmppsEvent),
-          url = "$baseUrl/${integrationEventType.path(hmppsId, hmppsEvent.additionalInformation)}",
+          prisonId = prisonId,
+          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId,hmppsEvent.additionalInformation)}",
           lastModifiedDateTime = LocalDateTime.now(),
         )
         eventNotificationRepository.save(eventNotification)
