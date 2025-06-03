@@ -20,6 +20,16 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean
 
   @Modifying
+  @Query("""
+    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, lastModifiedDateTime)
+    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.lastModifiedDateTime})
+    ON CONFLICT(url, eventType)
+    DO UPDATE SET
+      lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
+  """)
+  fun insertOrUpdate(eventNotification: EventNotification): Int
+
+  @Modifying
   @Query("update EventNotification e set e.lastModifiedDateTime = :dateTime where e.hmppsId = :hmppsId and e.eventType = :eventType")
   fun updateLastModifiedDateTimeByHmppsIdAndEventType(
     @Param("dateTime") dateTime: LocalDateTime,
