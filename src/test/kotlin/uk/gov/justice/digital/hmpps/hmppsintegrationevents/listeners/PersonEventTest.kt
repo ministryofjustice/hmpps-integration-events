@@ -101,6 +101,14 @@ class PersonEventTest {
               IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
               IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
               IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+              IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
+              IntegrationEventType.PERSON_ADDRESS_CHANGED,
+              IntegrationEventType.PERSON_CONTACTS_CHANGED,
+              IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
+              IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
+              IntegrationEventType.PERSON_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+              IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED
             ),
           )
         },

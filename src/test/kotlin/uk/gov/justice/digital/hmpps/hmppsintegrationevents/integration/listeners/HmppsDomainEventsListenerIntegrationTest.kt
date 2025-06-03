@@ -512,7 +512,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(16)
+    savedEvents.size.shouldBe(24)
     val eventTypes = savedEvents.map { it.eventType }
     val hmppsIds = savedEvents.map { it.hmppsId }
     val urls = savedEvents.map { it.url }
@@ -534,6 +534,15 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       IntegrationEventType.PRISONERS_CHANGED,
       IntegrationEventType.PRISONER_CHANGED,
       IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
+      IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
+      IntegrationEventType.PERSON_ADDRESS_CHANGED,
+      IntegrationEventType.PERSON_CONTACTS_CHANGED,
+      IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
+      IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
+      IntegrationEventType.PERSON_ALERTS_CHANGED,
+      IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+      IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED
+
     )
     hmppsIds.shouldContainOnly(crn)
     urls.shouldContainExactlyInAnyOrder(
@@ -553,6 +562,14 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "https://localhost:8443/v1/prison/prisoners",
       "https://localhost:8443/v1/prison/prisoners/$crn",
       "https://localhost:8443/v1/prison/$prisonId/prisoners/$crn/non-associations",
+      "https://localhost:8443/v1/persons/$crn/sentences/latest-key-dates-and-adjustments",
+      "https://localhost:8443/v1/persons/$crn/addresses",
+      "https://localhost:8443/v1/persons/$crn/contacts",
+      "https://localhost:8443/v1/persons/$crn/iep-level",
+      "https://localhost:8443/v1/persons/$crn/visit-restrictions",
+      "https://localhost:8443/v1/persons/$crn/alerts",
+      "https://localhost:8443/v1/pnd/persons/$crn/alerts",
+      "https://localhost:8443/v1/persons/$crn/person-responsible-officer"
     )
   }
 
