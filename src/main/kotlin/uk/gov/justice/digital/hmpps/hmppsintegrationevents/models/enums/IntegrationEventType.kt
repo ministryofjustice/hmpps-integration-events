@@ -238,7 +238,7 @@ enum class IntegrationEventType(
   ),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
     "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
-    { KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE_EVENTS.contains(it.eventType) },
   ),
   LICENCE_CONDITION_CHANGED(
     "v1/persons/{hmppsId}/licences/conditions",
@@ -262,15 +262,15 @@ enum class IntegrationEventType(
   ),
   PERSON_ADDRESS_CHANGED(
     "v1/persons/{hmppsId}/addresses",
-    { PERSON_ADDRESS_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_ADDRESS_EVENTS.contains(it.eventType) },
   ),
   PERSON_CONTACTS_CHANGED(
     "v1/persons/{hmppsId}/contacts",
-    { PERSON_CONTACT_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_CONTACT_EVENTS.contains(it.eventType) },
   ),
   PERSON_IEP_LEVEL_CHANGED(
     "v1/persons/{hmppsId}/iep-level",
-    { PERSON_IEP_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || PERSON_IEP_EVENTS.contains(it.eventType) },
   ),
   PERSON_VISITOR_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visitor/{contactId}/restrictions",
@@ -278,7 +278,7 @@ enum class IntegrationEventType(
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",
-    { it.eventType == HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || it.eventType == HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",
@@ -290,11 +290,11 @@ enum class IntegrationEventType(
   ),
   PERSON_ALERTS_CHANGED(
     "v1/persons/{hmppsId}/alerts",
-    { ALERT_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || ALERT_EVENTS.contains(it.eventType) },
   ),
   PERSON_PND_ALERTS_CHANGED(
     "v1/pnd/persons/{hmppsId}/alerts",
-    { ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || ALERT_EVENTS.contains(it.eventType) && PND_ALERT_TYPES.contains(it.additionalInformation!!.alertCode) },
   ),
   PERSON_CASE_NOTES_CHANGED(
     "v1/persons/{hmppsId}/case-notes",
@@ -340,7 +340,7 @@ enum class IntegrationEventType(
   ),
   PERSON_RESPONSIBLE_OFFICER_CHANGED(
     "v1/persons/{hmppsId}/person-responsible-officer",
-    { RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || RESPONSIBLE_OFFICER_EVENTS.contains(it.eventType) },
   ),
   PERSON_PROTECTED_CHARACTERISTICS_CHANGED(
     "v1/persons/{hmppsId}/protected-characteristics",
