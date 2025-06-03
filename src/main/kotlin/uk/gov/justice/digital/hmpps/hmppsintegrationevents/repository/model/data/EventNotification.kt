@@ -22,8 +22,8 @@ data class EventNotification(
   @Column(name = "EVENT_ID", nullable = false, unique = true)
   val eventId: Long? = null,
 
-  @Column(name = "HMPPS_ID", nullable = false)
-  val hmppsId: String,
+  @Column(name = "HMPPS_ID", nullable = true)
+  val hmppsId: String? = null,
 
   @Enumerated(EnumType.STRING)
   @Column(name = "EVENT_TYPE", nullable = false)
