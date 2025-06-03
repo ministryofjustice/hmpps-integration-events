@@ -108,7 +108,7 @@ class PersonEventTest {
               IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
               IntegrationEventType.PERSON_ALERTS_CHANGED,
               IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
-              IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED
+              IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
             ),
           )
         },

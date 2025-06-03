@@ -541,7 +541,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
       IntegrationEventType.PERSON_ALERTS_CHANGED,
       IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
-      IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED
+      IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
 
     )
     hmppsIds.shouldContainOnly(crn)
@@ -569,7 +569,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "https://localhost:8443/v1/persons/$crn/visit-restrictions",
       "https://localhost:8443/v1/persons/$crn/alerts",
       "https://localhost:8443/v1/pnd/persons/$crn/alerts",
-      "https://localhost:8443/v1/persons/$crn/person-responsible-officer"
+      "https://localhost:8443/v1/persons/$crn/person-responsible-officer",
     )
   }
 
