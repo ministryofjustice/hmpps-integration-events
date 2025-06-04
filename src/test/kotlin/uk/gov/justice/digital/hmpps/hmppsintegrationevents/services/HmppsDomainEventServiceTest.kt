@@ -54,7 +54,7 @@ class HmppsDomainEventServiceTest {
     every { LocalDateTime.now() } returns currentTime
     every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
     every { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), any()) } returns 1
-    every { eventNotificationRepository.save(any()) } returnsArgument 0
+    every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(mockCrn, mockNomisId)
@@ -75,7 +75,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.valueOf(integrationEvent)))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.valueOf(integrationEvent),
           hmppsId = "X777776",
@@ -93,7 +93,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "X777776",
@@ -114,18 +114,6 @@ class HmppsDomainEventServiceTest {
     assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
   }
 
-  @Test
-  fun `will not insert or update db if a relevant event is already stored`() {
-    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) } returns true
-
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent()
-
-    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED))
-
-    verify(exactly = 0) { eventNotificationRepository.save(any()) }
-    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.MAPPA_DETAIL_CHANGED) }
-  }
-
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -140,7 +128,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
@@ -152,18 +140,6 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not try to insert or update db if a relevant risk score changed event is already stored`() {
-    every { eventNotificationRepository.existsByHmppsIdAndEventType("X777776", IntegrationEventType.RISK_SCORE_CHANGED) } returns true
-
-    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
-
-    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
-
-    verify(exactly = 0) { eventNotificationRepository.save(any()) }
-    verify(exactly = 0) { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(currentTime, "X777776", IntegrationEventType.RISK_SCORE_CHANGED) }
-  }
-
-  @Test
   fun `will use the prison ID if it is found on the domain event`() {
     val prisonId = "MDI"
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(eventType = "assessment.summary.produced", prisonId = prisonId)
@@ -171,7 +147,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
@@ -194,7 +170,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
           hmppsId = "X777776",
@@ -220,7 +196,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockNomisId,
@@ -254,7 +230,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockCrn,
@@ -272,7 +248,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
           hmppsId = mockCrn,
@@ -309,7 +285,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_STATUS_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.PERSON_STATUS_CHANGED,
           hmppsId = "X777776",
@@ -342,7 +318,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_PND_ALERTS_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
           hmppsId = "X777776",
