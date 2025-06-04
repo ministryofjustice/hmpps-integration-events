@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 @Table(
   name = "EVENT_NOTIFICATION",
   indexes = [
-    Index(name = "idx_event_notification_url_event_type", columnList = "url, event_type")
+    Index(name = "idx_event_notification_url_event_type", columnList = "url, event_type", unique = true)
   ]
 )
 data class EventNotification(

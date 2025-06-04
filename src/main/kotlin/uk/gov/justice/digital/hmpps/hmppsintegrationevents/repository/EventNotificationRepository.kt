@@ -29,7 +29,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   """)
   fun insertOrUpdate(
     @Param("eventNotification") eventNotification: EventNotification,
-  ): EventNotification
+  )
 
   @Modifying
   @Query("update EventNotification e set e.lastModifiedDateTime = :dateTime where e.hmppsId = :hmppsId and e.eventType = :eventType")
