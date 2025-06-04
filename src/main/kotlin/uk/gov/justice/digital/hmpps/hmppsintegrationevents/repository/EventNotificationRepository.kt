@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository
 
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -20,6 +21,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean
 
   @Modifying
+  @Transactional
   @Query("""
     INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, lastModifiedDateTime)
     VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.lastModifiedDateTime})

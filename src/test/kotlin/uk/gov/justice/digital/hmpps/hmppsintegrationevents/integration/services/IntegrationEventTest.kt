@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.transaction.Transactional
 import junit.framework.AssertionFailedError
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions
@@ -90,7 +91,7 @@ class IntegrationEventTest {
   )
   fun willPublishPrisonEvent(prisonId: String?) {
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-      eventRepository.save(
+      eventRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "MockId",
