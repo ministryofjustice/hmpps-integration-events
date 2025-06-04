@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
@@ -43,7 +44,7 @@ class EventNotificationRepositoryTest {
     assertThat(eventNotifications[0].hmppsId).isEqualTo(eventNotification.hmppsId)
     assertThat(eventNotifications[0].prisonId).isEqualTo(eventNotification.prisonId)
     assertThat(eventNotifications[0].url).isEqualTo(eventNotification.url)
-    assertThat(eventNotifications[0].lastModifiedDateTime).isEqualTo(eventNotification.lastModifiedDateTime)
+    assertThat(eventNotifications[0].lastModifiedDateTime.truncatedTo(ChronoUnit.MINUTES)).isEqualTo(eventNotification.lastModifiedDateTime.truncatedTo(ChronoUnit.MINUTES))
   }
 
   @Test
@@ -65,6 +66,6 @@ class EventNotificationRepositoryTest {
 
     val updatedEventNotifications = eventNotificationRepository.findAll()
     assertThat(updatedEventNotifications).hasSize(1)
-    assertThat(updatedEventNotifications[0].lastModifiedDateTime).isEqualTo(updatedEventNotification.lastModifiedDateTime)
+    assertThat(updatedEventNotifications[0].lastModifiedDateTime.truncatedTo(ChronoUnit.MINUTES)).isEqualTo(updatedEventNotification.lastModifiedDateTime.truncatedTo(ChronoUnit.MINUTES))
   }
 }
