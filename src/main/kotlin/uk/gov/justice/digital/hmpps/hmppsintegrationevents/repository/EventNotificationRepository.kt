@@ -27,7 +27,9 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     DO UPDATE SET
       lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
   """)
-  fun insertOrUpdate(eventNotification: EventNotification): Int
+  fun insertOrUpdate(
+    @Param("eventNotification") eventNotification: EventNotification,
+  ): Int
 
   @Modifying
   @Query("update EventNotification e set e.lastModifiedDateTime = :dateTime where e.hmppsId = :hmppsId and e.eventType = :eventType")
