@@ -37,7 +37,7 @@ class HmppsDomainEventServiceROSHTest {
     every { LocalDateTime.now() } returns currentTime
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
     every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { eventNotificationRepository.save(any()) } returnsArgument 0
+    every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
   }
 
   @Test
@@ -50,7 +50,7 @@ class HmppsDomainEventServiceROSHTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED,
           hmppsId = crn,

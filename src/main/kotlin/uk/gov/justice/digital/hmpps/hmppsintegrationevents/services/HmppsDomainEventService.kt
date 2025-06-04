@@ -29,19 +29,17 @@ class HmppsDomainEventService(
   fun execute(hmppsDomainEvent: HmppsDomainEvent, integrationEventTypes: List<IntegrationEventType>) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
     val hmppsId = getHmppsId(hmppsEvent) ?: throw NotFoundException("Identifier could not be found in domain event message ${hmppsDomainEvent.messageId}")
+    val prisonId = getPrisonId(hmppsEvent)
 
     for (integrationEventType in integrationEventTypes) {
-      if (!eventNotificationRepository.existsByHmppsIdAndEventType(hmppsId, integrationEventType)) {
-        val prisonId = getPrisonId(hmppsEvent)
-        val eventNotification = EventNotification(
-          eventType = integrationEventType,
-          hmppsId = hmppsId,
-          prisonId = prisonId,
-          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId,hmppsEvent.additionalInformation)}",
-          lastModifiedDateTime = LocalDateTime.now(),
-        )
-        eventNotificationRepository.save(eventNotification)
-      }
+      val eventNotification = EventNotification(
+        eventType = integrationEventType,
+        hmppsId = hmppsId,
+        prisonId = prisonId,
+        url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId,hmppsEvent.additionalInformation)}",
+        lastModifiedDateTime = LocalDateTime.now(),
+      )
+      eventNotificationRepository.insertOrUpdate(eventNotification)
     }
   }
 

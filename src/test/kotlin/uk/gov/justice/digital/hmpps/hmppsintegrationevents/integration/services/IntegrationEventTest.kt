@@ -90,7 +90,7 @@ class IntegrationEventTest {
   )
   fun willPublishPrisonEvent(prisonId: String?) {
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-      eventRepository.save(
+      eventRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
           hmppsId = "MockId",

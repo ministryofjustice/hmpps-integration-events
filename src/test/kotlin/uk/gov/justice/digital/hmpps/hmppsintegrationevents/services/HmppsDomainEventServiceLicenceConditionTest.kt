@@ -38,7 +38,7 @@ class HmppsDomainEventServiceLicenceConditionTest {
     every { LocalDateTime.now() } returns currentTime
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
     every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { eventNotificationRepository.save(any()) } returnsArgument 0
+    every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 
     every { getPrisonIdService.execute(nomsNumber) } returns null
   }
@@ -61,7 +61,7 @@ class HmppsDomainEventServiceLicenceConditionTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.LICENCE_CONDITION_CHANGED))
 
     verify(exactly = 1) {
-      eventNotificationRepository.save(
+      eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.LICENCE_CONDITION_CHANGED,
           hmppsId = "X777776",
