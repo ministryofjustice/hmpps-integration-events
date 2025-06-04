@@ -33,7 +33,7 @@ class EventNotificationRepositoryTest {
       hmppsId = "MockId",
       prisonId = "MKI",
       url = "MockUrl",
-      lastModifiedDateTime = LocalDateTime.now().minusMinutes(6)
+      lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
     )
     eventNotificationRepository.insertOrUpdate(eventNotification)
 
@@ -53,7 +53,7 @@ class EventNotificationRepositoryTest {
       hmppsId = "MockId",
       prisonId = "MKI",
       url = "MockUrl",
-      lastModifiedDateTime = LocalDateTime.now().minusMinutes(6)
+      lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
     )
     eventNotificationRepository.insertOrUpdate(eventNotification)
 

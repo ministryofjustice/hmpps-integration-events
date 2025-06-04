@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import jakarta.transaction.Transactional
 import junit.framework.AssertionFailedError
 import net.javacrumbs.jsonunit.assertj.JsonAssertions
 import org.assertj.core.api.Assertions
