@@ -51,6 +51,19 @@ The [runbook](https://github.com/ministryofjustice/hmpps-integration-events/tree
 
 ## Get started locally
 
+1. Enable pre-commit hooks for formatting, linting, and secret scanning.
+
+   ```
+    # Install pipx if not already installed
+    brew install pipx
+    # Ensure the path to pipx-installed tools is active
+    pipx ensurepath
+    # Restart your terminal after running this
+    # Install pre-commit
+    pipx install pre-commit
+    # Install hooks into .git/hooks
+    pre-commit install
+   ```
 ### Local dependencies
 
 - [localstack](https://www.localstack.cloud/) a cloud software development framework to emulate AWS services.
