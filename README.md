@@ -39,7 +39,11 @@ This project has three asynchronous processes:
 
 To restrict the events that a consumer receives, the SNS subscription filter policy for each queue is updated every hour. To do this, we 
 1. Call the Integration API's config method to receive the updated consumer configurations.
-2. Update the SNS subscription filter policy to only allow the events that correspond to endpoints they have access to.  
+2. Update the SNS subscription filter policy.  
+
+We set the filter policies to only allow the events that 
+- Correspond to endpoints they have access to.
+- Match the filters they have on the Integration API (if any).
 
 #### 2. Listen for HMPPS Domain Events
 
