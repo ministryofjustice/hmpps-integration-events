@@ -9,6 +9,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -105,13 +106,22 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not process and save a domain registration event message with no CRN or no Nomis Number`() {
+  fun `will not process and save a domain registration event message with no CRN or no Nomis Number which requires a hmppsId`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
     val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
 
     verify { eventNotificationRepository wasNot Called }
-    assertThat(exception.message, equalTo("Identifier could not be found in domain event message ${event.messageId}"))
+    assertThat(exception.message, equalTo("Identifier could not be found in domain event message"))
+  }
+
+  @Test
+  fun `will process and save a domain registration event message with no CRN or no Nomis Number which doesn't require a hmppsId`() {
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
+
+    assertDoesNotThrow { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISON_LOCATION_CHANGED)) }
+
+    verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(any()) }
   }
 
   @ParameterizedTest

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_PROTECTION_CODE
@@ -454,8 +455,14 @@ enum class IntegrationEventType(
   ),
   ;
 
-  fun path(hmppsId: String, prisonId: String?, additionalInformation: AdditionalInformation?): String {
-    var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
+  fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
+    var replacedPath = pathTemplate
+    if (replacedPath.contains("{hmppsId}")) {
+      if (hmppsId == null) {
+        throw NotFoundException("Identifier could not be found in domain event message")
+      }
+      replacedPath = replacedPath.replace("{hmppsId}", hmppsId)
+    }
     if (prisonId != null) replacedPath = replacedPath.replace("{prisonId}", prisonId)
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
