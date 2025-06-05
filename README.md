@@ -48,7 +48,7 @@ Whenever a Domain event is received, we convert it to the corresponding Integrat
 
 #### 3. Send HMPPS Integration Events - Every 10 seconds
 
-Test
+Search the database for events older than 5 minutes. Add them to the Integration Events Topic and then delete them.
 
 ### Technologies
 
