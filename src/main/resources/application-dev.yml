@@ -51,7 +51,7 @@ hmpps.secret:
       queueId: bmadleysubscriberqueue
     KILCO:
       secretId: ${KILCO_FILTER_POLICY_SECRET_ID}
-      queueId: <client>subscriberqueue
+      queueId: kilcosubscriberqueue
 notifier:
   schedule:
     rate: 10000
