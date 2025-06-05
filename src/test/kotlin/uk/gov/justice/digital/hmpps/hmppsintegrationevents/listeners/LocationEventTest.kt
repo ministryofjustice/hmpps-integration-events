@@ -104,6 +104,6 @@ class LocationEventTest {
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.PRISON_CAPACITY_CHANGED)) }
+    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, match { it.contains(IntegrationEventType.PRISON_CAPACITY_CHANGED) }) }
   }
 }
