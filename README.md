@@ -27,20 +27,19 @@ A Kotlin Spring boot application which triggers SNS notifications by processing 
 ### How it works
 
 At a high level, this service 
-- listens for HMPPS Domain Events, 
-- transforms them into HMPPS Integration Events,
-- puts the Integration Event on the Integration Event Topic,
-- consumer queues subscribe to this event.
+1. Listens for HMPPS Domain Events
+2. Transforms them into HMPPS Integration Events
+3. Puts the Integration Event on the Integration Event Topic
+
+Consumers who want to receive Integration Events, [will need an SQS queue and Subscription to the Integration Events Topic created](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md#create-new-consumer-subscriber-queue-for-events). This will provide them with a queue that receives events when they are put on the Integration Event topic
 
 This project has three asynchronous processes:
 
 #### 1. Update filter policies - Every hour
 
-Consumers who want to receive Integration Events, [will have had an SQS queue and subscriber set up to the Integration Events Topic](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md#create-new-consumer-subscriber-queue-for-events). The events that are received by a consumer are put onto the queue from the Integration Event Topic. 
-
-To restrict the events that they receive, the filter policy for each queue is updated every hour. To do this, we 
-- call the Integration API's config method to receive the updated consumer configurations,
-- update the SNS subscription filter policy to only allow the events that correspond to endpoints they have access to  
+To restrict the events that a consumer receives, the SNS subscription filter policy for each queue is updated every hour. To do this, we 
+1. Call the Integration API's config method to receive the updated consumer configurations.
+2. Update the SNS subscription filter policy to only allow the events that correspond to endpoints they have access to.  
 
 #### 2. Listen for HMPPS Domain Events
 
