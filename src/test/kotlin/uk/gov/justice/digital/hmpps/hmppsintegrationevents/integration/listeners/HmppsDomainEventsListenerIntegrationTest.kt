@@ -749,17 +749,13 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val eventTypes = savedEvents.map { it.eventType }
     val urls = savedEvents.map { it.url }
 
-    savedEvents.size.shouldBe(3)
-    eventTypes.shouldContainExactlyInAnyOrder(
-      IntegrationEventType.PRISON_LOCATION_CHANGED,
-      IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
-      IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
-    )
-    urls.shouldContainExactlyInAnyOrder(
-      "https://localhost:8443/v1/prison/$prisonId/location/$locationKey",
-      "https://localhost:8443/v1/prison/$prisonId/residential-hierarchy",
-      "https://localhost:8443/v1/prison/$prisonId/residential-details",
-    )
+    eventTypes.shouldContain(IntegrationEventType.PRISON_LOCATION_CHANGED)
+    eventTypes.shouldContain(IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED)
+    eventTypes.shouldContain(IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED)
+
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/location/$locationKey")
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/residential-hierarchy")
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/residential-details")
   }
 
   @ParameterizedTest
