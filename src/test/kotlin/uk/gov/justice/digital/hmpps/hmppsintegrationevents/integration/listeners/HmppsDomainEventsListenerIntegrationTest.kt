@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -719,7 +718,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/$prisonId/prisoners/$crn/non-associations")
   }
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -764,7 +762,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     )
   }
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [

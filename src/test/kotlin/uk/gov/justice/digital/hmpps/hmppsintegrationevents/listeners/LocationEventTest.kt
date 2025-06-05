@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.boot.test.autoconfigure.json.JsonTest
@@ -27,7 +26,6 @@ class LocationEventTest {
 
   private val locationKey = "MDI-001-01"
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -75,7 +73,6 @@ class LocationEventTest {
     }
   }
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [
