@@ -44,7 +44,7 @@ To restrict the events that they receive, the filter policy for each queue is up
 
 #### 2. Listen for HMPPS Domain Events
 
-Test
+Whenever a Domain event is received, we convert it to the corresponding Integration Events and insert them into the database (a single Domain event can cause multiple Integration Events). In the case that the new Integration Event is a duplicate, we update the existing event. 
 
 #### 3. Send HMPPS Integration Events - Every 10 seconds
 
