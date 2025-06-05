@@ -79,7 +79,8 @@ class HmppsDomainEventService(
   }
 
   private fun getPrisonId(hmppsEvent: HmppsDomainEventMessage): String? {
-    val prisonId = hmppsEvent.prisonId ?: hmppsEvent.additionalInformation?.prisonId
+    val prisonId = hmppsEvent.prisonId
+      ?: hmppsEvent.additionalInformation?.prisonId
     if (prisonId != null) {
       return prisonId
     }
@@ -87,6 +88,15 @@ class HmppsDomainEventService(
     val nomsNumber = getNomisNumber(hmppsEvent)
     if (nomsNumber != null) {
       return getPrisonIdService.execute(nomsNumber)
+    }
+
+    val locationKey = hmppsEvent.additionalInformation?.key
+    if (locationKey != null) {
+      val regex = Regex("^[A-Z]*((?=-)|$)")
+      val match = regex.find(locationKey)
+      if (match != null) {
+        return match.groups.first()?.value
+      }
     }
 
     return null

@@ -729,7 +729,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     ],
   )
   fun `will process and save a location event SQS message`(eventType: String) {
-    val locationKey = "MDI-001-01"
+    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
@@ -769,12 +769,16 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     ],
   )
   fun `will process and save a prison capacity event SQS message`(eventType: String) {
+    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
       "version": "1.0",
       "description": "Locations – a location inside prison has been amended",
-      "occurredAt": "2024-08-14T12:33:34+01:00"
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "key": "$locationKey"
+      }
     }
     """
     val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
