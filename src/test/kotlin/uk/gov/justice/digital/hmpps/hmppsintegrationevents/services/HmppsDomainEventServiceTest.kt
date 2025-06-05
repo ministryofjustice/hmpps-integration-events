@@ -119,8 +119,7 @@ class HmppsDomainEventServiceTest {
   fun `will process and save a domain registration event message with no CRN or no Nomis Number which doesn't require a hmppsId`() {
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
 
-    assertDoesNotThrow { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISON_LOCATION_CHANGED)) }
-
+    assertDoesNotThrow { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONERS_CHANGED)) }
     verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(any()) }
   }
 
@@ -160,7 +159,7 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will not process if  found on the domain event`() {
+  fun `will use prisonId if found on the domain event`() {
     val prisonId = "MDI"
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(eventType = "assessment.summary.produced", prisonId = prisonId)
 
