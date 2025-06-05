@@ -459,7 +459,12 @@ enum class IntegrationEventType(
       }
       replacedPath = replacedPath.replace("{hmppsId}", hmppsId)
     }
-    if (prisonId != null) replacedPath = replacedPath.replace("{prisonId}", prisonId)
+    if (replacedPath.contains("{prisonId}")) {
+      if (prisonId == null) {
+        throw NotFoundException("Prison ID could not be found in domain event message")
+      }
+      replacedPath = replacedPath.replace("{prisonId}", prisonId)
+    }
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
       if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)

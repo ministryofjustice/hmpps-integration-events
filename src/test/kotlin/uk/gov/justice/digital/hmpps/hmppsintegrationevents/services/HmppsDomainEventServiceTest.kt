@@ -150,7 +150,17 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will use the prison ID if it is found on the domain event`() {
+  fun `will not process and save a domain event message with no prisonId which requires a prisonId`() {
+    val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(identifiers = "[{\"type\":\"PNC\",\"value\":\"2018/0123456X\"}]")
+
+    val exception = assertThrows<NotFoundException> { hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISON_LOCATION_CHANGED)) }
+
+    verify { eventNotificationRepository wasNot Called }
+    assertThat(exception.message, equalTo("Prison ID could not be found in domain event message"))
+  }
+
+  @Test
+  fun `will not process if  found on the domain event`() {
     val prisonId = "MDI"
     val event: HmppsDomainEvent = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(eventType = "assessment.summary.produced", prisonId = prisonId)
 
