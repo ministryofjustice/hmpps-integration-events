@@ -1,4 +1,4 @@
-include .env
+-include .env
 
 create-env-file:
 	./scripts/create-env-file.sh
