@@ -24,6 +24,32 @@
 
 A Kotlin Spring boot application which triggers SNS notifications by processing upstream MoJ domain events which are related to the information served by the [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api). This allows the clients of our API to be notified when a change occurs to a domain that is of interest to them.
 
+### How it works
+
+At a high level, this service 
+- listens for HMPPS Domain Events, 
+- transforms them into HMPPS Integration Events,
+- puts the Integration Event on the Integration Event Topic,
+- consumer queues subscribe to this event.
+
+This project has three asynchronous processes:
+
+#### 1. Update filter policies - Every hour
+
+Consumers who want to receive Integration Events, [will have had an SQS queue and subscriber set up to the Integration Events Topic](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md#create-new-consumer-subscriber-queue-for-events). The events that are received by a consumer are put onto the queue from the Integration Event Topic. 
+
+To restrict the events that they receive, the filter policy for each queue is updated every hour. To do this, we 
+- call the Integration API's config method to receive the updated consumer configurations,
+- update the SNS subscription filter policy to only allow the events that correspond to endpoints they have access to  
+
+#### 2. Listen for HMPPS Domain Events
+
+Test
+
+#### 3. Send HMPPS Integration Events - Every 10 seconds
+
+Test
+
 ### Technologies
 
 - [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/#cloud-platform-user-guide) - Ministry of
