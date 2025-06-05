@@ -24,6 +24,35 @@
 
 A Kotlin Spring boot application which triggers SNS notifications by processing upstream MoJ domain events which are related to the information served by the [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api). This allows the clients of our API to be notified when a change occurs to a domain that is of interest to them.
 
+### How it works
+
+At a high level, this service 
+1. Listens for HMPPS Domain Events
+2. Transforms them into HMPPS Integration Events
+3. Puts the Integration Event on the Integration Event Topic
+
+Consumers who want to receive Integration Events, [will need an SQS queue and Subscription to the Integration Events Topic created](https://github.com/ministryofjustice/hmpps-integration-api/blob/main/docs/guides/setting-up-a-new-consumer.md#create-new-consumer-subscriber-queue-for-events). This will provide them with a queue that receives events when they are put on the Integration Event topic
+
+This project has three asynchronous processes:
+
+#### 1. Update filter policies - Every hour
+
+To restrict the events that a consumer receives, the SNS subscription filter policy for each queue is updated every hour. To do this, we 
+1. Call the Integration API's config method to receive the updated consumer configurations.
+2. Update the SNS subscription filter policy.  
+
+We set the filter policies to only allow the events that 
+- Correspond to endpoints they have access to.
+- Match the filters they have on the Integration API (if any).
+
+#### 2. Listen for HMPPS Domain Events
+
+Whenever a Domain event is received, we convert it to the corresponding Integration Events and insert them into the database (a single Domain event can cause multiple Integration Events). In the case that the new Integration Event is a duplicate, we update the existing event. 
+
+#### 3. Send HMPPS Integration Events - Every 10 seconds
+
+Search the database for events older than 5 minutes. Add them to the Integration Events Topic and then delete them.
+
 ### Technologies
 
 - [Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/#cloud-platform-user-guide) - Ministry of
