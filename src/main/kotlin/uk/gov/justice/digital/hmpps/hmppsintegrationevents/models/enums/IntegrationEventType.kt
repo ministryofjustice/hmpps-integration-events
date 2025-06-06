@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_PROTECTION_CODE
@@ -403,29 +404,25 @@ enum class IntegrationEventType(
   PRISON_RESIDENTIAL_HIERARCHY_CHANGED(
     "v1/prison/{prisonId}/residential-hierarchy",
     {
-      false
-      // LOCATION_EVENTS.contains(it.eventType)
+      LOCATION_EVENTS.contains(it.eventType)
     },
   ),
   PRISON_LOCATION_CHANGED(
     "v1/prison/{prisonId}/location/{locationKey}",
     {
-      false
-      // LOCATION_EVENTS.contains(it.eventType)
+      LOCATION_EVENTS.contains(it.eventType)
     },
   ),
   PRISON_RESIDENTIAL_DETAILS_CHANGED(
     "v1/prison/{prisonId}/residential-details",
     {
-      false
-      // LOCATION_EVENTS.contains(it.eventType)
+      LOCATION_EVENTS.contains(it.eventType)
     },
   ),
   PRISON_CAPACITY_CHANGED(
     "v1/prison/{prisonId}/capacity",
     {
-      false
-      // PRISON_CAPACITY_EVENTS.contains(it.eventType)
+      PRISON_CAPACITY_EVENTS.contains(it.eventType)
     },
   ),
   VISIT_CHANGED(
@@ -454,9 +451,20 @@ enum class IntegrationEventType(
   ),
   ;
 
-  fun path(hmppsId: String, prisonId: String?, additionalInformation: AdditionalInformation?): String {
-    var replacedPath = pathTemplate.replace("{hmppsId}", hmppsId)
-    if (prisonId != null) replacedPath = replacedPath.replace("{prisonId}", prisonId)
+  fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
+    var replacedPath = pathTemplate
+    if (replacedPath.contains("{hmppsId}")) {
+      if (hmppsId == null) {
+        throw NotFoundException("Identifier could not be found in domain event message")
+      }
+      replacedPath = replacedPath.replace("{hmppsId}", hmppsId)
+    }
+    if (replacedPath.contains("{prisonId}")) {
+      if (prisonId == null) {
+        throw NotFoundException("Prison ID could not be found in domain event message")
+      }
+      replacedPath = replacedPath.replace("{prisonId}", prisonId)
+    }
     additionalInformation?.let {
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
       if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)

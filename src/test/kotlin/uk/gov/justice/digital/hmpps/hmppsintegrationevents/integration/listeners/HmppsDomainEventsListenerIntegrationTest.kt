@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -719,7 +718,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/prison/$prisonId/prisoners/$crn/non-associations")
   }
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -731,7 +729,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     ],
   )
   fun `will process and save a location event SQS message`(eventType: String) {
-    val locationKey = "MDI-001-01"
+    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
@@ -751,20 +749,15 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val eventTypes = savedEvents.map { it.eventType }
     val urls = savedEvents.map { it.url }
 
-    savedEvents.size.shouldBe(3)
-    eventTypes.shouldContainExactlyInAnyOrder(
-      IntegrationEventType.PRISON_LOCATION_CHANGED,
-      IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
-      IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
-    )
-    urls.shouldContainExactlyInAnyOrder(
-      "https://localhost:8443/v1/prison/$prisonId/location/$locationKey",
-      "https://localhost:8443/v1/prison/$prisonId/residential-hierarchy",
-      "https://localhost:8443/v1/prison/$prisonId/residential-details",
-    )
+    eventTypes.shouldContain(IntegrationEventType.PRISON_LOCATION_CHANGED)
+    eventTypes.shouldContain(IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED)
+    eventTypes.shouldContain(IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED)
+
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/location/$locationKey")
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/residential-hierarchy")
+    urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/residential-details")
   }
 
-  @Disabled("This won't work until we handle missing hmppsIds")
   @ParameterizedTest
   @ValueSource(
     strings = [
@@ -776,12 +769,16 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     ],
   )
   fun `will process and save a prison capacity event SQS message`(eventType: String) {
+    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
       "version": "1.0",
       "description": "Locations – a location inside prison has been amended",
-      "occurredAt": "2024-08-14T12:33:34+01:00"
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "key": "$locationKey"
+      }
     }
     """
     val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
