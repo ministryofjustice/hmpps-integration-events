@@ -24,6 +24,16 @@
 
 A Kotlin Spring boot application which triggers SNS notifications by processing upstream MoJ domain events which are related to the information served by the [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api). This allows the clients of our API to be notified when a change occurs to a domain that is of interest to them.
 
+### The role of this service
+
+The events served from this service are primarily intended to be used to let you know when to invalidate a cache. The events are:
+- Minimal - they do not contain data beyond what is needed to refresh your cache (e.g. the URL).
+- Mapped 1 to 1 with API endpoints on [HMPPS Integration API](https://github.com/ministryofjustice/hmpps-integration-api). An event is only provided to you if you have access to the corresponding endpoint.
+
+For example, if you have access to the "Get a person's name" endpoint (`v1/persons/{hmppsId}/name`), and a new person is created in the upstream systems, you will receive a `PERSON_NAME_CHANGED` event for an HMPPS ID you have not seen before. You will not receive a new person event.
+
+This also means that if you have access to multiple endpoints, a single action (such as a new person being created in the system) may result in you receiving multiple events.
+
 ### How it works
 
 At a high level, this service 
