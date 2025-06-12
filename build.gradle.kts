@@ -11,7 +11,7 @@ configurations {
 
 dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql")
+  runtimeOnly("org.postgresql:postgresql:42.7.7")
   runtimeOnly("org.flywaydb:flyway-core")
 
   annotationProcessor("org.projectlombok:lombok:1.18.38")
