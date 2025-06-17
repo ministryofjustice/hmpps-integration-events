@@ -7,8 +7,6 @@ hmpps.sqs:
       queueArn: ${HMPPS_DOMAIN_QUEUE_ARN}
       dlqName: ${HMPPS_DOMAIN_DL_QUEUE_NAME}
       subscribeTopicId: domainevents
-    audit:
-      queueName: ${AUDIT_QUEUE_NAME}
   topics:
     domainevents:
       arn: ${HMPPS_DOMAIN_TOPIC_ARN}
