@@ -30,7 +30,7 @@ dependencies {
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.14.0")
   testImplementation("org.testcontainers:localstack:1.21.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.27.1")
