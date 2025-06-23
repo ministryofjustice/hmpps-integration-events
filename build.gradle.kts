@@ -31,7 +31,7 @@ dependencies {
     exclude("org.apache.common", "commons-compress")
   }
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
-  testImplementation("org.testcontainers:localstack:1.21.1")
+  testImplementation("org.testcontainers:localstack:1.21.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.27.1")
   testImplementation("io.kotest:kotest-assertions-json-jvm:5.9.1")
@@ -40,8 +40,8 @@ dependencies {
   testImplementation("com.h2database:h2:2.3.232")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.5.0")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
-  testImplementation("io.mockk:mockk:1.14.2")
-  testImplementation("io.mockk:mockk-agent-jvm:1.14.2")
+  testImplementation("io.mockk:mockk:1.14.4")
+  testImplementation("io.mockk:mockk-agent-jvm:1.14.4")
 }
 
 kotlin {
