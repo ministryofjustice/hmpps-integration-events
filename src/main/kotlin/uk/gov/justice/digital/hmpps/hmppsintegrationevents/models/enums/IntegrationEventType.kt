@@ -142,7 +142,6 @@ val PLP_REVIEW_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.PLP.ReviewSchedule.
 val SAN_PLAN_CREATION_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.SAN.PlanCreationSchedule.UPDATED)
 val SAN_REVIEW_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.SAN.ReviewSchedule.UPDATED)
 
-
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
   const val CHILD_CONCERNS_CODE = "RCCO" // Safeguarding concerns where a child is at risk from the offender
