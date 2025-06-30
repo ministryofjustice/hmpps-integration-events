@@ -36,7 +36,7 @@ class HmppsDomainEventsListenerSANPlanCreationScheduleUpdatedTest {
     val payload = DomainEvents.generateDomainEvent(eventType, message)
     val hmppsDomainEvent = generateHmppsDomainEvent(eventType, hmppsMessage)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.SAN_REVIEW_SCHEDULE_CHANGED)) } just runs
+    every { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)) } just runs
 
     hmppsDomainEventsListener.onDomainEvent(payload)
 
