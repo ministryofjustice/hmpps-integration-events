@@ -139,6 +139,9 @@ val DYNAMIC_RISKS_REGISTER_TYPES = listOf(
 
 val PLP_INDUCTION_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.PLP.InductionSchedule.UPDATED)
 val PLP_REVIEW_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.PLP.ReviewSchedule.UPDATED)
+val SAN_PLAN_CREATION_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.SAN.PlanCreationSchedule.UPDATED)
+val SAN_REVIEW_SCHEDULE_EVENTS = listOf(HmppsDomainEventName.SAN.ReviewSchedule.UPDATED)
+
 
 object RegisterTypes {
   const val MAPPA_CODE = "MAPP" // Multi-Agency Public Protection Arrangements
@@ -256,6 +259,14 @@ enum class IntegrationEventType(
   PLP_REVIEW_SCHEDULE_CHANGED(
     "v1/persons/{hmppsId}/plp-review-schedule",
     { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
+  ),
+  SAN_PLAN_CREATION_SCHEDULE_CHANGED(
+    "v1/persons/{hmppsId}/san-plan-creation-schedule",
+    { SAN_PLAN_CREATION_SCHEDULE_EVENTS.contains(it.eventType) },
+  ),
+  SAN_REVIEW_SCHEDULE_CHANGED(
+    "v1/persons/{hmppsId}/san-review-schedule",
+    { SAN_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
