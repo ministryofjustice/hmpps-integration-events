@@ -795,7 +795,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will process and save a san creation schedule event SQS message`() {
-    val eventType = HmppsDomainEventName.SAN.PlanCreationSchedule
+    val eventType = HmppsDomainEventName.SAN.PlanCreationSchedule.UPDATED
     val locationKey = "$prisonId-001-01"
     val message = """
     {
@@ -808,7 +808,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       }
     }
     """
-    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType.UPDATED, message)
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
     sendDomainSqsMessage(rawMessage)
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
@@ -822,7 +822,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
   @Test
   fun `will process and save a san review schedule event SQS message`() {
-    val eventType = HmppsDomainEventName.SAN.ReviewSchedule
+    val eventType = HmppsDomainEventName.SAN.ReviewSchedule.UPDATED
     val locationKey = "$prisonId-001-01"
     val message = """
     {
@@ -835,7 +835,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       }
     }
     """
-    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType.UPDATED, message)
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
     sendDomainSqsMessage(rawMessage)
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
