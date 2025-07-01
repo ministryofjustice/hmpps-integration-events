@@ -41,6 +41,15 @@ object HmppsDomainEventName {
     }
   }
 
+  object SAN {
+    object PlanCreationSchedule {
+      const val UPDATED = "san.plan-creation-schedule.updated"
+    }
+    object ReviewSchedule {
+      const val UPDATED = "san.review-schedule.updated"
+    }
+  }
+
   object CreateAndVaryALicence {
     object Licence {
       const val ACTIVATED = "create-and-vary-a-licence.licence.activated"
