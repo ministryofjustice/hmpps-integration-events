@@ -792,4 +792,58 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     eventTypes.shouldContain(IntegrationEventType.PRISON_CAPACITY_CHANGED)
     urls.shouldContain("https://localhost:8443/v1/prison/$prisonId/capacity")
   }
+
+  @Test
+  fun `will process and save a san creation schedule event SQS message`() {
+    val eventType = HmppsDomainEventName.SAN.PlanCreationSchedule
+    val locationKey = "$prisonId-001-01"
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "A Support for additional needs plan creation schedule created or amended",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "key": "$locationKey"
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType.UPDATED, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
+    urls.shouldContain("https://localhost:8443/v1/persons/$prisonId/san-plan-creation-schedule")
+  }
+
+  @Test
+  fun `will process and save a san review schedule event SQS message`() {
+    val eventType = HmppsDomainEventName.SAN.ReviewSchedule
+    val locationKey = "$prisonId-001-01"
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "A Support for additional needs review schedule was created or amended",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "key": "$locationKey"
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType.UPDATED, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
+    urls.shouldContain("https://localhost:8443/v1/persons/$prisonId/san-review-schedule")
+  }
 }
