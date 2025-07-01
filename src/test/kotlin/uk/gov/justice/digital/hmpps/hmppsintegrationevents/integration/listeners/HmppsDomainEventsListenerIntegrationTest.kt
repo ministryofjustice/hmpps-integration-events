@@ -794,7 +794,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `will process and save a san creation schedule event SQS message`() {
+  fun `will process and save a san create schedule event SQS message`() {
     val eventType = HmppsDomainEventName.SAN.PlanCreationSchedule.UPDATED
     val message = """
     {
@@ -802,10 +802,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "version": "1.0",
       "description": "A Support for additional needs plan creation schedule created or amended",
       "occurredAt": "2024-08-14T12:33:34+01:00",
-      "additionalInformation": {
+      "personReference": {
         "identifiers": [
           {
-            "type": "NOMS",
+            "type": "NOMS", 
             "value": "$nomsNumber"
            }
         ]
@@ -817,15 +817,14 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    val eventTypes = savedEvents.map { it.eventType }
-    val urls = savedEvents.map { it.url }
-
-    eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
-    urls.shouldContain("https://localhost:8443/v1/persons/$crn/san-plan-creation-schedule")
+    savedEvents.size.shouldBe(1)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/san-plan-creation-schedule")
   }
 
   @Test
-  fun `will process and save a san review schedule event SQS message`() {
+  fun `will process and save a san review event SQS message`() {
     val eventType = HmppsDomainEventName.SAN.ReviewSchedule.UPDATED
     val message = """
     {
@@ -833,10 +832,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "version": "1.0",
       "description": "A Support for additional needs review schedule was created or amended",
       "occurredAt": "2024-08-14T12:33:34+01:00",
-      "additionalInformation": {
+      "personReference": {
         "identifiers": [
           {
-            "type": "NOMS",
+            "type": "NOMS", 
             "value": "$nomsNumber"
            }
         ]
@@ -848,10 +847,9 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    val eventTypes = savedEvents.map { it.eventType }
-    val urls = savedEvents.map { it.url }
-
-    eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
-    urls.shouldContain("https://localhost:8443/v1/persons/$crn/san-review-schedule")
+    savedEvents.size.shouldBe(1)
+    savedEvents[0].eventType.shouldBe(IntegrationEventType.SAN_REVIEW_SCHEDULE_CHANGED)
+    savedEvents[0].hmppsId.shouldBe(crn)
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/san-review-schedule")
   }
 }
