@@ -796,7 +796,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   @Test
   fun `will process and save a san creation schedule event SQS message`() {
     val eventType = HmppsDomainEventName.SAN.PlanCreationSchedule.UPDATED
-    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
@@ -804,7 +803,12 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "description": "A Support for additional needs plan creation schedule created or amended",
       "occurredAt": "2024-08-14T12:33:34+01:00",
       "additionalInformation": {
-        "key": "$locationKey"
+        "identifiers": [
+          {
+            "type": "NOMS",
+            "value": "$nomsNumber"
+           }
+        ]
       }
     }
     """
@@ -817,13 +821,12 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val urls = savedEvents.map { it.url }
 
     eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
-    urls.shouldContain("https://localhost:8443/v1/persons/$prisonId/san-plan-creation-schedule")
+    urls.shouldContain("https://localhost:8443/v1/persons/$crn/san-plan-creation-schedule")
   }
 
   @Test
   fun `will process and save a san review schedule event SQS message`() {
     val eventType = HmppsDomainEventName.SAN.ReviewSchedule.UPDATED
-    val locationKey = "$prisonId-001-01"
     val message = """
     {
       "eventType": "$eventType",
@@ -831,7 +834,12 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       "description": "A Support for additional needs review schedule was created or amended",
       "occurredAt": "2024-08-14T12:33:34+01:00",
       "additionalInformation": {
-        "key": "$locationKey"
+        "identifiers": [
+          {
+            "type": "NOMS",
+            "value": "$nomsNumber"
+           }
+        ]
       }
     }
     """
@@ -844,6 +852,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val urls = savedEvents.map { it.url }
 
     eventTypes.shouldContain(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
-    urls.shouldContain("https://localhost:8443/v1/persons/$prisonId/san-review-schedule")
+    urls.shouldContain("https://localhost:8443/v1/persons/$crn/san-review-schedule")
   }
 }
