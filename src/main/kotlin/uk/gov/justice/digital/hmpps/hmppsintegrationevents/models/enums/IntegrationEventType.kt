@@ -16,7 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
-import kotlin.collections.contains
 
 val DYNAMIC_RISK_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Registration.ADDED,
@@ -157,6 +156,21 @@ object RegisterTypes {
   const val WARRANT_SUMMONS_CODE = "WRSM" // Outstanding warrant or summons
 }
 
+object ReleaseReasons {
+  const val RELEASED = "RELEASED"
+  const val TEMPORARY_ABSENCE_RELEASE = "TEMPORARY_ABSENCE_RELEASE"
+  const val RELEASED_TO_HOSPITAL = "RELEASED_TO_HOSPITAL"
+  const val SENT_TO_COURT = "SENT_TO_COURT"
+  const val TRANSFERRED = "TRANSFERRED"
+}
+
+object ReceptionReasons {
+  const val ADMISSION = "ADMISSION"
+  const val TEMPORARY_ABSENCE_RETURN = "TEMPORARY_ABSENCE_RETURN"
+  const val RETURN_FROM_COURT = "RETURN_FROM_COURT"
+  const val TRANSFERRED = "TRANSFERRED"
+}
+
 val PERSON_CONTACT_EVENTS = listOf(
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_ADDED,
   HmppsDomainEventName.PrisonOffenderEvents.Prisoner.CONTACT_APPROVED,
@@ -219,6 +233,18 @@ val PRISON_CAPACITY_EVENTS = listOf(
   HmppsDomainEventName.LocationsInsidePrison.SignedOpCapacity.AMENDED,
 )
 
+val RECEPTION_REASONS = setOf(
+  ReceptionReasons.ADMISSION,
+  ReceptionReasons.TRANSFERRED,
+  ReceptionReasons.TEMPORARY_ABSENCE_RETURN,
+  ReceptionReasons.RETURN_FROM_COURT,
+)
+
+val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
+  PrisonerChangedCategory.SENTENCE.name,
+  PrisonerChangedCategory.LOCATION.name,
+)
+
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -238,6 +264,21 @@ enum class IntegrationEventType(
   RISK_SCORE_CHANGED(
     "v1/persons/{hmppsId}/risks/scores",
     { RISK_SCORE_TYPES.contains(it.eventType) },
+  ),
+  PRISONER_BASE_LOCATION_CHANGED(
+    "v1/persons/{hmppsId}/prisoner-base-location",
+    {
+      with(HmppsDomainEventName.PrisonOffenderEvents.Prisoner) {
+        when (it.eventType) {
+          RECEIVED -> it.additionalInformation?.reason?.let { RECEPTION_REASONS.contains(it) } ?: false
+          RELEASED -> it.additionalInformation?.reason?.equals(
+            ReleaseReasons.RELEASED,
+          ) ?: false
+
+          else -> false
+        }
+      }
+    },
   ),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
     "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
@@ -390,6 +431,16 @@ enum class IntegrationEventType(
   PRISONER_CHANGED(
     "v1/prison/prisoners/{hmppsId}",
     { PRISONER_EVENTS.contains(it.eventType) },
+  ),
+  PERSON_EDUCATION_ASSESSMENTS_CHANGED(
+    "/v1/persons/{hmppsId}/education/assessments",
+    {
+      HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED == it.eventType &&
+        (
+          it.additionalInformation?.categoriesChanged?.toSet()
+            ?.intersect(EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES)?.isNotEmpty() ?: false
+          )
+    },
   ),
   PRISONER_BALANCES_CHANGED(
     "v1/prison/{prisonId}/prisoners/{hmppsId}/balances",

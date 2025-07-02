@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,7 +22,9 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.ReceptionReasons
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
@@ -380,7 +384,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(4)
+    savedEvents.size.shouldBe(5)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
@@ -393,6 +397,9 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
     savedEvents[3].hmppsId.shouldBe(crn)
     savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
+    savedEvents[3].eventType.shouldBe(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
+    savedEvents[3].hmppsId.shouldBe(crn)
+    savedEvents[3].url.shouldBe("https://localhost:8443//v1/persons/$crn/education/assessments")
   }
 
   @Test
@@ -464,7 +471,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
 
     Awaitility.await().until { repo.findAll().isNotEmpty() }
     val savedEvents = repo.findAll()
-    savedEvents.size.shouldBe(4)
+    savedEvents.size.shouldBe(5)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_STATUS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn")
@@ -477,6 +484,9 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[3].eventType.shouldBe(IntegrationEventType.PRISONER_CHANGED)
     savedEvents[3].hmppsId.shouldBe(crn)
     savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
+    savedEvents[4].eventType.shouldBe(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
+    savedEvents[4].hmppsId.shouldBe(crn)
+    savedEvents[4].url.shouldBe("https://localhost:8443//v1/persons/$crn/education/assessments")
   }
 
   @ParameterizedTest
@@ -541,7 +551,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       IntegrationEventType.PERSON_ALERTS_CHANGED,
       IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
       IntegrationEventType.PERSON_RESPONSIBLE_OFFICER_CHANGED,
-
     )
     hmppsIds.shouldContainOnly(crn)
     urls.shouldContainExactlyInAnyOrder(
@@ -684,10 +693,6 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
   @ValueSource(
     strings = [
       HmppsDomainEventName.PrisonOffenderEvents.Prisoner.NonAssociationDetail.CHANGED,
-//      HmppsDomainEventName.NonAssociations.CREATED,
-//      HmppsDomainEventName.NonAssociations.AMENDED,
-//      HmppsDomainEventName.NonAssociations.CLOSED,
-//      HmppsDomainEventName.NonAssociations.DELETED,
     ],
   )
   fun `will process and save a non-association event SQS message`(eventType: String) {
@@ -851,5 +856,121 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents[0].eventType.shouldBe(IntegrationEventType.SAN_REVIEW_SCHEDULE_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
     savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/san-review-schedule")
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = [
+      ReceptionReasons.ADMISSION,
+      ReceptionReasons.TRANSFERRED,
+    ],
+  )
+  fun `will process and save a received prisoner base location change event SQS message`(reason: String) {
+    val eventType = HmppsDomainEventName.PrisonOffenderEvents.Prisoner.RECEIVED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a A prisoner has been received into prison.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": [],
+        "reason": "$reason"
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED)
+    urls.shouldContain("https://localhost:8443/v1/persons/$crn/prisoner-base-location")
+  }
+
+  @Test
+  fun `will process and save a released prisoner base location change event SQS message`() {
+    val eventType = HmppsDomainEventName.PrisonOffenderEvents.Prisoner.RELEASED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a A prisoner has been received into prison.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": [],
+        "reason": "RELEASED"
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED)
+    urls.shouldContain("https://localhost:8443/v1/persons/$crn/prisoner-base-location")
+  }
+
+  @ParameterizedTest
+  @MethodSource("educationAssessmentCategoryProvider")
+  fun `will process and save a prisoner education assessments change event SQS message`(changedCategory: String) {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a prisoner record has been updated.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": ["$changedCategory"]
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldContain(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
+    urls.shouldContain("https://localhost:8443//v1/persons/$crn/education/assessments")
+  }
+
+  companion object {
+    @JvmStatic
+    fun educationAssessmentCategoryProvider() = EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES.map { Arguments.of(it) }
   }
 }
