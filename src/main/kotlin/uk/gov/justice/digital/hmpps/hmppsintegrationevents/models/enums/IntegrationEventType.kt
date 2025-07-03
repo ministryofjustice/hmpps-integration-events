@@ -270,7 +270,9 @@ enum class IntegrationEventType(
     {
       with(HmppsDomainEventName.PrisonOffenderEvents.Prisoner) {
         when (it.eventType) {
-          RECEIVED -> it.additionalInformation?.reason?.let { RECEPTION_REASONS.contains(it) } ?: false
+          RECEIVED -> it.additionalInformation?.reason?.let { reason ->
+            reason == ReceptionReasons.ADMISSION || reason == ReceptionReasons.TRANSFERRED
+          } ?: false
           RELEASED -> it.additionalInformation?.reason?.equals(
             ReleaseReasons.RELEASED,
           ) ?: false
@@ -358,7 +360,8 @@ enum class IntegrationEventType(
       NEW_PERSON_EVENTS.contains(it.eventType) ||
         (
           it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
-            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name) ?: false)
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PERSONAL_DETAILS.name)
+              ?: false)
           )
     },
   ),
@@ -412,7 +415,8 @@ enum class IntegrationEventType(
       NEW_PERSON_EVENTS.contains(it.eventType) ||
         (
           it.eventType == HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED &&
-            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name) ?: false)
+            (it.additionalInformation?.categoriesChanged?.contains(PrisonerChangedCategory.PHYSICAL_DETAILS.name)
+              ?: false)
           )
     },
   ),
