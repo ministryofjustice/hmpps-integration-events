@@ -1013,6 +1013,40 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     urls.shouldContain("https://localhost:8443//v1/persons/$crn/education/assessments")
   }
 
+  @Test
+  fun `will not process and save a prisoner education assessments change event SQS message`() {
+    val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
+    val message = """
+    {
+      "eventType": "$eventType",
+      "version": "1.0",
+      "description": "This is when a prisoner record has been updated.",
+      "occurredAt": "2024-08-14T12:33:34+01:00",
+      "additionalInformation": {
+        "categoriesChanged": ["PHYSICAL_DETAILS"]
+      },
+      "personReference": {
+        "identifiers": [
+          {
+            "type": "NOMS", 
+            "value": "$nomsNumber"
+           }
+        ]
+      }
+    }
+    """
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await()
+      .atMost(Duration.ofSeconds(10))
+      .untilAsserted {
+        assertThat(repo.findAll(), empty())
+      }
+  }
+
+
+
   companion object {
     @JvmStatic
     fun educationAssessmentCategoryProvider() =
