@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listeners
 
-import java.time.Duration
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
@@ -33,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.ProbationIntegrationApiExtension
+import java.time.Duration
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -910,7 +910,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     ],
   )
   fun `will not process or save a received prisoner base location change event SQS message for filtered reception reasons`(
-    filteredReason: String
+    filteredReason: String,
   ) {
     val eventType = HmppsDomainEventName.PrisonOffenderEvents.Prisoner.RECEIVED
     val message = """
@@ -1045,11 +1045,8 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       }
   }
 
-
-
   companion object {
     @JvmStatic
-    fun educationAssessmentCategoryProvider() =
-      EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES.map { Arguments.of(it) }
+    fun educationAssessmentCategoryProvider() = EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES.map { Arguments.of(it) }
   }
 }
