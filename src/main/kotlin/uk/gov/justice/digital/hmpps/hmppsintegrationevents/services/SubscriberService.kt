@@ -100,6 +100,8 @@ class SubscriberService(
       "/v1/persons/.*/health-and-diet" to IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
       "/v1/persons/.*/care-needs" to IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
       "/v1/persons/.*/languages" to IntegrationEventType.PERSON_LANGUAGES_CHANGED,
+      "/v1/persons/.*/prisoner-base-location" to IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED,
+      "/v1/persons/.*/education/assessments" to IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED,
     )
   }
 }
