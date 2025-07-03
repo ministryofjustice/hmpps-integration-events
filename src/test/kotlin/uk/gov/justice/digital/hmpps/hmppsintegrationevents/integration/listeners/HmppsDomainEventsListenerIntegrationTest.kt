@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listener
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -1038,11 +1039,13 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
     sendDomainSqsMessage(rawMessage)
 
-    Awaitility.await()
-      .atMost(Duration.ofSeconds(10))
-      .untilAsserted {
-        assertThat(repo.findAll(), empty())
-      }
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents = repo.findAll()
+    val eventTypes = savedEvents.map { it.eventType }
+    val urls = savedEvents.map { it.url }
+
+    eventTypes.shouldNotContain(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
+    urls.shouldNotContain("https://localhost:8443//v1/persons/$crn/education/assessments")
   }
 
   companion object {
