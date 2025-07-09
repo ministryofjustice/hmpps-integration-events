@@ -454,8 +454,8 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     }
 
     @Nested
-    @DisplayName("and Education Assessments Integration Event is expected")
-    inner class AndEducationAssessmentIntegrationEventIsExpected {
+    @DisplayName("and Education Assessments Integration Event is expected or not.")
+    inner class AndEducationAssessmentIntegrationEventIsExpectedOrNot {
       private val intEventType = IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED
       private val url = "https://localhost:8443//v1/persons/$crn/education/assessments"
 
