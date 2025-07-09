@@ -89,6 +89,7 @@ object HmppsDomainEventName {
   object PrisonOffenderEvents {
     object Prisoner {
       const val RELEASED = "prison-offender-events.prisoner.released"
+      const val RECEIVED = "prison-offender-events.prisoner.received"
       const val CONTACT_ADDED = "prison-offender-events.prisoner.contact-added"
       const val CONTACT_APPROVED = "prison-offender-events.prisoner.contact-approved"
       const val CONTACT_UNAPPROVED = "prison-offender-events.prisoner.contact-unapproved"
