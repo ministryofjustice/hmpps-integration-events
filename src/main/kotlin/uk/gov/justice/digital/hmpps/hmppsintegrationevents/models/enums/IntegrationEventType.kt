@@ -233,13 +233,6 @@ val PRISON_CAPACITY_EVENTS = listOf(
   HmppsDomainEventName.LocationsInsidePrison.SignedOpCapacity.AMENDED,
 )
 
-val RECEPTION_REASONS = setOf(
-  ReceptionReasons.ADMISSION,
-  ReceptionReasons.TRANSFERRED,
-  ReceptionReasons.TEMPORARY_ABSENCE_RETURN,
-  ReceptionReasons.RETURN_FROM_COURT,
-)
-
 val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
   PrisonerChangedCategory.SENTENCE.name,
   PrisonerChangedCategory.LOCATION.name,
