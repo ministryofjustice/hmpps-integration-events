@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
 import org.apache.tomcat.util.json.JSONParser
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
@@ -10,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.Authentica
 import java.util.*
 
 @Component
+@Scope("singleton")
 class HmppsAuthGateway(
   @Value("\${services.hmpps-auth.base-url}") hmppsAuthUrl: String,
 ) {
