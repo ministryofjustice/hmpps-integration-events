@@ -34,6 +34,10 @@ class HmppsAuthGateway(
     }
   }
 
+  fun reset() {
+    existingAccessToken = null
+  }
+
   fun getClientToken(service: String): String {
     existingAccessToken?.let {
       if (checkTokenValid(it)) {

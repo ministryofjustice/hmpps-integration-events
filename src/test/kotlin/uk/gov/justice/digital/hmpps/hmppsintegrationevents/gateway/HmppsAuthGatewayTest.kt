@@ -32,6 +32,7 @@ class HmppsAuthGatewayTest {
   @AfterEach
   fun tearDown() {
     HmppsAuthExtension.server.stop()
+    hmppsAuthGateway.reset()
   }
 
   private fun getToken(expiresInMinutes: Long = 20): String {
