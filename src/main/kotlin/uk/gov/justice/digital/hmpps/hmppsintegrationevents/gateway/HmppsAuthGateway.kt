@@ -8,6 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.AuthenticationFailedException
+import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.util.*
 
 @Component
@@ -61,5 +63,11 @@ class HmppsAuthGateway(
     }
   }
 
-  private fun checkTokenValid(token: String): Boolean = false
+  private fun checkTokenValid(token: String): Boolean {
+    val decodedToken = String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8)
+
+    val exp = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
+    val now = Instant.now().epochSecond
+    return (now < exp)
+  }
 }
