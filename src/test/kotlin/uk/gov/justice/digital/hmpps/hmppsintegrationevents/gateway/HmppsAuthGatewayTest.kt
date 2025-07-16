@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.AuthenticationFailedException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
+import java.util.UUID
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -23,7 +24,6 @@ class HmppsAuthGatewayTest {
   @BeforeEach
   fun setup() {
     HmppsAuthExtension.server.start()
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret")
   }
 
   @AfterEach
@@ -65,5 +65,18 @@ class HmppsAuthGatewayTest {
       }
 
     exception.message.shouldBe("Invalid credentials used for NOMIS.")
+  }
+
+  @Test
+  fun `re-uses the existing access token if it is still valid`() {
+    val token = UUID.randomUUID().toString()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", token)
+    val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
+
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", UUID.randomUUID().toString())
+    val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
+
+    firstToken shouldBe token
+    secondToken shouldBe firstToken
   }
 }

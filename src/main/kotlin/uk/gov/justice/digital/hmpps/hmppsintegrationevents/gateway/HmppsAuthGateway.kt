@@ -23,6 +23,8 @@ class HmppsAuthGateway(
   @Value("\${services.hmpps-auth.password}")
   private lateinit var password: String
 
+  private var existingAccessToken: String? = null
+
   companion object Credentials {
     fun toBasicAuth(username: String, password: String): String {
       val encodedCredentials = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
@@ -30,22 +32,28 @@ class HmppsAuthGateway(
     }
   }
 
-  fun getClientToken(service: String): String = try {
-    val response =
-      webClient
-        .post()
-        .uri("/auth/oauth/token?grant_type=client_credentials")
-        .header("Authorization", Credentials.toBasicAuth(username, password))
-        .retrieve()
-        .bodyToMono(String::class.java)
-        .block()
+  fun getClientToken(service: String): String {
+    existingAccessToken?.let { return it }
 
-    JSONParser(response).parseObject()["access_token"].toString()
-  } catch (exception: WebClientRequestException) {
-    throw AuthenticationFailedException("Connection to ${exception.uri.authority} failed for $service.")
-  } catch (exception: WebClientResponseException.ServiceUnavailable) {
-    throw AuthenticationFailedException("${exception.request?.uri?.authority} is unavailable for $service.")
-  } catch (exception: WebClientResponseException.Unauthorized) {
-    throw AuthenticationFailedException("Invalid credentials used for $service.")
+    return try {
+      val response =
+        webClient
+          .post()
+          .uri("/auth/oauth/token?grant_type=client_credentials")
+          .header("Authorization", Credentials.toBasicAuth(username, password))
+          .retrieve()
+          .bodyToMono(String::class.java)
+          .block()
+
+      val accessToken = JSONParser(response).parseObject()["access_token"].toString()
+      this.existingAccessToken = accessToken
+      accessToken
+    } catch (exception: WebClientRequestException) {
+      throw AuthenticationFailedException("Connection to ${exception.uri.authority} failed for $service.")
+    } catch (exception: WebClientResponseException.ServiceUnavailable) {
+      throw AuthenticationFailedException("${exception.request?.uri?.authority} is unavailable for $service.")
+    } catch (exception: WebClientResponseException.Unauthorized) {
+      throw AuthenticationFailedException("Invalid credentials used for $service.")
+    }
   }
 }
