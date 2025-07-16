@@ -2,14 +2,28 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import java.time.Instant
+import java.util.Base64
+import java.util.UUID
 
 class HmppsAuthMockServer internal constructor() : WireMockServer(8444) {
   val authUrl = "/auth/oauth/token?grant_type=client_credentials"
 
+  fun getToken(expiresInMinutes: Long = 20): String {
+    val decodedPayload = """
+    {
+      "client_id": "${UUID.randomUUID()}",
+      "exp": ${Instant.now().plusSeconds(60 * expiresInMinutes).epochSecond}
+    }
+    """.trimIndent()
+    val token = Base64.getEncoder().encodeToString(decodedPayload.toByteArray())
+    return token
+  }
+
   fun stubGetOAuthToken(
     client: String,
     clientSecret: String,
-    token: String = "mock-bearer-token",
+    token: String = getToken(),
   ) {
     stubFor(
       WireMock.post(authUrl)

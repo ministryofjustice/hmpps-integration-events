@@ -12,9 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.AuthenticationFailedException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
-import java.time.Instant
-import java.util.Base64
-import java.util.UUID
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,17 +30,6 @@ class HmppsAuthGatewayTest {
   fun tearDown() {
     HmppsAuthExtension.server.stop()
     hmppsAuthGateway.reset()
-  }
-
-  private fun getToken(expiresInMinutes: Long = 20): String {
-    val decodedPayload = """
-    {
-      "client_id": "${UUID.randomUUID()}",
-      "exp": ${Instant.now().plusSeconds(60 * expiresInMinutes).epochSecond}
-    }
-    """.trimIndent()
-    val token = Base64.getEncoder().encodeToString(decodedPayload.toByteArray())
-    return token
   }
 
   @Test
@@ -84,24 +70,24 @@ class HmppsAuthGatewayTest {
 
   @Test
   fun `re-uses the existing access token if it is still valid`() {
-    val token = getToken()
+    val token = HmppsAuthExtension.server.getToken()
     HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", token)
     val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
     firstToken shouldBe token
 
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", getToken())
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", HmppsAuthExtension.server.getToken())
     val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
     secondToken shouldBe firstToken
   }
 
   @Test
   fun `asks for new token if the existing access token is not valid`() {
-    val token = getToken(expiresInMinutes = 0)
+    val token = HmppsAuthExtension.server.getToken(expiresInMinutes = 0)
     HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", token)
     val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
     firstToken shouldBe token
 
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", getToken())
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", HmppsAuthExtension.server.getToken())
     val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
     secondToken shouldNotBe firstToken
   }
