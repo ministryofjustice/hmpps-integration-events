@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.Authentica
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import java.time.Instant
 import java.util.Base64
+import java.util.UUID
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,7 +37,7 @@ class HmppsAuthGatewayTest {
   private fun getToken(expiresInMinutes: Long = 20): String {
     val decodedPayload = """
     {
-      "client_id": "test-client",
+      "client_id": "${UUID.randomUUID()}",
       "exp": ${Instant.now().plusSeconds(60 * expiresInMinutes).epochSecond}
     }
     """.trimIndent()

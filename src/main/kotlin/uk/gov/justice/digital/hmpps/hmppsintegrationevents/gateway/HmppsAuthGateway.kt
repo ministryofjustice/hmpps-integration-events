@@ -33,7 +33,11 @@ class HmppsAuthGateway(
   }
 
   fun getClientToken(service: String): String {
-    existingAccessToken?.let { return it }
+    existingAccessToken?.let {
+      if (checkTokenValid(it)) {
+        return it
+      }
+    }
 
     return try {
       val response =
@@ -56,4 +60,6 @@ class HmppsAuthGateway(
       throw AuthenticationFailedException("Invalid credentials used for $service.")
     }
   }
+
+  private fun checkTokenValid(token: String): Boolean = false
 }
