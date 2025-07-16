@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,12 +24,12 @@ class HmppsAuthGatewayTest {
   @BeforeEach
   fun setup() {
     HmppsAuthExtension.server.start()
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret")
   }
 
   @AfterEach
   fun tearDown() {
     HmppsAuthExtension.server.stop()
+    hmppsAuthGateway.reset()
   }
 
   @Test
@@ -65,5 +66,33 @@ class HmppsAuthGatewayTest {
       }
 
     exception.message.shouldBe("Invalid credentials used for NOMIS.")
+  }
+
+  @Test
+  fun `re-uses the existing access token if it is still valid`() {
+    val firstMockedToken = HmppsAuthExtension.server.getToken()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", firstMockedToken)
+    val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
+    firstToken shouldBe firstMockedToken
+
+    val secondMockedToken = HmppsAuthExtension.server.getToken()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", HmppsAuthExtension.server.getToken())
+    val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
+    secondToken shouldBe firstToken
+    secondToken shouldNotBe secondMockedToken
+  }
+
+  @Test
+  fun `asks for new token if the existing access token is not valid`() {
+    val firstMockedToken = HmppsAuthExtension.server.getToken(expiresInMinutes = 0)
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", firstMockedToken)
+    val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
+    firstToken shouldBe firstMockedToken
+
+    val secondMockedToken = HmppsAuthExtension.server.getToken()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", secondMockedToken)
+    val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
+    secondToken shouldBe secondMockedToken
+    secondToken shouldNotBe firstToken
   }
 }
