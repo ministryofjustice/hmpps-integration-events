@@ -70,25 +70,29 @@ class HmppsAuthGatewayTest {
 
   @Test
   fun `re-uses the existing access token if it is still valid`() {
-    val token = HmppsAuthExtension.server.getToken()
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", token)
+    val firstMockedToken = HmppsAuthExtension.server.getToken()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", firstMockedToken)
     val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
-    firstToken shouldBe token
+    firstToken shouldBe firstMockedToken
 
+    val secondMockedToken = HmppsAuthExtension.server.getToken()
     HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", HmppsAuthExtension.server.getToken())
     val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
     secondToken shouldBe firstToken
+    secondToken shouldNotBe secondMockedToken
   }
 
   @Test
   fun `asks for new token if the existing access token is not valid`() {
-    val token = HmppsAuthExtension.server.getToken(expiresInMinutes = 0)
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", token)
+    val firstMockedToken = HmppsAuthExtension.server.getToken(expiresInMinutes = 0)
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", firstMockedToken)
     val firstToken = hmppsAuthGateway.getClientToken("NOMIS")
-    firstToken shouldBe token
+    firstToken shouldBe firstMockedToken
 
-    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", HmppsAuthExtension.server.getToken())
+    val secondMockedToken = HmppsAuthExtension.server.getToken()
+    HmppsAuthExtension.server.stubGetOAuthToken("TestClient", "TestSecret", secondMockedToken)
     val secondToken = hmppsAuthGateway.getClientToken("NOMIS")
+    secondToken shouldBe secondMockedToken
     secondToken shouldNotBe firstToken
   }
 }
