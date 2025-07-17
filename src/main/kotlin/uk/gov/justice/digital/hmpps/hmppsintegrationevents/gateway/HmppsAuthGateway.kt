@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
+import io.sentry.Sentry
 import org.apache.tomcat.util.json.JSONParser
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Scope
@@ -73,7 +74,8 @@ class HmppsAuthGateway(
     val now = Instant.now().epochSecond
     val expiration = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
     (now < (expiration - 5))
-  } catch (_: Exception) {
+  } catch (e: Exception) {
+    Sentry.captureException(e)
     false
   }
 }
