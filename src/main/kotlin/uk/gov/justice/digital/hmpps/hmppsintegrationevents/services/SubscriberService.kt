@@ -59,7 +59,7 @@ class SubscriberService(
       "/v1/persons/.*/plp-induction-schedule" to IntegrationEventType.PLP_INDUCTION_SCHEDULE_CHANGED,
       "/v1/persons/.*/plp-review-schedule" to IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED,
       "/v1/persons/.*/education/san-plan-creation-schedule" to IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED,
-      "/v1/persons/.*/san-review-schedule" to IntegrationEventType.SAN_REVIEW_SCHEDULE_CHANGED,
+      "/v1/persons/.*/education/san-review-schedule" to IntegrationEventType.SAN_REVIEW_SCHEDULE_CHANGED,
       "/v1/persons/.*/addresses" to IntegrationEventType.PERSON_ADDRESS_CHANGED,
       "/v1/persons/.*/contacts[^/]*$" to IntegrationEventType.PERSON_CONTACTS_CHANGED,
       "/v1/persons/.*/iep-level" to IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
