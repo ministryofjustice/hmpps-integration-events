@@ -296,11 +296,11 @@ enum class IntegrationEventType(
     { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   SAN_PLAN_CREATION_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/san-plan-creation-schedule",
+    "v1/persons/{hmppsId}/education/san/plan-creation-schedule",
     { SAN_PLAN_CREATION_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   SAN_REVIEW_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/san-review-schedule",
+    "v1/persons/{hmppsId}/education/san/review-schedule",
     { SAN_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
