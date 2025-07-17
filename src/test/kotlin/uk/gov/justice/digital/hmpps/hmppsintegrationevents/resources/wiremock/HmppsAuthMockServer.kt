@@ -12,11 +12,12 @@ class HmppsAuthMockServer internal constructor() : WireMockServer(8444) {
   fun getToken(expiresInMinutes: Long = 20): String {
     val decodedPayload = """
     {
-      "client_id": "${UUID.randomUUID()}",
+      "client_id": "client_id",
       "exp": ${Instant.now().plusSeconds(60 * expiresInMinutes).epochSecond}
     }
     """.trimIndent()
-    val token = Base64.getEncoder().encodeToString(decodedPayload.toByteArray())
+    val encodedPayload = Base64.getEncoder().encodeToString(decodedPayload.toByteArray())
+    val token = "${UUID.randomUUID()}.$encodedPayload.${UUID.randomUUID()}" // UUIDs to simulate the other parts of a JWT
     return token
   }
 
