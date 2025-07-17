@@ -68,7 +68,8 @@ class HmppsAuthGateway(
   }
 
   private fun checkTokenValid(token: String): Boolean {
-    val decodedToken = String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8)
+    val encodedPayload = token.split(".")[1]
+    val decodedToken = String(Base64.getDecoder().decode(encodedPayload), StandardCharsets.UTF_8)
     val exp = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
     val now = Instant.now().epochSecond
     return (now < exp)
