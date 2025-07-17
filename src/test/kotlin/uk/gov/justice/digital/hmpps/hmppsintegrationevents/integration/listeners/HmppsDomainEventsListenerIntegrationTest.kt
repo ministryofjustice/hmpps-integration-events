@@ -822,7 +822,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents.size.shouldBe(1)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
-    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/san-plan-creation-schedule")
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/education/san-plan-creation-schedule")
   }
 
   @Test
