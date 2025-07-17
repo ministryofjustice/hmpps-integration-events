@@ -13,6 +13,8 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.7")
   runtimeOnly("org.flywaydb:flyway-core")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
   annotationProcessor("org.projectlombok:lombok:1.18.38")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
@@ -31,6 +33,8 @@ dependencies {
     exclude("org.apache.common", "commons-compress")
   }
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
+  implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+
   testImplementation("org.testcontainers:localstack:1.21.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.27.1")
