@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
+import io.sentry.Sentry
 import org.apache.tomcat.util.json.JSONParser
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Scope
@@ -67,10 +68,14 @@ class HmppsAuthGateway(
     }
   }
 
-  private fun checkTokenValid(token: String): Boolean {
-    val decodedToken = String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8)
-    val exp = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
+  private fun checkTokenValid(token: String): Boolean = try {
+    val encodedPayload = token.split(".")[1]
+    val decodedToken = String(Base64.getDecoder().decode(encodedPayload), StandardCharsets.UTF_8)
     val now = Instant.now().epochSecond
-    return (now < exp)
+    val expiration = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
+    (now < (expiration - 5))
+  } catch (e: Exception) {
+    Sentry.captureException(e)
+    false
   }
 }
