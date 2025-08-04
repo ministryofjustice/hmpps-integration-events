@@ -13,6 +13,8 @@ import java.time.LocalDateTime
 @Repository
 interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
 
+  fun findByHmppsIdIsIn(hmppsIds: Collection<String>): List<EventNotification>
+
   @Query("select a from EventNotification a where a.lastModifiedDateTime <= :dateTime")
   fun findAllWithLastModifiedDateTimeBefore(
     @Param("dateTime") dateTime: LocalDateTime?,

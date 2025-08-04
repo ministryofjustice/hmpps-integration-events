@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_PROTECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.HIGH_ROSH_CODE
@@ -261,11 +262,12 @@ enum class IntegrationEventType(
   PRISONER_BASE_LOCATION_CHANGED(
     "v1/persons/{hmppsId}/prisoner-base-location",
     {
-      with(HmppsDomainEventName.PrisonOffenderEvents.Prisoner) {
+      with(PrisonOffenderEvents.Prisoner) {
         when (it.eventType) {
           RECEIVED -> it.additionalInformation?.reason?.let { reason ->
             reason == ReceptionReasons.ADMISSION || reason == ReceptionReasons.TRANSFERRED
           } ?: false
+
           RELEASED -> it.additionalInformation?.reason?.equals(
             ReleaseReasons.RELEASED,
           ) ?: false
@@ -510,6 +512,10 @@ enum class IntegrationEventType(
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
+  ),
+  PRISONER_MERGE(
+    "v1/persons/{hmppsId}",
+    { PrisonOffenderEvents.Prisoner.MERGED == it.eventType },
   ),
   ;
 

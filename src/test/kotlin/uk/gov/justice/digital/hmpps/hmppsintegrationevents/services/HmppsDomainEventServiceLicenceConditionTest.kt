@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationInte
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -27,7 +28,15 @@ class HmppsDomainEventServiceLicenceConditionTest {
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
   private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
   private val getPrisonIdService = mockk<GetPrisonIdService>()
-  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, probationIntegrationApiGateway, getPrisonIdService, baseUrl)
+  private val integrationEventCreationStrategyProvider = mockk<IntegrationEventCreationStrategyProvider>()
+  private val defaultEventCreationStrategy = mockk<DefaultEventCreationStrategy>()
+
+  private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(
+    eventNotificationRepository,
+    deadLetterQueueService,
+    integrationEventCreationStrategyProvider,
+    baseUrl,
+  )
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val crn = "X777776"
   private val nomsNumber = "A1234BC"
@@ -41,6 +50,24 @@ class HmppsDomainEventServiceLicenceConditionTest {
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 
     every { getPrisonIdService.execute(nomsNumber) } returns null
+    every { integrationEventCreationStrategyProvider.forEventType(any()) } returns defaultEventCreationStrategy
+
+    every { defaultEventCreationStrategy.createNotifications(any(), any(), any()) } answers {
+      val hmppsDomainEventMessage = arg<HmppsDomainEventMessage>(0)
+      val integrationEventType = arg<IntegrationEventType>(1)
+      val baseUrl = arg<String>(2)
+
+      val additionalInfo = hmppsDomainEventMessage.additionalInformation
+
+      listOf(
+        EventNotification(
+          eventType = integrationEventType,
+          hmppsId = crn,
+          url = "$baseUrl/${integrationEventType.path(crn, null, additionalInfo)}",
+          lastModifiedDateTime = LocalDateTime.now(),
+        ),
+      )
+    }
   }
 
   @ParameterizedTest
