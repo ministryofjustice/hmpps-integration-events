@@ -3,10 +3,14 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.listener
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.tuple
 import org.awaitility.Awaitility
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.until
@@ -34,6 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.ReceptionReasons
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.ReleaseReasons
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.HmppsAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.resources.wiremock.PrisonerSearchMockServer
@@ -147,6 +152,27 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvent.eventType.shouldBe(IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE)
     savedEvent.hmppsId.shouldBe("mockCrn")
     savedEvent.url.shouldBe("https://localhost:8443/v1/persons/mockCrn/sentences/latest-key-dates-and-adjustments")
+  }
+
+  @Test
+  fun `will process and save a prisoner merge event SQS message`() {
+    val rawMessage = SqsNotificationGeneratingHelper().generateRawHmppsMergeDomainEvent()
+    sendDomainSqsMessage(rawMessage)
+
+    Awaitility.await().until { repo.findAll().isNotEmpty() }
+    val savedEvents: List<EventNotification> = repo.findByHmppsIdIsIn(listOf("A3646EA", "A3646EB"))
+    savedEvents.shouldNotBeEmpty().shouldHaveSize(2)
+
+    Assertions.assertThat(savedEvents)
+      .extracting(
+        EventNotification::eventType,
+        EventNotification::hmppsId,
+        EventNotification::url,
+      )
+      .containsExactlyInAnyOrder(
+        tuple(IntegrationEventType.PRISONER_MERGE, "A3646EA", "https://localhost:8443/v1/persons/A3646EA"),
+        tuple(IntegrationEventType.PRISONER_MERGE, "A3646EB", "https://localhost:8443/v1/persons/A3646EB"),
+      )
   }
 
   @ParameterizedTest
