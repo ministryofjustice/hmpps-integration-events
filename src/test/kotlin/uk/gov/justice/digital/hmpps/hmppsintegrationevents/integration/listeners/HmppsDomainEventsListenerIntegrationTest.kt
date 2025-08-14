@@ -427,7 +427,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
       savedEvents[4].eventType.shouldBe(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
       savedEvents[4].hmppsId.shouldBe(crn)
-      savedEvents[4].url.shouldBe("https://localhost:8443//v1/persons/$crn/education/assessments")
+      savedEvents[4].url.shouldBe("https://localhost:8443/v1/persons/$crn/education/assessments")
     }
 
     @Test
@@ -476,14 +476,14 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
       savedEvents[3].url.shouldBe("https://localhost:8443/v1/prison/prisoners/$crn")
       savedEvents[4].eventType.shouldBe(IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED)
       savedEvents[4].hmppsId.shouldBe(crn)
-      savedEvents[4].url.shouldBe("https://localhost:8443//v1/persons/$crn/education/assessments")
+      savedEvents[4].url.shouldBe("https://localhost:8443/v1/persons/$crn/education/assessments")
     }
 
     @Nested
     @DisplayName("and Education Assessments Integration Event is expected or not.")
     inner class AndEducationAssessmentIntegrationEventIsExpectedOrNot {
       private val intEventType = IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED
-      private val url = "https://localhost:8443//v1/persons/$crn/education/assessments"
+      private val url = "https://localhost:8443/v1/persons/$crn/education/assessments"
 
       @ParameterizedTest
       @MethodSource("$CLASS_QUALIFIED_NAME#educationAssessmentCategoryProvider")
