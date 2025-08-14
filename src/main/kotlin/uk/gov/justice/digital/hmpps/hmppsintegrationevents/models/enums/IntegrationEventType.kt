@@ -436,7 +436,7 @@ enum class IntegrationEventType(
     { PRISONER_EVENTS.contains(it.eventType) },
   ),
   PERSON_EDUCATION_ASSESSMENTS_CHANGED(
-    "/v1/persons/{hmppsId}/education/assessments",
+    "v1/persons/{hmppsId}/education/assessments",
     {
       HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED == it.eventType &&
         (
