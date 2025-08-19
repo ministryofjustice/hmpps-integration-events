@@ -1,7 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository
 
+import jakarta.persistence.LockModeType
 import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -17,6 +19,12 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
 
   @Query("select a from EventNotification a where a.lastModifiedDateTime <= :dateTime")
   fun findAllWithLastModifiedDateTimeBefore(
+    @Param("dateTime") dateTime: LocalDateTime?,
+  ): List<EventNotification>
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select a from EventNotification a where a.lastModifiedDateTime <= :dateTime")
+  fun findAllEventsWithLastModifiedDateTimeBefore(
     @Param("dateTime") dateTime: LocalDateTime?,
   ): List<EventNotification>
 
