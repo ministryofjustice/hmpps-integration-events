@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeleteProcessedService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.StateEventNotifierService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
@@ -30,6 +31,9 @@ class StateEventNotifierServiceTest {
 
   @MockitoBean
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
+
+  @MockitoBean
+  private lateinit var subscriberService: SubscriberService
 
   @Autowired
   private lateinit var eventNotifierService: StateEventNotifierService
@@ -50,6 +54,7 @@ class StateEventNotifierServiceTest {
     threadPoolTaskExecutor.stop()
 
     doNothing().`when`(integrationEventTopicService).sendEvent(any())
+    doNothing().`when`(subscriberService).checkSubscriberFilterList()
     eventNotificationRepository.deleteAll()
     eventNotificationRepository.save(getEvent("MockUrl1"))
     eventNotificationRepository.save(getEvent("MockUrl2"))

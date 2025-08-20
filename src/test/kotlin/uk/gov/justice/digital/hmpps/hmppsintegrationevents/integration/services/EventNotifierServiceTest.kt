@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotif
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.EventNotifierService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
@@ -29,6 +30,9 @@ class EventNotifierServiceTest {
 
   @MockitoBean
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
+
+  @MockitoBean
+  private lateinit var subscriberService: SubscriberService
 
   @Autowired
   private lateinit var eventNotifierService: EventNotifierService
@@ -44,8 +48,8 @@ class EventNotifierServiceTest {
     mockkStatic(Sentry::class)
     // Stop the scheduled task executor, we are going to schedule the task manually in this test
     threadPoolTaskExecutor.stop()
-
     doNothing().`when`(integrationEventTopicService).sendEvent(any())
+    doNothing().`when`(subscriberService).checkSubscriberFilterList()
     eventNotificationRepository.deleteAll()
     eventNotificationRepository.save(getEvent("MockUrl1"))
     eventNotificationRepository.save(getEvent("MockUrl2"))
