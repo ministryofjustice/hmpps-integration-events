@@ -22,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -29,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationE
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
@@ -80,6 +82,15 @@ class IntegrationEventTest {
     throw AssertionFailedError(String.format("Message %s is not parseable", message))
   }
 
+  fun getEvent(prisonId: String? = null, url: String) = EventNotification(
+    status = IntegrationEventStatus.PENDING,
+    eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
+    hmppsId = "MockId",
+    prisonId = prisonId,
+    url = url,
+    lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
+  )
+
   @ParameterizedTest
   @NullSource
   @ValueSource(strings = ["MKI"])
@@ -90,15 +101,7 @@ class IntegrationEventTest {
   )
   fun willPublishPrisonEvent(prisonId: String?) {
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-      eventRepository.insertOrUpdate(
-        EventNotification(
-          eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
-          hmppsId = "MockId",
-          prisonId = prisonId,
-          url = "MockUrl",
-          lastModifiedDateTime = LocalDateTime.now().minusMinutes(6),
-        ),
-      )
+      eventRepository.save(getEvent(prisonId, UUID.randomUUID().toString()))
       Mockito.verify(integrationEventTopicService, Mockito.atLeast(1)).sendEvent(any())
       val prisonEventMessages = getMessagesCurrentlyOnTestQueue()
       Assertions.assertThat(prisonEventMessages)

@@ -77,11 +77,12 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   @Transactional
   @Query(
     """
-    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, lastModifiedDateTime)
-    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.lastModifiedDateTime})
+    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, status, lastModifiedDateTime)
+    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.status}, :#{#eventNotification.lastModifiedDateTime})
     ON CONFLICT(url, eventType)
     DO UPDATE SET
-      lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
+      lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime},
+      status = :#{#eventNotification.status}
   """,
   )
   fun insertOrUpdate(
