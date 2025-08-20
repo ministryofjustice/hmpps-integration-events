@@ -60,4 +60,4 @@ subscriber-checker:
 
 
 feature-flag:
-  locked-events: true
+  event-state-management: true

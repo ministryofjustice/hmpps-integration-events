@@ -83,4 +83,4 @@ subscriber-checker:
     rate: 1000
 
 feature-flag:
-  locked-events: true
+  event-state-management: true

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -20,10 +21,54 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     @Param("dateTime") dateTime: LocalDateTime?,
   ): List<EventNotification>
 
+  @Modifying
+  @Query(
+    """
+    update EventNotification a 
+    set a.claimId = :claimId, a.status = :toStatus 
+    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = :fromStatus )
+  """,
+  )
+  fun setProcessing(
+    @Param("dateTime") dateTime: LocalDateTime,
+    @Param("claimId") claimId: String,
+    @Param("toStatus") toStatus: IntegrationEventStatus? = IntegrationEventStatus.PROCESSING,
+    @Param("fromStatus") fromStatus: IntegrationEventStatus? = IntegrationEventStatus.PENDING,
+  )
 
-  @Query("select * from event_notification a where a.last_modified_datetime <= :datetime for update skip locked", nativeQuery = true)
-  fun findAllEventsWithLastModifiedDateTimeBefore(
-    @Param("dateTime") dateTime: LocalDateTime?,
+  @Modifying
+  @Query(
+    """
+    update EventNotification a
+    set a.status = :status 
+    where a.eventId = :eventId
+  """,
+  )
+  fun setProcessed(
+    @Param("eventId") eventId: Long,
+    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSED,
+  )
+
+  @Modifying
+  @Query(
+    """
+    delete from EventNotification a
+    where a.lastModifiedDateTime <= :dateTime and a.status = :status
+  """,
+  )
+  fun deleteEvents(
+    @Param("dateTime") dateTime: LocalDateTime,
+    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSED,
+  )
+
+  @Query(
+    """
+    select a from EventNotification a where a.status = :status and a.claimId = :claimId
+  """,
+  )
+  fun findAllProcessingEvents(
+    @Param("claimId") claimId: String,
+    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSING,
   ): List<EventNotification>
 
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean

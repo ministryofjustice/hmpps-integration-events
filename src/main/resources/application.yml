@@ -86,6 +86,3 @@ notifier:
 subscriber-checker:
   schedule:
     rate: 3600000
-
-feature-flag:
-  locked-events: true

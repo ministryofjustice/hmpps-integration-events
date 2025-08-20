@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationE
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(properties = ["feature-flag.locked-events=false"])
+@SpringBootTest(properties = ["feature-flag.event-state-management=false"])
 @ActiveProfiles("test")
 class EventNotifierServiceTest {
 

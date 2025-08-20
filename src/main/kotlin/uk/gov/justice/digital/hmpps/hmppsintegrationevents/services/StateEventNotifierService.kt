@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import java.time.LocalDateTime
+import java.util.*
 
 /**
  This performs the read of the events within a transaction with a PESSIMISTIC lock so the transaction has exclusive access to the records.
@@ -18,9 +19,9 @@ import java.time.LocalDateTime
  **/
 
 @Service
-@ConditionalOnProperty("feature-flag.locked-events", havingValue = "true")
+@ConditionalOnProperty("feature-flag.event-state-management", havingValue = "true")
 @Configuration
-class LockedEventNotifierService(
+class StateEventNotifierService(
   private val integrationEventTopicService: IntegrationEventTopicService,
   val eventRepository: EventNotificationRepository,
 ) {
@@ -28,11 +29,16 @@ class LockedEventNotifierService(
   @Transactional
   fun sentNotifications() {
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
-    val events = eventRepository.findAllEventsWithLastModifiedDateTimeBefore(fiveMinutesAgo)
+
+    val claimId = UUID.randomUUID().toString()
+    // Claim records to process
+    eventRepository.setProcessing(fiveMinutesAgo, claimId)
+
+    val events = eventRepository.findAllProcessingEvents(claimId)
     events.forEach {
       try {
         integrationEventTopicService.sendEvent(it)
-        eventRepository.deleteById(it.eventId!!)
+        eventRepository.setProcessed(it.eventId!!)
       } catch (e: Exception) {
         Sentry.captureException(e)
       }

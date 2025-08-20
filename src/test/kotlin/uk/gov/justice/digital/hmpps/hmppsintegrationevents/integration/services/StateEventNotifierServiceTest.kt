@@ -18,20 +18,24 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeleteProcessedService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.LockedEventNotifierService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.StateEventNotifierService
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(properties = ["feature-flag.locked-events=true"])
+@SpringBootTest(properties = ["feature-flag.event-state-management=true"])
 @ActiveProfiles("test")
-class LockedEventNotifierServiceTest {
+class StateEventNotifierServiceTest {
 
   @MockitoBean
   private lateinit var integrationEventTopicService: IntegrationEventTopicService
 
   @Autowired
-  private lateinit var eventNotifierService: LockedEventNotifierService
+  private lateinit var eventNotifierService: StateEventNotifierService
+
+  @Autowired
+  private lateinit var deleteProcessedService: DeleteProcessedService
 
   @Autowired
   private lateinit var eventNotificationRepository: EventNotificationRepository
@@ -63,15 +67,19 @@ class LockedEventNotifierServiceTest {
     hmppsId = "MockId",
     prisonId = "MKI",
     url = url,
-    lastModifiedDateTime = LocalDateTime.now().minusMinutes(60),
+    lastModifiedDateTime = LocalDateTime.now().minusHours(25),
   )
 
   @Test
   fun `Concurrent Event Notifier services reads the DB records and deletes them without any exceptions`() {
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     val thread2 = Thread { eventNotifierService.sentNotifications() }
+    val deleteThread1 = Thread { deleteProcessedService.deleteProcessedEvents() }
+    val deleteThread2 = Thread { deleteProcessedService.deleteProcessedEvents() }
     thread1.start()
     thread2.start()
+    deleteThread1.start()
+    deleteThread2.start()
     Awaitility.await().until { eventNotificationRepository.findAll().isEmpty() }
     io.mockk.verify(exactly = 0) { Sentry.captureException(any()) }
   }

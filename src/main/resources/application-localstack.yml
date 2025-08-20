@@ -62,4 +62,4 @@ hmpps.s3:
       bucketName: certificate-backup
 
 feature-flag:
-  locked-events: true
+  event-state-management: true
