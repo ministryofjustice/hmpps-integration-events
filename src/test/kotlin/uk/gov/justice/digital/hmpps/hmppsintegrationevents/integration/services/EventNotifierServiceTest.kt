@@ -87,11 +87,6 @@ class EventNotifierServiceTest {
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     val thread2 = Thread { eventNotifierService.sentNotifications() }
     thread1.start()
-    eventNotificationRepository.save(makeEvent("MockUrl6"))
-    eventNotificationRepository.save(makeEvent("MockUrl7"))
-    eventNotificationRepository.save(makeEvent("MockUrl8"))
-    eventNotificationRepository.save(makeEvent("MockUrl9"))
-    eventNotificationRepository.save(makeEvent("MockUrl10"))
     thread2.start()
     Awaitility.await().until { eventNotificationRepository.findAll().isEmpty() }
     io.mockk.verify { Sentry.captureException(any()) }
