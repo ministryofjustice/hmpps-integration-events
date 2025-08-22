@@ -56,11 +56,7 @@ class EventNotifierServiceTest {
     // Stop the scheduled task executor, we are going to schedule the task manually in this test
     threadPoolTaskExecutor.stop()
     threadPoolTaskScheduler.stop()
-    whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
-      AdditionalAnswers.answersWithDelay(
-        300,
-      ) { "SUCCESS" },
-    )
+    doNothing().`when`(integrationEventTopicService).sendEvent(any())
     doNothing().`when`(subscriberService).checkSubscriberFilterList()
     eventNotificationRepository.deleteAll()
     eventNotificationRepository.save(makeEvent("MockUrl1"))
