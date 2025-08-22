@@ -21,54 +21,51 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     @Param("dateTime") dateTime: LocalDateTime?,
   ): List<EventNotification>
 
+  @Transactional
   @Modifying
   @Query(
     """
     update EventNotification a 
-    set a.claimId = :claimId, a.status = :toStatus 
-    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = :fromStatus )
+    set a.claimId = :claimId, a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSING} 
+    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PENDING} )
   """,
   )
   fun setProcessing(
     @Param("dateTime") dateTime: LocalDateTime,
-    @Param("claimId") claimId: String,
-    @Param("toStatus") toStatus: IntegrationEventStatus? = IntegrationEventStatus.PROCESSING,
-    @Param("fromStatus") fromStatus: IntegrationEventStatus? = IntegrationEventStatus.PENDING,
+    @Param("claimId") claimId: String
   )
 
+  @Transactional
   @Modifying
   @Query(
     """
     update EventNotification a
-    set a.status = :status 
+    set a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSED}  
     where a.eventId = :eventId
   """,
   )
   fun setProcessed(
-    @Param("eventId") eventId: Long,
-    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSED,
+    @Param("eventId") eventId: Long
   )
 
   @Modifying
   @Query(
     """
     delete from EventNotification a
-    where a.lastModifiedDateTime <= :dateTime and a.status = :status
+    where a.lastModifiedDateTime <= :dateTime and a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSED} 
   """,
   )
   fun deleteEvents(
-    @Param("dateTime") dateTime: LocalDateTime,
-    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSED,
+    @Param("dateTime") dateTime: LocalDateTime
   )
 
   @Query(
     """
-    select a from EventNotification a where a.status = :status and a.claimId = :claimId
+    select a from EventNotification a where a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSING} and a.claimId = :claimId
   """,
   )
   fun findAllProcessingEvents(
-    @Param("claimId") claimId: String,
-    @Param("status") status: IntegrationEventStatus? = IntegrationEventStatus.PROCESSING,
+    @Param("claimId") claimId: String
   ): List<EventNotification>
 
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean
@@ -77,13 +74,11 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   @Transactional
   @Query(
     """
-    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, status, lastModifiedDateTime)
-    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, 
-            :#{#eventNotification.status}, :#{#eventNotification.lastModifiedDateTime})
+    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, lastModifiedDateTime)
+    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.lastModifiedDateTime})
     ON CONFLICT(url, eventType)
     DO UPDATE SET
-      lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime},
-      status = :#{#eventNotification.status}
+      lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
   """,
   )
   fun insertOrUpdate(

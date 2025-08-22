@@ -4,14 +4,18 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.sentry.Sentry
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.AdditionalAnswers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -22,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.EventNotifie
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
 import java.time.LocalDateTime
+
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(properties = ["feature-flag.event-state-management=false"])
@@ -43,26 +48,34 @@ class EventNotifierServiceTest {
   @Autowired
   private lateinit var threadPoolTaskExecutor: ThreadPoolTaskExecutor
 
+  @Autowired
+  private lateinit var threadPoolTaskScheduler: ThreadPoolTaskScheduler
+
   @BeforeEach
   fun setup() {
     mockkStatic(Sentry::class)
     // Stop the scheduled task executor, we are going to schedule the task manually in this test
     threadPoolTaskExecutor.stop()
-    doNothing().`when`(integrationEventTopicService).sendEvent(any())
+    threadPoolTaskScheduler.stop()
+    whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
+      AdditionalAnswers.answersWithDelay(
+        300,
+      ) { "SUCCESS" },
+    )
     doNothing().`when`(subscriberService).checkSubscriberFilterList()
     eventNotificationRepository.deleteAll()
-    eventNotificationRepository.save(getEvent("MockUrl1"))
-    eventNotificationRepository.save(getEvent("MockUrl2"))
-    eventNotificationRepository.save(getEvent("MockUrl3"))
-    eventNotificationRepository.save(getEvent("MockUrl4"))
-    eventNotificationRepository.save(getEvent("MockUrl5"))
+    eventNotificationRepository.save(makeEvent("MockUrl1"))
+    eventNotificationRepository.save(makeEvent("MockUrl2"))
+    eventNotificationRepository.save(makeEvent("MockUrl3"))
+    eventNotificationRepository.save(makeEvent("MockUrl4"))
+    eventNotificationRepository.save(makeEvent("MockUrl5"))
   }
 
-  @BeforeEach
+  @AfterEach
   fun teardown() {
     unmockkStatic(Sentry::class)
   }
-  fun getEvent(url: String): EventNotification = EventNotification(
+  fun makeEvent(url: String): EventNotification = EventNotification(
     eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
     hmppsId = "MockId",
     prisonId = "MKI",
@@ -75,6 +88,12 @@ class EventNotifierServiceTest {
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     val thread2 = Thread { eventNotifierService.sentNotifications() }
     thread1.start()
+    Thread.sleep(10)
+    eventNotificationRepository.save(makeEvent("MockUrl6"))
+    eventNotificationRepository.save(makeEvent("MockUrl7"))
+    eventNotificationRepository.save(makeEvent("MockUrl8"))
+    eventNotificationRepository.save(makeEvent("MockUrl9"))
+    eventNotificationRepository.save(makeEvent("MockUrl10"))
     thread2.start()
     Awaitility.await().until { eventNotificationRepository.findAll().isEmpty() }
     io.mockk.verify { Sentry.captureException(any()) }
