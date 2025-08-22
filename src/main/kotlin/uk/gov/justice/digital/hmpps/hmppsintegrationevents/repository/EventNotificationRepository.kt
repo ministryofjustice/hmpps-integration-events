@@ -20,6 +20,53 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     @Param("dateTime") dateTime: LocalDateTime?,
   ): List<EventNotification>
 
+  @Transactional
+  @Modifying
+  @Query(
+    """
+    update EventNotification a 
+    set a.claimId = :claimId, a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSING} 
+    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PENDING} )
+  """,
+  )
+  fun setProcessing(
+    @Param("dateTime") dateTime: LocalDateTime,
+    @Param("claimId") claimId: String,
+  )
+
+  @Transactional
+  @Modifying
+  @Query(
+    """
+    update EventNotification a
+    set a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSED}  
+    where a.eventId = :eventId
+  """,
+  )
+  fun setProcessed(
+    @Param("eventId") eventId: Long,
+  )
+
+  @Modifying
+  @Query(
+    """
+    delete from EventNotification a
+    where a.lastModifiedDateTime <= :dateTime and a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSED} 
+  """,
+  )
+  fun deleteEvents(
+    @Param("dateTime") dateTime: LocalDateTime,
+  )
+
+  @Query(
+    """
+    select a from EventNotification a where a.status = ?#{T(uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus).PROCESSING} and a.claimId = :claimId
+  """,
+  )
+  fun findAllProcessingEvents(
+    @Param("claimId") claimId: String,
+  ): List<EventNotification>
+
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean
 
   @Modifying

@@ -11,6 +11,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import java.time.LocalDateTime
 
@@ -28,6 +29,11 @@ data class EventNotification(
   @Column(name = "EVENT_ID", nullable = false, unique = true)
   val eventId: Long? = null,
 
+  // Used in the event notifier to set a claim on the records to be sent
+  // To avoid optimistic locking issues with multiple pods
+  @Column(name = "CLAIM_ID")
+  val claimId: String? = null,
+
   @Column(name = "HMPPS_ID", nullable = true)
   val hmppsId: String? = null,
 
@@ -40,6 +46,10 @@ data class EventNotification(
 
   @Column(name = "URL", nullable = false)
   val url: String,
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "STATUS")
+  val status: IntegrationEventStatus? = IntegrationEventStatus.PENDING,
 
   @Temporal(value = TemporalType.TIMESTAMP)
   @Column(name = "LAST_MODIFIED_DATETIME", nullable = false)
