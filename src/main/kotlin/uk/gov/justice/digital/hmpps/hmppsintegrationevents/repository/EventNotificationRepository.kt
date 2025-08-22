@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -32,7 +31,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   )
   fun setProcessing(
     @Param("dateTime") dateTime: LocalDateTime,
-    @Param("claimId") claimId: String
+    @Param("claimId") claimId: String,
   )
 
   @Transactional
@@ -45,7 +44,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   """,
   )
   fun setProcessed(
-    @Param("eventId") eventId: Long
+    @Param("eventId") eventId: Long,
   )
 
   @Modifying
@@ -56,7 +55,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   """,
   )
   fun deleteEvents(
-    @Param("dateTime") dateTime: LocalDateTime
+    @Param("dateTime") dateTime: LocalDateTime,
   )
 
   @Query(
@@ -65,7 +64,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
   """,
   )
   fun findAllProcessingEvents(
-    @Param("claimId") claimId: String
+    @Param("claimId") claimId: String,
   ): List<EventNotification>
 
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean

@@ -27,7 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
 import java.time.LocalDateTime
 
-
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(properties = ["feature-flag.event-state-management=false"])
 @ActiveProfiles("test")
