@@ -87,7 +87,7 @@ class EventNotifierServiceTest {
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     val thread2 = Thread { eventNotifierService.sentNotifications() }
     thread1.start()
-    Thread.sleep(10)
+    Thread.sleep(5)
     eventNotificationRepository.save(makeEvent("MockUrl6"))
     eventNotificationRepository.save(makeEvent("MockUrl7"))
     eventNotificationRepository.save(makeEvent("MockUrl8"))
