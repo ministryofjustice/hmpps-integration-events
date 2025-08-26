@@ -75,7 +75,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     """
     INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, status, lastModifiedDateTime)
     VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.status}, :#{#eventNotification.lastModifiedDateTime})
-    ON CONFLICT(url, eventType)
+    ON CONFLICT(url, eventType, status)
     DO UPDATE SET
       lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
   """,
