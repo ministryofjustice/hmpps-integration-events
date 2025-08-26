@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.Index
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -18,9 +17,6 @@ import java.time.LocalDateTime
 @Entity
 @Table(
   name = "EVENT_NOTIFICATION",
-  indexes = [
-    Index(name = "idx_event_notification_url_event_type", columnList = "url, event_type, status", unique = true),
-  ],
 )
 data class EventNotification(
 

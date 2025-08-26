@@ -12,8 +12,6 @@ spring:
     password: ${DB_PASS}
   jpa:
     show-sql: true
-    hibernate:
-      ddl-auto: create
   flyway:
     enabled: true
 
