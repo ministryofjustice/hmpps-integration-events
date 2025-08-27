@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -40,7 +41,7 @@ class DatabaseConstraintTest {
   }
 
   @Test
-  fun `does not create a new record when url, event type and status are all the same`() {
+  fun `does not create a new record when url, event type and status are all the same and all records are pending`() {
     assertThat(eventRepository.count()).isEqualTo(0)
     eventRepository.insertOrUpdate(makeEvent("MockUrl1"))
     assertThat(eventRepository.count()).isEqualTo(1)
@@ -58,5 +59,23 @@ class DatabaseConstraintTest {
     eventRepository.setProcessing(LocalDateTime.now().minusMinutes(5), claimId)
     eventRepository.insertOrUpdate(makeEvent("MockUrl1"))
     assertThat(eventRepository.count()).isEqualTo(2)
+  }
+
+  @Test
+  fun `allows another record with the same url and event type to be set to PROCESSING`() {
+    // Put an event in the processing state
+    val claimId1 = UUID.randomUUID().toString()
+    eventRepository.insertOrUpdate(makeEvent("MockUrl1"))
+    eventRepository.setProcessing(LocalDateTime.now().minusMinutes(5), claimId1)
+
+    // Put an event in the processing state
+    val claimId2 = UUID.randomUUID().toString()
+    eventRepository.insertOrUpdate(makeEvent("MockUrl1"))
+    eventRepository.setProcessing(LocalDateTime.now().minusMinutes(5), claimId2)
+
+    val events = eventRepository.findAll()
+    assertThat(events).hasSize(2)
+    assertThat(events[0].status).isEqualTo(IntegrationEventStatus.PROCESSING)
+    assertThat(events[1].status).isEqualTo(IntegrationEventStatus.PROCESSING)
   }
 }
