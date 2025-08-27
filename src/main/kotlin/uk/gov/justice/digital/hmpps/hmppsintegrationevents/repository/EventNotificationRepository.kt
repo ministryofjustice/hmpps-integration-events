@@ -20,15 +20,62 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     @Param("dateTime") dateTime: LocalDateTime?,
   ): List<EventNotification>
 
+  @Transactional
+  @Modifying
+  @Query(
+    """
+    update EventNotification a 
+    set a.claimId = :claimId, a.status = "PROCESSING" 
+    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = "PENDING")
+  """,
+  )
+  fun setProcessing(
+    @Param("dateTime") dateTime: LocalDateTime,
+    @Param("claimId") claimId: String,
+  )
+
+  @Transactional
+  @Modifying
+  @Query(
+    """
+    update EventNotification a
+    set a.status = "PROCESSED" 
+    where a.eventId = :eventId
+  """,
+  )
+  fun setProcessed(
+    @Param("eventId") eventId: Long,
+  )
+
+  @Modifying
+  @Query(
+    """
+    delete from EventNotification a
+    where a.lastModifiedDateTime <= :dateTime and a.status = "PROCESSED" 
+  """,
+  )
+  fun deleteEvents(
+    @Param("dateTime") dateTime: LocalDateTime,
+  )
+
+  @Query(
+    """
+    select a from EventNotification a where a.status = "PROCESSING" and a.claimId = :claimId
+  """,
+  )
+  fun findAllProcessingEvents(
+    @Param("claimId") claimId: String,
+  ): List<EventNotification>
+
   fun existsByHmppsIdAndEventType(hmppsId: String, eventType: IntegrationEventType): Boolean
 
   @Modifying
   @Transactional
   @Query(
     """
-    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, lastModifiedDateTime)
-    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.lastModifiedDateTime})
-    ON CONFLICT(url, eventType)
+    INSERT INTO EventNotification (url, eventType, hmppsId, prisonId, status, lastModifiedDateTime)
+    VALUES (:#{#eventNotification.url}, :#{#eventNotification.eventType}, :#{#eventNotification.hmppsId}, :#{#eventNotification.prisonId}, :#{#eventNotification.status}, :#{#eventNotification.lastModifiedDateTime})
+    ON CONFLICT(url, eventType, status)
     DO UPDATE SET
       lastModifiedDateTime = :#{#eventNotification.lastModifiedDateTime}
   """,

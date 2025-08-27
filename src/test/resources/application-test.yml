@@ -12,8 +12,6 @@ spring:
     password: ${DB_PASS}
   jpa:
     show-sql: true
-    hibernate:
-      ddl-auto: create
   flyway:
     enabled: true
 
@@ -81,3 +79,6 @@ notifier:
 subscriber-checker:
   schedule:
     rate: 1000
+
+feature-flag:
+  event-state-management: true
