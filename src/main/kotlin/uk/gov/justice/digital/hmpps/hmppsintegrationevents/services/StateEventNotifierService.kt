@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import io.sentry.Sentry
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -10,7 +9,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-@ConditionalOnProperty("feature-flag.event-state-management", havingValue = "true")
 @Configuration
 class StateEventNotifierService(
   private val integrationEventTopicService: IntegrationEventTopicService,

@@ -26,6 +26,3 @@ notifier:
 subscriber-checker:
   schedule:
     rate: 3600000
-
-feature-flag:
-  event-state-management: false
