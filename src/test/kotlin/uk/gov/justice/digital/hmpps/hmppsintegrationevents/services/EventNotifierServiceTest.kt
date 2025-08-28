@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 @JsonTest
 class EventNotifierServiceTest {
 
-  private lateinit var eventNotifierService: EventNotifierService
+  private lateinit var eventNotifierService: StateEventNotifierService
 
   private val integrationEventTopicService: IntegrationEventTopicService = mock()
   private val eventRepository: EventNotificationRepository = mock()
@@ -32,7 +32,7 @@ class EventNotifierServiceTest {
   fun setUp() {
     Mockito.reset(eventRepository)
 
-    eventNotifierService = EventNotifierService(integrationEventTopicService, eventRepository)
+    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository)
   }
 
   @Test
@@ -45,7 +45,7 @@ class EventNotifierServiceTest {
   @Test
   fun `Event published for event notification in database`() {
     val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = "MKI", url = "mockUrl", lastModifiedDateTime = currentTime)
-    whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
+    whenever(eventRepository.findAllProcessingEvents(any())).thenReturn(listOf(event))
 
     eventNotifierService.sentNotifications()
 
@@ -53,15 +53,6 @@ class EventNotifierServiceTest {
       verify(integrationEventTopicService, times(1)).sendEvent(capture())
       Assertions.assertThat(firstValue).isEqualTo(event)
     }
-  }
-
-  @Test
-  fun `Remove event notification after event processed`() {
-    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
-    whenever(eventRepository.findAllWithLastModifiedDateTimeBefore(any())).thenReturn(listOf(event))
-
-    eventNotifierService.sentNotifications()
-    verify(eventRepository, times(1)).deleteById(123)
   }
 
   @Test

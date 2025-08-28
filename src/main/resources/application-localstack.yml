@@ -60,6 +60,3 @@ hmpps.s3:
   buckets:
     certificate-backup:
       bucketName: certificate-backup
-
-feature-flag:
-  event-state-management: true

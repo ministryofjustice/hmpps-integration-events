@@ -29,7 +29,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberSe
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(properties = ["feature-flag.event-state-management=true"])
+@SpringBootTest
 @ActiveProfiles("test")
 class StateEventNotifierServiceTest {
 
