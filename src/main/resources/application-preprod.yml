@@ -28,4 +28,4 @@ subscriber-checker:
     rate: 3600000
 
 feature-flag:
-  event-state-management: false
+  event-state-management: true
