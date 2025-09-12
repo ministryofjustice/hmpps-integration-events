@@ -175,7 +175,7 @@ class DefaultEventCreationStrategyTest {
     assertThatThrownBy {
       strategy.createNotifications(domainMessage, eventType, baseUrl)
     }.isInstanceOf(NotFoundException::class.java)
-      .hasMessage("Prison ID could not be found in domain event message")
+      .hasMessage("Prison ID could not be found in domain event message for path v1/prison/{prisonId}/location/{locationKey}")
   }
 
   @Test
