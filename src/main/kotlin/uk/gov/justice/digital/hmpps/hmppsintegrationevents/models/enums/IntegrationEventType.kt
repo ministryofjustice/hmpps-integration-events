@@ -523,13 +523,13 @@ enum class IntegrationEventType(
     var replacedPath = pathTemplate
     if (replacedPath.contains("{hmppsId}")) {
       if (hmppsId == null) {
-        throw NotFoundException("Identifier could not be found in domain event message")
+        throw NotFoundException("Identifier could not be found in domain event message for path $pathTemplate")
       }
       replacedPath = replacedPath.replace("{hmppsId}", hmppsId)
     }
     if (replacedPath.contains("{prisonId}")) {
       if (prisonId == null) {
-        throw NotFoundException("Prison ID could not be found in domain event message")
+        throw NotFoundException("Prison ID could not be found in domain event message for path $pathTemplate")
       }
       replacedPath = replacedPath.replace("{prisonId}", prisonId)
     }
