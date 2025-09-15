@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -47,36 +46,22 @@ class MultipleEventCreationStrategy(domainEventIdentitiesResolver: DomainEventId
     hmppsDomainEventMessage: HmppsDomainEventMessage,
     integrationEventType: IntegrationEventType,
     baseUrl: String,
-  ): List<EventNotification> {
-    if (hmppsDomainEventMessage.eventType == PrisonOffenderEvents.Prisoner.MERGED) {
-      return listOf(
-        notification(
-          integrationEventType,
-          hmppsDomainEventMessage,
-          hmppsDomainEventMessage.additionalInformation?.removedNomsNumber,
-          getPrisonId(hmppsDomainEventMessage),
-          baseUrl,
-        ),
-        notification(
-          integrationEventType,
-          hmppsDomainEventMessage,
-          hmppsDomainEventMessage.additionalInformation?.nomsNumber,
-          getPrisonId(hmppsDomainEventMessage),
-          baseUrl,
-        ),
-      )
-    } else {
-      return listOf(
-        notification(
-          integrationEventType,
-          hmppsDomainEventMessage,
-          getHmppsId(hmppsDomainEventMessage),
-          getPrisonId(hmppsDomainEventMessage),
-          baseUrl,
-        ),
-      )
-    }
-  }
+  ): List<EventNotification> = listOf(
+    notification(
+      integrationEventType,
+      hmppsDomainEventMessage,
+      hmppsDomainEventMessage.additionalInformation?.removedNomsNumber,
+      getPrisonId(hmppsDomainEventMessage),
+      baseUrl,
+    ),
+    notification(
+      integrationEventType,
+      hmppsDomainEventMessage,
+      hmppsDomainEventMessage.additionalInformation?.nomsNumber,
+      getPrisonId(hmppsDomainEventMessage),
+      baseUrl,
+    ),
+  )
 }
 
 private fun notification(
