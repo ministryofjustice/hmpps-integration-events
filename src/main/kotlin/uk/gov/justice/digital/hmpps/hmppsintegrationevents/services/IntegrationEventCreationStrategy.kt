@@ -65,8 +65,7 @@ class MultipleEventCreationStrategy(domainEventIdentitiesResolver: DomainEventId
           baseUrl,
         ),
       )
-    }
-    else {
+    } else {
       return listOf(
         notification(
           integrationEventType,
