@@ -97,11 +97,7 @@ class HmppsDomainEventServiceTest {
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.valueOf(integrationEvent)))
 
     verify(exactly = 1) {
-      integrationEventCreationStrategyProvider.forEventType(
-        IntegrationEventType.valueOf(
-          integrationEvent,
-        ),
-      )
+      integrationEventCreationStrategyProvider.forEventType(eventType)
     }
     verify(exactly = 1) {
       defaultEventCreationStrategy.createNotifications(

@@ -307,7 +307,7 @@ enum class IntegrationEventType(
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
-    { PERSON_EVENTS.contains(it.eventType) },
+    { PERSON_EVENTS.contains(it.eventType) || it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ),
   PERSON_ADDRESS_CHANGED(
     "v1/persons/{hmppsId}/addresses",
@@ -327,7 +327,7 @@ enum class IntegrationEventType(
   ),
   PERSON_VISIT_RESTRICTIONS_CHANGED(
     "v1/persons/{hmppsId}/visit-restrictions",
-    { NEW_PERSON_EVENTS.contains(it.eventType) || it.eventType == HmppsDomainEventName.PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
+    { NEW_PERSON_EVENTS.contains(it.eventType) || it.eventType == PrisonOffenderEvents.Prisoner.Restriction.CHANGED },
   ),
   PERSON_VISIT_ORDERS_CHANGED(
     "v1/persons/{hmppsId}/visit-orders",
@@ -512,10 +512,6 @@ enum class IntegrationEventType(
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
-  ),
-  PRISONER_MERGE(
-    "v1/persons/{hmppsId}",
-    { PrisonOffenderEvents.Prisoner.MERGED == it.eventType },
   ),
   ;
 

@@ -170,8 +170,8 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
         EventNotification::url,
       )
       .containsExactlyInAnyOrder(
-        tuple(IntegrationEventType.PRISONER_MERGE, "A3646EA", "https://localhost:8443/v1/persons/A3646EA"),
-        tuple(IntegrationEventType.PRISONER_MERGE, "A3646EB", "https://localhost:8443/v1/persons/A3646EB"),
+        tuple(IntegrationEventType.PERSON_STATUS_CHANGED, "A3646EA", "https://localhost:8443/v1/persons/A3646EA"),
+        tuple(IntegrationEventType.PERSON_STATUS_CHANGED, "A3646EB", "https://localhost:8443/v1/persons/A3646EB"),
       )
   }
 

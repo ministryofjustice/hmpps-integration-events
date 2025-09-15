@@ -24,7 +24,7 @@ class HmppsDomainEventService(
   fun execute(hmppsDomainEvent: HmppsDomainEvent, integrationEventTypes: List<IntegrationEventType>) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
     for (integrationEventType in integrationEventTypes) {
-      val notifications = integrationEventCreationStrategyProvider.forEventType(integrationEventType)
+      val notifications = integrationEventCreationStrategyProvider.forEventType(hmppsEvent.eventType)
         .createNotifications(hmppsEvent, integrationEventType, baseUrl)
       for (notification in notifications) {
         eventNotificationRepository.insertOrUpdate(notification)

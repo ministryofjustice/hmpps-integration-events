@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -23,11 +24,11 @@ class MultipleEventCreationStrategyTest {
   private val hmppsId = "X777776"
   private val prisonId = "LEI"
   private val baseUrl = "https://event-service.test"
-  private var eventType = IntegrationEventType.PRISONER_MERGE
+  private var eventType = PrisonOffenderEvents.Prisoner.MERGED
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
   private var domainMessage = HmppsDomainEventMessage(
-    eventType = eventType.name,
+    eventType = eventType,
     occurredAt = "2024-08-13T14:15:16.460942253+01:00",
     prisonId = prisonId,
     personReference = null,
@@ -55,7 +56,7 @@ class MultipleEventCreationStrategyTest {
       )
     domainMessage = objectMapper.readValue(domainEvent.message)
 
-    val notifications = strategy.createNotifications(domainMessage, eventType, baseUrl)
+    val notifications = strategy.createNotifications(domainMessage, IntegrationEventType.PERSON_STATUS_CHANGED, baseUrl)
 
     assertThat(notifications)
       .extracting(
@@ -64,8 +65,8 @@ class MultipleEventCreationStrategyTest {
         EventNotification::url,
       )
       .containsExactlyInAnyOrder(
-        tuple(IntegrationEventType.PRISONER_MERGE, nomisNumber, "$baseUrl/v1/persons/$nomisNumber"),
-        tuple(IntegrationEventType.PRISONER_MERGE, removedNomisNumber, "$baseUrl/v1/persons/$removedNomisNumber"),
+        tuple(IntegrationEventType.PERSON_STATUS_CHANGED, nomisNumber, "$baseUrl/v1/persons/$nomisNumber"),
+        tuple(IntegrationEventType.PERSON_STATUS_CHANGED, removedNomisNumber, "$baseUrl/v1/persons/$removedNomisNumber"),
       )
   }
 }
