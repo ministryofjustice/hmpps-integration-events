@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
@@ -174,7 +175,7 @@ class DefaultEventCreationStrategyTest {
 
     assertThatThrownBy {
       strategy.createNotifications(domainMessage, eventType, baseUrl)
-    }.isInstanceOf(NotFoundException::class.java)
+    }.isInstanceOf(PrisonNotFoundException::class.java)
       .hasMessage("Prison ID could not be found in domain event message for path v1/prison/{prisonId}/location/{locationKey}")
   }
 
