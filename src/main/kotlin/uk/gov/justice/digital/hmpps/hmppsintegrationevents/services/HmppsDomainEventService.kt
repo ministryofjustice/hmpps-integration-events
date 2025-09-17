@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.UnmappableUrlException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
@@ -33,8 +33,8 @@ class HmppsDomainEventService(
       val notifications = try {
         integrationEventCreationStrategyProvider.forEventType(integrationEventType)
           .createNotifications(hmppsEvent, integrationEventType, baseUrl)
-      } catch (nfe: PrisonNotFoundException) {
-        log.warn(nfe.message)
+      } catch (ume: UnmappableUrlException) {
+        log.warn(ume.message)
         emptyList()
       }
       for (notification in notifications) {
