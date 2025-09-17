@@ -307,7 +307,7 @@ enum class IntegrationEventType(
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
-    { PERSON_EVENTS.contains(it.eventType) },
+    { PERSON_EVENTS.contains(it.eventType) || it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ),
   PERSON_ADDRESS_CHANGED(
     "v1/persons/{hmppsId}/addresses",
@@ -515,7 +515,7 @@ enum class IntegrationEventType(
   ),
   PRISONER_MERGE(
     "v1/persons/{hmppsId}",
-    { PrisonOffenderEvents.Prisoner.MERGED == it.eventType },
+    { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ),
   ;
 

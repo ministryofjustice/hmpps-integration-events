@@ -8,12 +8,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.ASSESSMENT_SUMMARY_PRODUCED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -26,44 +23,24 @@ class HmppsDomainEventServiceROSHTest {
 
   private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
-  private val probationIntegrationApiGateway = mockk<ProbationIntegrationApiGateway>()
-  private val integrationEventCreationStrategyProvider = mockk<IntegrationEventCreationStrategyProvider>()
-  private val defaultEventCreationStrategy = mockk<DefaultEventCreationStrategy>()
+  private val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
   private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(
     eventNotificationRepository,
     deadLetterQueueService,
-    integrationEventCreationStrategyProvider,
+    domainEventIdentitiesResolver,
     baseUrl,
   )
   private val currentTime: LocalDateTime = LocalDateTime.now()
-  private val crn = "X777776"
+  private val hmppsId = "AA1234A"
 
   @BeforeEach
   fun setup() {
     mockkStatic(LocalDateTime::class)
+    every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
+    every { domainEventIdentitiesResolver.getPrisonId(any()) } returns null
     every { LocalDateTime.now() } returns currentTime
-    every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, true)
-    every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
+
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
-
-    every { integrationEventCreationStrategyProvider.forEventType(any()) } returns defaultEventCreationStrategy
-
-    every { defaultEventCreationStrategy.createNotifications(any(), any(), any()) } answers {
-      val hmppsDomainEventMessage = arg<HmppsDomainEventMessage>(0)
-      val integrationEventType = arg<IntegrationEventType>(1)
-      val baseUrl = arg<String>(2)
-
-      val additionalInfo = hmppsDomainEventMessage.additionalInformation
-
-      listOf(
-        EventNotification(
-          eventType = integrationEventType,
-          hmppsId = crn,
-          url = "$baseUrl/${integrationEventType.path(crn, null, additionalInfo)}",
-          lastModifiedDateTime = LocalDateTime.now(),
-        ),
-      )
-    }
   }
 
   @Test
@@ -79,8 +56,8 @@ class HmppsDomainEventServiceROSHTest {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED,
-          hmppsId = crn,
-          url = "$baseUrl/v1/persons/X777776/risks/serious-harm",
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/risks/serious-harm",
           lastModifiedDateTime = currentTime,
         ),
       )
