@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
@@ -529,7 +530,7 @@ enum class IntegrationEventType(
     }
     if (replacedPath.contains("{prisonId}")) {
       if (prisonId == null) {
-        throw NotFoundException("Prison ID could not be found in domain event message for path $pathTemplate")
+        throw PrisonNotFoundException("Prison ID could not be found in domain event message for path $pathTemplate")
       }
       replacedPath = replacedPath.replace("{prisonId}", prisonId)
     }
