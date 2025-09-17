@@ -24,4 +24,24 @@ class PrisonerSearchMockServer internal constructor() : WireMockServer(8446) {
         ),
     )
   }
+
+  fun stubGetPrisonerNullPrisonId(nomsNumber: String) {
+    stubFor(
+      WireMock.get(WireMock.urlEqualTo("/prisoner/$nomsNumber"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              """
+              {
+                "prisonerNumber": "$nomsNumber",
+                "firstName": "Jane",
+                "lastName": "Smith"
+              }
+              """
+                .trimIndent(),
+            ),
+        ),
+    )
+  }
 }
