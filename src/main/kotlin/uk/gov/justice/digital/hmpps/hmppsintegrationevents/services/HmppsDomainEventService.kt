@@ -56,8 +56,7 @@ class HmppsDomainEventService(
           )
         }
         eventNotificationRepository.insertOrUpdate(eventNotification)
-      }
-      catch (ume: UnmappableUrlException) {
+      } catch (ume: UnmappableUrlException) {
         log.warn(ume.message)
       }
     }
