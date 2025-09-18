@@ -242,7 +242,7 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
 )
 
 enum class IntegrationEventType(
-  private val pathTemplate: String,
+  protected val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
 ) {
   DYNAMIC_RISKS_CHANGED(
@@ -518,10 +518,16 @@ enum class IntegrationEventType(
   PRISONER_MERGE(
     "v1/persons/{hmppsId}",
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
-  ),
+  ) {
+    override fun getHmppsId(hmppsId: String?, additionalInformation: AdditionalInformation?): String = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
+
+    override fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String = pathTemplate.replace("{hmppsId}", getHmppsId(hmppsId, additionalInformation))
+  },
   ;
 
-  fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
+  open fun getHmppsId(hmppsId: String?, additionalInformation: AdditionalInformation?): String? = hmppsId
+
+  open fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
     if (replacedPath.contains("{hmppsId}")) {
       if (hmppsId == null) {

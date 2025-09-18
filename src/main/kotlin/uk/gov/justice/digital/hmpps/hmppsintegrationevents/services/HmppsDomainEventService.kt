@@ -37,17 +37,11 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       try {
-        val resolvedHmppsId = if (integrationEventType == IntegrationEventType.PRISONER_MERGE) {
-          hmppsEvent.additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
-        } else {
-          hmppsId
-        }
-
         val eventNotification = EventNotification(
           eventType = integrationEventType,
-          hmppsId = resolvedHmppsId,
+          hmppsId = integrationEventType.getHmppsId(hmppsId, hmppsEvent.additionalInformation),
           prisonId = prisonId,
-          url = "$baseUrl/${integrationEventType.path(resolvedHmppsId, prisonId, hmppsEvent.additionalInformation)}",
+          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId, hmppsEvent.additionalInformation)}",
           lastModifiedDateTime = LocalDateTime.now(),
         )
 
