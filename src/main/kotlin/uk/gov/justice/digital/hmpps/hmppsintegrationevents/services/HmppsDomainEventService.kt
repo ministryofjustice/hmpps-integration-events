@@ -37,24 +37,20 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       try {
-        val eventNotification = if (integrationEventType == IntegrationEventType.PRISONER_MERGE) {
-          val nomisId = hmppsEvent.additionalInformation?.removedNomsNumber!!
-          EventNotification(
-            eventType = integrationEventType,
-            hmppsId = nomisId,
-            prisonId = prisonId,
-            url = "$baseUrl/${integrationEventType.path(nomisId, prisonId, hmppsEvent.additionalInformation)}",
-            lastModifiedDateTime = LocalDateTime.now(),
-          )
+        val resolvedHmppsId = if (integrationEventType == IntegrationEventType.PRISONER_MERGE) {
+          hmppsEvent.additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
         } else {
-          EventNotification(
-            eventType = integrationEventType,
-            hmppsId = hmppsId,
-            prisonId = prisonId,
-            url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId, hmppsEvent.additionalInformation)}",
-            lastModifiedDateTime = LocalDateTime.now(),
-          )
+          hmppsId
         }
+
+        val eventNotification = EventNotification(
+          eventType = integrationEventType,
+          hmppsId = resolvedHmppsId,
+          prisonId = prisonId,
+          url = "$baseUrl/${integrationEventType.path(resolvedHmppsId, prisonId, hmppsEvent.additionalInformation)}",
+          lastModifiedDateTime = LocalDateTime.now(),
+        )
+
         eventNotificationRepository.insertOrUpdate(eventNotification)
       } catch (ume: UnmappableUrlException) {
         log.warn(ume.message)
