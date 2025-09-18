@@ -26,7 +26,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     """
     update EventNotification a 
     set a.claimId = :claimId, a.status = "PROCESSING" 
-    where a.lastModifiedDateTime <= :dateTime and ( a.status is null or a.status = "PENDING") and a.claimId is null
+    where a.lastModifiedDateTime <= :dateTime and a.status = "PENDING"
   """,
   )
   fun setProcessing(
