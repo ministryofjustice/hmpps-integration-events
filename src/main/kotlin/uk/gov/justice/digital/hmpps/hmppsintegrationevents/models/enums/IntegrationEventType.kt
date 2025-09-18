@@ -52,6 +52,7 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.MERGED
 )
 
 val PRISONER_EVENTS = listOf(
@@ -308,7 +309,7 @@ enum class IntegrationEventType(
   ),
   PERSON_STATUS_CHANGED(
     "v1/persons/{hmppsId}",
-    { PERSON_EVENTS.contains(it.eventType) || it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
+    { PERSON_EVENTS.contains(it.eventType) },
   ),
   PERSON_ADDRESS_CHANGED(
     "v1/persons/{hmppsId}/addresses",
