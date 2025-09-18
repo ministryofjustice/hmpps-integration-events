@@ -524,13 +524,7 @@ enum class IntegrationEventType(
     override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification {
       val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
 
-      return EventNotification(
-        eventType = this,
-        hmppsId = removedNomisNumber,
-        prisonId = prisonId,
-        url = "$baseUrl/${path(removedNomisNumber, prisonId, additionalInformation)}",
-        lastModifiedDateTime = LocalDateTime.now(),
-      )
+      return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation)
     }
   },
   ;
