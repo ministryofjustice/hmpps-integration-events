@@ -52,7 +52,7 @@ val PERSON_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.CREATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED,
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
-  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.MERGED
+  HmppsDomainEventName.PrisonOffenderEvents.Prisoner.MERGED,
 )
 
 val PRISONER_EVENTS = listOf(
