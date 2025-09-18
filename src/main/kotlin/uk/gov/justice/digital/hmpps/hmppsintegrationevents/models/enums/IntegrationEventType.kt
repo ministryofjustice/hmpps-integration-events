@@ -18,6 +18,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import java.time.LocalDateTime
 
 val DYNAMIC_RISK_EVENTS = listOf(
   HmppsDomainEventName.ProbabtionCase.Registration.ADDED,
@@ -242,7 +244,7 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
 )
 
 enum class IntegrationEventType(
-  protected val pathTemplate: String,
+  private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
 ) {
   DYNAMIC_RISKS_CHANGED(
@@ -519,15 +521,29 @@ enum class IntegrationEventType(
     "v1/persons/{hmppsId}",
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ) {
-    override fun getHmppsId(hmppsId: String?, additionalInformation: AdditionalInformation?): String = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
+    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification {
+      val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
 
-    override fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String = pathTemplate.replace("{hmppsId}", getHmppsId(hmppsId, additionalInformation))
+      return EventNotification(
+        eventType = this,
+        hmppsId = removedNomisNumber,
+        prisonId = prisonId,
+        url = "$baseUrl/${path(removedNomisNumber, prisonId, additionalInformation)}",
+        lastModifiedDateTime = LocalDateTime.now(),
+      )
+    }
   },
   ;
 
-  open fun getHmppsId(hmppsId: String?, additionalInformation: AdditionalInformation?): String? = hmppsId
+  open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification = EventNotification(
+    eventType = this,
+    hmppsId = hmppsId,
+    prisonId = prisonId,
+    url = "$baseUrl/${path(hmppsId, prisonId, additionalInformation)}",
+    lastModifiedDateTime = LocalDateTime.now(),
+  )
 
-  open fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
+  protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
     if (replacedPath.contains("{hmppsId}")) {
       if (hmppsId == null) {
