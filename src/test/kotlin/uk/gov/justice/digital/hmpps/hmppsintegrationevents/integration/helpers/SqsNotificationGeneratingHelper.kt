@@ -207,13 +207,20 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     identifiers: String = "[{\"type\":\"NOMS\",\"value\":\"A3645EA\"}]",
     attributeEventTypes: String = eventType,
     nomisNumber: String,
-    removedNomisNumber: String,
-  ): HmppsDomainEvent = HmppsDomainEvent(
-    type = "Notification",
-    message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A prisoner has been merged from $removedNomisNumber to $nomisNumber\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\": {\"bookingId\": \"1216772\", \"nomsNumber\": \"$nomisNumber\", \"reason\": \"MERGE\", \"removedNomsNumber\": \"$removedNomisNumber\"}}",
-    messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
-  )
+    removedNomisNumber: String? = null,
+  ): HmppsDomainEvent {
+    val removedNomisAttribute = if (removedNomisNumber != null) {
+      ", \"removedNomsNumber\": \"$removedNomisNumber\""
+    } else {
+      ""
+    }
+    return HmppsDomainEvent(
+      type = "Notification",
+      message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A prisoner has been merged from $removedNomisNumber to $nomisNumber\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\": {\"bookingId\": \"1216772\", \"nomsNumber\": \"$nomisNumber\", \"reason\": \"MERGE\" $removedNomisAttribute}}",
+      messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+      messageAttributes = DomainEventMessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    )
+  }
 
   fun createHmppsDomainEventWithoutRegisterType(
     eventType: String,
