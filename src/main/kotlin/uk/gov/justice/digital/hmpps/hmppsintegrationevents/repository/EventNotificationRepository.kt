@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
 
+const val EVENT_NOTIFICATION_BATCH_LIMIT = 1000
+
 @Repository
 interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
 
@@ -26,12 +28,17 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     """
     update EventNotification a 
     set a.claimId = :claimId, a.status = "PROCESSING" 
-    where a.lastModifiedDateTime <= :dateTime and a.status = "PENDING"
+    where a.eventId in 
+        (select b.eventId from EventNotification b
+            where b.lastModifiedDateTime <= :dateTime and b.status = "PENDING" 
+            order by b.lastModifiedDateTime asc limit :limit
+        )
   """,
   )
   fun setProcessing(
     @Param("dateTime") dateTime: LocalDateTime,
     @Param("claimId") claimId: String,
+    @Param("limit") limit: Int = EVENT_NOTIFICATION_BATCH_LIMIT,
   )
 
   @Transactional
@@ -60,7 +67,8 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
 
   @Query(
     """
-    select a from EventNotification a where a.status = "PROCESSING" and a.claimId = :claimId
+    select a from EventNotification a where a.status = "PROCESSING" and a.claimId = :claimId 
+    order by a.lastModifiedDateTime asc
   """,
   )
   fun findAllProcessingEvents(
