@@ -28,7 +28,7 @@ A Kotlin Spring boot application which triggers SNS notifications by processing 
 
 The events served from this service are primarily intended to be used to let you know when to invalidate a cache. The events are:
 - Minimal - they do not contain data beyond what is needed to refresh your cache (e.g. the URL).
-- Mapped 1 to 1 with API endpoints on [HMPPS Integration API](https://github.com/ministryofjustice/hmpps-integration-api). An event is only provided to you if you have access to the corresponding endpoint.
+- Mapped directly to API endpoints on [HMPPS External API](https://github.com/ministryofjustice/hmpps-integration-api). An event is only provided to you if you have access to the corresponding endpoint.
 
 For example, if you have access to the "Get a person's name" endpoint (`v1/persons/{hmppsId}/name`), and a new person is created in the upstream systems, you will receive a `PERSON_NAME_CHANGED` event for an HMPPS ID you have not seen before. You will not receive a new person event.
 

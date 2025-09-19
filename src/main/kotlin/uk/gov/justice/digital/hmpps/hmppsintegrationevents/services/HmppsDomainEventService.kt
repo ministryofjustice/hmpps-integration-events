@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotif
 class HmppsDomainEventService(
   @Autowired val eventNotificationRepository: EventNotificationRepository,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
-  @Autowired val integrationEventCreationStrategyProvider: IntegrationEventCreationStrategyProvider,
+  @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
   @Value("\${services.integration-api.url}") val baseUrl: String,
 ) {
   companion object {
@@ -29,16 +29,17 @@ class HmppsDomainEventService(
 
   fun execute(hmppsDomainEvent: HmppsDomainEvent, integrationEventTypes: List<IntegrationEventType>) {
     val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
+
+    val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsEvent)
+    val prisonId = domainEventIdentitiesResolver.getPrisonId(hmppsEvent)
+
     for (integrationEventType in integrationEventTypes) {
-      val notifications = try {
-        integrationEventCreationStrategyProvider.forEventType(integrationEventType)
-          .createNotifications(hmppsEvent, integrationEventType, baseUrl)
+      try {
+        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation)
+
+        eventNotificationRepository.insertOrUpdate(eventNotification)
       } catch (ume: UnmappableUrlException) {
         log.warn(ume.message)
-        emptyList()
-      }
-      for (notification in notifications) {
-        eventNotificationRepository.insertOrUpdate(notification)
       }
     }
   }

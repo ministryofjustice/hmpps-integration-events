@@ -1,12 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -14,7 +11,6 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
@@ -23,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
@@ -33,51 +28,29 @@ import java.time.ZoneId
 @ActiveProfiles("test")
 class HmppsDomainEventServiceTest {
 
-  private val hmppsId = "X777776"
-  private val prisonId = "MDI"
+  private val hmppsId = "AA1234A"
   private final val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
-  private final val objectMapper = ObjectMapper()
 
   private val eventNotificationRepository = mockk<EventNotificationRepository>()
   private val deadLetterQueueService = mockk<DeadLetterQueueService>()
-  private val integrationEventCreationStrategyProvider = mockk<IntegrationEventCreationStrategyProvider>()
-  private val defaultEventCreationStrategy = mockk<DefaultEventCreationStrategy>()
+  private val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
   private val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(
     eventNotificationRepository,
     deadLetterQueueService,
-    integrationEventCreationStrategyProvider,
+    domainEventIdentitiesResolver,
     baseUrl,
   )
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
-  private val mockNomisId = "mockNomisId"
 
   @BeforeEach
   fun setup() {
     mockkStatic(LocalDateTime::class)
+    every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
+    every { domainEventIdentitiesResolver.getPrisonId(any()) } returns null
     every { LocalDateTime.now() } returns currentTime
-    every { eventNotificationRepository.existsByHmppsIdAndEventType(any(), any()) } returns false
-    every { eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(any(), any(), any()) } returns 1
+
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
-    every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
-    every { integrationEventCreationStrategyProvider.forEventType(any()) } returns defaultEventCreationStrategy
-
-    every { defaultEventCreationStrategy.createNotifications(any(), any(), any()) } answers {
-      val hmppsDomainEventMessage = arg<HmppsDomainEventMessage>(0)
-      val integrationEventType = arg<IntegrationEventType>(1)
-      val baseUrl = arg<String>(2)
-
-      val additionalInfo = hmppsDomainEventMessage.additionalInformation
-
-      listOf(
-        EventNotification(
-          eventType = integrationEventType,
-          hmppsId = hmppsId,
-          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId, additionalInfo)}",
-          lastModifiedDateTime = LocalDateTime.now(),
-        ),
-      )
-    }
   }
 
   @ParameterizedTest
@@ -96,20 +69,6 @@ class HmppsDomainEventServiceTest {
 
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.valueOf(integrationEvent)))
 
-    verify(exactly = 1) {
-      integrationEventCreationStrategyProvider.forEventType(
-        IntegrationEventType.valueOf(
-          integrationEvent,
-        ),
-      )
-    }
-    verify(exactly = 1) {
-      defaultEventCreationStrategy.createNotifications(
-        objectMapper.readValue(event.message),
-        IntegrationEventType.valueOf(integrationEvent),
-        baseUrl,
-      )
-    }
     verify(exactly = 1) {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
@@ -131,8 +90,8 @@ class HmppsDomainEventServiceTest {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.DYNAMIC_RISKS_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/dynamic",
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/risks/dynamic",
           lastModifiedDateTime = currentTime,
         ),
       )
@@ -165,8 +124,8 @@ class HmppsDomainEventServiceTest {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/scores",
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
           lastModifiedDateTime = currentTime,
         ),
       )
@@ -182,8 +141,8 @@ class HmppsDomainEventServiceTest {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.RISK_SCORE_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/persons/X777776/risks/scores",
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
           lastModifiedDateTime = currentTime,
         ),
       )
@@ -208,106 +167,9 @@ class HmppsDomainEventServiceTest {
   }
 
   @Test
-  fun `will use prisonId if found on the domain event`() {
-    val prisonId = "MDI"
-    val event =
-      SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithPrisonId(
-        eventType = "assessment.summary.produced",
-        prisonId = prisonId,
-      )
-    mockStrategy(prisonId, hmppsId)
-    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
-    verify(exactly = 1) {
-      eventNotificationRepository.insertOrUpdate(
-        EventNotification(
-          eventType = IntegrationEventType.RISK_SCORE_CHANGED,
-          hmppsId = hmppsId,
-          prisonId = prisonId,
-          url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
-          lastModifiedDateTime = currentTime,
-        ),
-      )
-    }
-    verify(exactly = 0) {
-      eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(
-        currentTime,
-        hmppsId,
-        IntegrationEventType.RISK_SCORE_CHANGED,
-      )
-    }
-  }
-
-  @Test
-  fun `will get the prison ID from the getPrisonIdService`() {
-    val prisonId = "MDI"
-    val hmppsId = hmppsId
-    mockStrategy(prisonId, hmppsId)
-    val event =
-      SqsNotificationGeneratingHelper(zonedCurrentDateTime)
-        .createHmppsDomainEvent(eventType = "assessment.summary.produced")
-    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
-    verify(exactly = 1) {
-      eventNotificationRepository.insertOrUpdate(
-        EventNotification(
-          eventType = IntegrationEventType.RISK_SCORE_CHANGED,
-          hmppsId = hmppsId,
-          prisonId = prisonId,
-          url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
-          lastModifiedDateTime = currentTime,
-        ),
-      )
-    }
-    verify(exactly = 0) {
-      eventNotificationRepository.updateLastModifiedDateTimeByHmppsIdAndEventType(
-        currentTime,
-        hmppsId,
-        IntegrationEventType.RISK_SCORE_CHANGED,
-      )
-    }
-  }
-
-  @Test
-  fun `should throw exception when hmpps id not found`() {
-    val crn = "NOT_FOUND_CRN"
-    every {
-      defaultEventCreationStrategy.createNotifications(
-        any(),
-        any(),
-        any(),
-      )
-    } throws NotFoundException("Person with crn $crn not found")
-
-    val event: HmppsDomainEvent =
-      SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEvent(eventType = "assessment.summary.produced")
-
-    assertThatThrownBy {
-      hmppsDomainEventService.execute(event, listOf(IntegrationEventType.RISK_SCORE_CHANGED))
-    }.isInstanceOf(NotFoundException::class.java)
-      .hasMessage("Person with crn $crn not found")
-  }
-
-  private fun mockStrategy(prisonId: String? = null, hmppsId: String) {
-    every { defaultEventCreationStrategy.createNotifications(any(), any(), any()) } answers {
-      val hmppsDomainEventMessage = arg<HmppsDomainEventMessage>(0)
-      val integrationEventType = arg<IntegrationEventType>(1)
-      val baseUrl = arg<String>(2)
-      val additionalInfo = hmppsDomainEventMessage.additionalInformation
-      listOf(
-        EventNotification(
-          eventType = integrationEventType,
-          hmppsId = hmppsId,
-          prisonId = prisonId,
-          url = "$baseUrl/${integrationEventType.path(hmppsId, prisonId, additionalInfo)}",
-          lastModifiedDateTime = LocalDateTime.now(),
-        ),
-      )
-    }
-  }
-
-  @Test
   fun `process and save prisoner released domain event message for event with message event type of CALCULATED_RELEASE_DATES_PRISONER_CHANGED`() {
     val hmppsMessage = """
-      {"eventType":"calculate-release-dates.prisoner.changed","description":"Prisoners release dates have been re-calculated","additionalInformation":{"prisonerId":"$mockNomisId","bookingId":1219387},"version":1,"occurredAt":"2024-08-13T14:15:16.460942253+01:00"}
+      {"eventType":"calculate-release-dates.prisoner.changed","description":"Prisoners release dates have been re-calculated","additionalInformation":{"prisonerId":"mockNomisId","bookingId":1219387},"version":1,"occurredAt":"2024-08-13T14:15:16.460942253+01:00"}
     """.trimIndent()
     val event = generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", hmppsMessage)
 
@@ -375,16 +237,14 @@ class HmppsDomainEventServiceTest {
     """.trimIndent()
     val event = generateHmppsDomainEvent(eventType, message)
 
-    mockStrategy(hmppsId = "X777776")
-
     hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PERSON_PND_ALERTS_CHANGED))
 
     verify(exactly = 1) {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
           eventType = IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
-          hmppsId = "X777776",
-          url = "$baseUrl/v1/pnd/persons/X777776/alerts",
+          hmppsId = hmppsId,
+          url = "$baseUrl/v1/pnd/persons/$hmppsId/alerts",
           lastModifiedDateTime = currentTime,
         ),
       )
