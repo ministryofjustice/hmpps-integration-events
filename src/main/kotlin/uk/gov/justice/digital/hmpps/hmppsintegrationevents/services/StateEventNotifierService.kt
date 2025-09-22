@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.StuckEventsException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import java.time.LocalDateTime
 import java.util.*
@@ -22,6 +23,8 @@ class StateEventNotifierService(
 
   @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
   fun sentNotifications() {
+    alertForAnyStuckMessages()
+
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
 
     val claimId = UUID.randomUUID().toString()
@@ -45,5 +48,15 @@ class StateEventNotifierService(
       }
     }
     log.info("Successfully sent ${events.size} events for claim id $claimId")
+  }
+
+  private fun alertForAnyStuckMessages() {
+    val stuck = eventRepository.getStuckEvents(LocalDateTime.now().minusMinutes(10))
+    if (stuck.isNotEmpty()) {
+      val messages = stuck.map {
+        "${it.eventCount} stuck events found for claim id ${it.claimId}. Earliest event has date ${it.earliestDatetime}"
+      }
+      Sentry.captureException(StuckEventsException(messages.joinToString("\n")))
+    }
   }
 }
