@@ -104,9 +104,8 @@ class StuckEventsTest {
   @Test
   fun `Stuck messages are found in the database`() {
     val expectedExceptionMessage = """
-      1 stuck events found for claim id claimId3. Earliest event has date 2025-08-11T05:00
-      2 stuck events found for claim id claimId2. Earliest event has date 2025-08-12T00:00
-      3 stuck events found for claim id claimId1. Earliest event has date 2025-08-13T02:00
+      2 stuck events with status PENDING. Earliest event has date 2025-08-11T05:00
+      4 stuck events with status PROCESSING. Earliest event has date 2025-08-12T00:00
     """.trimIndent()
     val exception = slot<StuckEventsException>()
     val thread1 = Thread { eventNotifierService.sentNotifications() }

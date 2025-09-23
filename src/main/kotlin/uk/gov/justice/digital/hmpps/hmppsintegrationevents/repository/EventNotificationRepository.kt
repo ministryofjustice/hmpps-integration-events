@@ -14,7 +14,7 @@ const val EVENT_NOTIFICATION_BATCH_LIMIT = 1000
 
 interface StuckEvents {
   val eventCount: Int
-  val claimId: String?
+  val status: String?
   val earliestDatetime: LocalDateTime
 }
 
@@ -117,11 +117,11 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     """
     select * from (
       select count(*) as event_count, 
-      claim_id, 
+      status, 
       min(last_modified_datetime) as earliest_datetime 
       from event_notification where status in ('PROCESSING','PENDING')
       and last_modified_datetime < :dateTime
-      group by claim_id
+      group by status
     ) stuck
     order by earliest_datetime asc
   """,

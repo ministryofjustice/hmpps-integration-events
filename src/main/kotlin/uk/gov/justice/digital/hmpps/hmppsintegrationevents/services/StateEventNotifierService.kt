@@ -54,7 +54,7 @@ class StateEventNotifierService(
     val stuck = eventRepository.getStuckEvents(LocalDateTime.now().minusMinutes(10))
     if (stuck.isNotEmpty()) {
       val messages = stuck.map {
-        "${it.eventCount} stuck events found for claim id ${it.claimId}. Earliest event has date ${it.earliestDatetime}"
+        "${it.eventCount} stuck events with status ${it.status}. Earliest event has date ${it.earliestDatetime}"
       }
       Sentry.captureException(StuckEventsException(messages.joinToString("\n")))
     }
