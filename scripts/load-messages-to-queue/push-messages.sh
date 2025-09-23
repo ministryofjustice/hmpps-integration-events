@@ -42,7 +42,7 @@ do
    esac
 done
 
-#helpFunction in case parameters are empty
+#Validation
 if [ -z "$env" ]
 then
     echo "environment not specified, please specify an environment: (dev/preprod/prod)";
@@ -109,14 +109,17 @@ kubectl wait \
 
 # Get queue url
 queue_url=$(kubectl exec "$pod_name" --namespace="$namespace" -- aws sqs get-queue-url --queue-name "$queue_name" --query QueueUrl --output text)
-echo "Got queue URL for $queue_name: $queue_url"
 
+# Exit if the queue cannot be found
 if [ -z "$queue_url" ]
 then
     echo "Queue $queue_name can not be found in namespace $namespace. Make sure the specified queue name exists";
     cleanUp
 fi
 
+echo "Got queue URL for $queue_name: $queue_url"
+
+# Prompt user to check they want to continue
 read -p "You are about to load $eventCount events to $queue_url. Are you sure you want to continue? <y/N> " prompt
 if [[ $prompt == "y" || $prompt == "Y" || $prompt == "yes" || $prompt == "Yes" ]]
 then
