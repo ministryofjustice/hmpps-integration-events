@@ -22,6 +22,8 @@ class StateEventNotifierService(
 
   @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
   fun sentNotifications() {
+    alertForAnyStuckMessages()
+
     val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
 
     val claimId = UUID.randomUUID().toString()
@@ -45,5 +47,15 @@ class StateEventNotifierService(
       }
     }
     log.info("Successfully sent ${events.size} events for claim id $claimId")
+  }
+
+  private fun alertForAnyStuckMessages() {
+    val stuck = eventRepository.getStuckEvents(LocalDateTime.now().minusMinutes(10))
+    if (stuck.isNotEmpty()) {
+      val messages = stuck.map {
+        "${it.eventCount} stuck events with status ${it.status}. Earliest event has date ${it.earliestDatetime}"
+      }
+      Sentry.captureMessage(messages.joinToString("\n"))
+    }
   }
 }
