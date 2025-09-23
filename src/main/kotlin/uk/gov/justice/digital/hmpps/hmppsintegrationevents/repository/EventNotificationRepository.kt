@@ -115,16 +115,14 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
 
   @Query(
     """
-    select * from (
-      select count(*) as event_count, 
-      status, 
-      min(last_modified_datetime) as earliest_datetime 
-      from event_notification where status in ('PROCESSING','PENDING')
-      and last_modified_datetime < :dateTime
+      select count(*) as event_count, status, 
+        min(last_modified_datetime) as earliest_datetime 
+      from event_notification 
+      where status in ('PROCESSING','PENDING')
+        and last_modified_datetime < :dateTime
       group by status
-    ) stuck
-    order by earliest_datetime asc
-  """,
+      order by earliest_datetime asc
+    """,
     nativeQuery = true,
   )
   fun getStuckEvents(@Param("dateTime") dateTime: LocalDateTime): List<StuckEvents>
