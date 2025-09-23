@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.StuckEventsException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import java.time.LocalDateTime
 import java.util.*
@@ -56,7 +55,7 @@ class StateEventNotifierService(
       val messages = stuck.map {
         "${it.eventCount} stuck events with status ${it.status}. Earliest event has date ${it.earliestDatetime}"
       }
-      Sentry.captureException(StuckEventsException(messages.joinToString("\n")))
+      Sentry.captureMessage(messages.joinToString("\n"))
     }
   }
 }

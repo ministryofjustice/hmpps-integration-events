@@ -23,7 +23,6 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.StuckEventsException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -107,10 +106,10 @@ class StuckEventsTest {
       2 stuck events with status PENDING. Earliest event has date 2025-08-11T05:00
       4 stuck events with status PROCESSING. Earliest event has date 2025-08-12T00:00
     """.trimIndent()
-    val exception = slot<StuckEventsException>()
+    val message = slot<String>()
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     thread1.start()
-    io.mockk.verify(atLeast = 1, timeout = 10000) { Sentry.captureException(capture(exception)) }
-    assertThat(exception.captured.message).isEqualTo(expectedExceptionMessage)
+    io.mockk.verify(atLeast = 1, timeout = 10000) { Sentry.captureMessage(capture(message)) }
+    assertThat(message.captured).isEqualTo(expectedExceptionMessage)
   }
 }
