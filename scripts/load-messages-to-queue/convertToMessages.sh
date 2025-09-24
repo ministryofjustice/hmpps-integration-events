@@ -50,13 +50,13 @@ fi
 
 if [ -z "$EVENT_TYPE" ]
 then
-    echo "Queue not specified, please specify a queue name: e.g events_pnd_queue";
+    echo "Event type not specified, please specify an event type: e.g PERSON_STATUS_CHANGED";
     helpFunction
 fi
 
 if [ -z "$INPUT" ]
 then
-    echo "No file containing events can be found";
+    echo "No file to convert has been specified";
     helpFunction
 fi
 
