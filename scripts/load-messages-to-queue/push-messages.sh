@@ -7,7 +7,6 @@
 ## Usage:
 ## /push-messages.sh -e <env> -q <queueName> -f <fileName>
 
-
 helpFunction()
 {
    echo ""
@@ -21,6 +20,89 @@ helpFunction()
 cleanUp(){
   # Clean up
   kubectl --namespace="$namespace" delete pod "$pod_name"
+  exit 1 # Exit script after deleting pod
+}
+
+validateParams(){
+  #Validation
+  if [ -z "$env" ]
+  then
+      echo "environment not specified, please specify an environment: (dev/preprod/prod)";
+      helpFunction
+  fi
+
+  if [ -z "$queueName" ]
+  then
+      echo "Queue not specified, please specify a queue name: e.g events_pnd_queue";
+      helpFunction
+  fi
+
+  if [ -z "$fileName" ]
+  then
+      echo "No file containing events can be found";
+      helpFunction
+  fi
+
+  if ! [ -f "$fileName" ]
+  then
+      echo "File $fileName cannot be found";
+      helpFunction
+  fi
+
+  eventCount=$(grep -c '.'  "$fileName")
+
+  if [ $eventCount -eq 0 ]
+  then
+      echo "File $fileName contains no events";
+      helpFunction
+  fi
+}
+
+startPod(){
+  namespace="hmpps-integration-api-$env"
+  pod_name="load-pnd-messages-$env"
+  queue_name="hmpps-integration-api-$env-$queueName"
+
+  # Start service pod in background
+  echo "Starting service pod '$pod_name'"
+  kubectl run "$pod_name" \
+    --namespace="$namespace" \
+    --image=ghcr.io/ministryofjustice/hmpps-devops-tools:latest \
+    --restart=Never \
+    --overrides='{
+      "spec": {
+        "serviceAccount":"hmpps-integration-event",
+        "containers": [
+          {
+            "name": "replay",
+            "image": "ghcr.io/ministryofjustice/hmpps-devops-tools:latest",
+            "command": ["sh", "-c", "sleep 600"],
+            "resources": {
+              "limits": {
+                "cpu": "1000m",
+                "memory": "1Gi"
+              }
+            }
+          }
+        ]
+      }
+    }' -- sh & sleep 5
+  kubectl wait \
+    --namespace="$namespace" \
+    --for=condition=ready pod "$pod_name"
+}
+
+checkQueue(){
+  # Get queue url
+  queue_url=$(kubectl exec "$pod_name" --namespace="$namespace" -- aws sqs get-queue-url --queue-name "$queue_name" --query QueueUrl --output text)
+  # Exit if the queue cannot be found
+  if [ -z "$queue_url" ]
+  then
+      echo "Queue $queue_name can not be found in namespace $namespace. Make sure the specified queue name exists";
+      cleanUp
+  fi
+
+  echo "Got queue URL for $queue_name: $queue_url"
 }
 
 load(){
@@ -42,82 +124,9 @@ do
    esac
 done
 
-#Validation
-if [ -z "$env" ]
-then
-    echo "environment not specified, please specify an environment: (dev/preprod/prod)";
-    helpFunction
-fi
-
-if [ -z "$queueName" ]
-then
-    echo "Queue not specified, please specify a queue name: e.g events_pnd_queue";
-    helpFunction
-fi
-
-if [ -z "$fileName" ]
-then
-    echo "No file containing events can be found";
-    helpFunction
-fi
-
-if ! [ -f "$fileName" ]
-then
-    echo "File $fileName cannot be found";
-    helpFunction
-fi
-
-eventCount=$(grep -c '.'  "$fileName")
-
-if [ $eventCount -eq 0 ]
-then
-    echo "File $fileName contains no events";
-    helpFunction
-fi
-
-namespace="hmpps-integration-api-$env"
-pod_name="load-pnd-messages-$env"
-queue_name="hmpps-integration-api-$env-$queueName"
-
-# Start service pod in background
-echo "Starting service pod '$pod_name'"
-kubectl run "$pod_name" \
-  --namespace="$namespace" \
-  --image=ghcr.io/ministryofjustice/hmpps-devops-tools:latest \
-  --restart=Never \
-  --overrides='{
-    "spec": {
-      "serviceAccount":"hmpps-integration-event",
-      "containers": [
-        {
-          "name": "replay",
-          "image": "ghcr.io/ministryofjustice/hmpps-devops-tools:latest",
-          "command": ["sh", "-c", "sleep 600"],
-          "resources": {
-            "limits": {
-              "cpu": "1000m",
-              "memory": "1Gi"
-            }
-          }
-        }
-      ]
-    }
-  }' -- sh & sleep 5
-kubectl wait \
-  --namespace="$namespace" \
-  --for=condition=ready pod "$pod_name"
-
-# Get queue url
-queue_url=$(kubectl exec "$pod_name" --namespace="$namespace" -- aws sqs get-queue-url --queue-name "$queue_name" --query QueueUrl --output text)
-
-# Exit if the queue cannot be found
-if [ -z "$queue_url" ]
-then
-    echo "Queue $queue_name can not be found in namespace $namespace. Make sure the specified queue name exists";
-    cleanUp
-fi
-
-echo "Got queue URL for $queue_name: $queue_url"
+validateParams
+startPod
+checkQueue
 
 # Prompt user to check they want to continue
 read -p "You are about to load $eventCount events to $queue_url. Are you sure you want to continue? <y/N> " prompt
