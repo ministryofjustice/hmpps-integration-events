@@ -26,8 +26,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("com.google.code.gson:gson:2.13.2")
-  //This needs to be fixed in hmpps-sqs-spring-boot-starter so the version is made available there
-  //Pinning to version 3.4.0 in the meantime
+  // This needs to be fixed in hmpps-sqs-spring-boot-starter so the version is made available there
+  // Pinning to version 3.4.0 in the meantime
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
   implementation("software.amazon.awssdk:secretsmanager")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11") {
