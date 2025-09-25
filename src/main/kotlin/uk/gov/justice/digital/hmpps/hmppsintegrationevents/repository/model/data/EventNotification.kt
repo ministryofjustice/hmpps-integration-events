@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
 @Table(
   name = "EVENT_NOTIFICATION",
 )
+@JsonIncludeProperties("eventId", "hmppsId", "eventType", "prisonId", "url", "lastModifiedDateTime")
 data class EventNotification(
 
   @Id

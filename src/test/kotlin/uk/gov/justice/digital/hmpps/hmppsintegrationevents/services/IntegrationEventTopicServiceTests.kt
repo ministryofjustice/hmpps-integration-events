@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
 import software.amazon.awssdk.services.sns.model.SetSubscriptionAttributesRequest
 import software.amazon.awssdk.services.sns.model.Subscription
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventStatus
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.hmpps.sqs.HmppsQueue
@@ -80,7 +81,7 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
 
   @Test
   fun `Publish Event with no prison Id`() {
-    val event = EventNotification(eventId = 123, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
+    val event = EventNotification(eventId = 123, claimId = "claimId", status = IntegrationEventStatus.PROCESSING, hmppsId = "hmppsId", eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED, prisonId = null, url = "mockUrl", lastModifiedDateTime = currentTime)
 
     val response = PublishResponse
       .builder()
@@ -98,6 +99,8 @@ class IntegrationEventTopicServiceTests(@Autowired private val objectMapper: Obj
       JsonAssertions.assertThatJson(payload).node("hmppsId").isEqualTo(event.hmppsId)
       JsonAssertions.assertThatJson(payload).node("prisonId").isEqualTo(event.prisonId)
       JsonAssertions.assertThatJson(payload).node("url").isEqualTo(event.url)
+      JsonAssertions.assertThatJson(payload).node("claimId").isAbsent()
+      JsonAssertions.assertThatJson(payload).node("status").isAbsent()
       Assertions.assertThat(messageAttributes["eventType"])
         .isEqualTo(MessageAttributeValue.builder().stringValue(event.eventType.name).dataType("String").build())
       messageAttributes.shouldNotHaveKey("prisonId")
