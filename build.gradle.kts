@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.1"
   kotlin("plugin.spring") version "2.2.20"
   kotlin("plugin.jpa") version "2.2.20"
   kotlin("plugin.lombok") version "2.2.20"
@@ -23,7 +26,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("com.google.code.gson:gson:2.13.2")
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+  //This needs to be fixed in hmpps-sqs-spring-boot-starter so the version is made available there
+  //Pinning to version 3.4.0 in the meantime
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
   implementation("software.amazon.awssdk:secretsmanager")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11") {
     exclude("org.springframework.security", "spring-security-config")
@@ -53,9 +58,10 @@ kotlin {
 }
 
 tasks {
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "21"
+  withType<KotlinCompile> {
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_21
+      freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
   }
 }
