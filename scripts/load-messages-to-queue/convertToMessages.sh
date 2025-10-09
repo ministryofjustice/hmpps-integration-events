@@ -11,7 +11,7 @@
 ##
 ## Usage:
 ## /convertToMessages.sh -t <EVENT_TYPE> -e <ENV> -f <INPUT>
-## /convertToMessages.sh -t <EVENT_TYPE> -e <ENV> -u "/<API-ENDPOINT>" -f <INPUT>
+## /convertToMessages.sh -t <EVENT_TYPE> -e <ENV> -u "<URL-SUFFIX>" -f <INPUT>
 ## e.g ./convertToMessages.sh -e dev -t PERSON_STATUS_CHANGED -f sqlResults.txt > eventMessages.txt
 ## returns
 ##
@@ -21,8 +21,8 @@
 ## e.g. ./convertToMessages.sh -e dev -t PRISONER_BASE_LOCATION_CHANGED -u "/prisoner-base-location" -f input-data-dev.txt > eventMessages-dev.txt
 ## returns
 ##
-## {"Type":"Notification","MessageId":"...","TopicArn":"...","Message":"{\"eventId\":166,\"hmppsId\":\"A123456\",\"eventType\":\"PRISONER_BASE_LOCATION_CHANGED\",\"prisonId\":\"TRN\",\"url\":\"https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/G0937UK/prisoner-base-location\",\"lastModifiedDateTime\":\"2017-03-15T15:47:51.000000\"}","Timestamp":"2025-10-09T11:17:35.000Z","SignatureVersion":"1","Signature":"...","SigningCertURL":"...","UnsubscribeURL":"...","MessageAttributes":{"prisonId":{"Type":"String","Value":"TRN"},"eventType":{"Type":"String","Value":"PRISONER_BASE_LOCATION_CHANGED"}}}
-## {"Type":"Notification","MessageId":"...","TopicArn":"...","Message":"{\"eventId\":166,\"hmppsId\":\"A123457\",\"eventType\":\"PRISONER_BASE_LOCATION_CHANGED\",\"prisonId\":\"MDI\",\"url\":\"https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/G0937UK/prisoner-base-location\",\"lastModifiedDateTime\":\"2025-03-15T13:27:03.000000\"}","Timestamp":"2025-10-09T11:17:35.000Z","SignatureVersion":"1","Signature":"...","SigningCertURL":"...","UnsubscribeURL":"...","MessageAttributes":{"prisonId":{"Type":"String","Value":"MDI"},"eventType":{"Type":"String","Value":"PRISONER_BASE_LOCATION_CHANGED"}}}
+## {"Type":"Notification","MessageId":"...","TopicArn":"...","Message":"{\"eventId\":166,\"hmppsId\":\"A123456\",\"eventType\":\"PRISONER_BASE_LOCATION_CHANGED\",\"prisonId\":\"TRN\",\"url\":\"https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/A123456/prisoner-base-location\",\"lastModifiedDateTime\":\"2017-03-15T15:47:51.000000\"}","Timestamp":"2025-10-09T11:17:35.000Z","SignatureVersion":"1","Signature":"...","SigningCertURL":"...","UnsubscribeURL":"...","MessageAttributes":{"prisonId":{"Type":"String","Value":"TRN"},"eventType":{"Type":"String","Value":"PRISONER_BASE_LOCATION_CHANGED"}}}
+## {"Type":"Notification","MessageId":"...","TopicArn":"...","Message":"{\"eventId\":166,\"hmppsId\":\"A123457\",\"eventType\":\"PRISONER_BASE_LOCATION_CHANGED\",\"prisonId\":\"MDI\",\"url\":\"https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/A123457/prisoner-base-location\",\"lastModifiedDateTime\":\"2025-03-15T13:27:03.000000\"}","Timestamp":"2025-10-09T11:17:35.000Z","SignatureVersion":"1","Signature":"...","SigningCertURL":"...","UnsubscribeURL":"...","MessageAttributes":{"prisonId":{"Type":"String","Value":"MDI"},"eventType":{"Type":"String","Value":"PRISONER_BASE_LOCATION_CHANGED"}}}
 
 helpFunction()
 {
