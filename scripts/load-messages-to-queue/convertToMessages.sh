@@ -13,7 +13,7 @@
 ## /convertToMessages.sh -t <EVENT_TYPE> -e <ENV> -f <INPUT>
 ## /convertToMessages.sh -t <EVENT_TYPE> -e <ENV> -u "<URL-SUFFIX>" -f <INPUT>
 ## e.g ./convertToMessages.sh -e dev -t PERSON_STATUS_CHANGED -f sqlResults.txt > eventMessages.txt
-## e.g. ./convertToMessages.sh -e dev -t PRISONER_BASE_LOCATION_CHANGED -u "/prisoner-base-location" -f input-data-dev.txt > eventMessages-dev.txt
+## e.g ./convertToMessages.sh -e dev -t PRISONER_BASE_LOCATION_CHANGED -u "/prisoner-base-location" -f input-data-dev.txt > eventMessages-dev.txt
 ## returns
 ## at `eventMessages.txt`
 ## {"Type":"Notification","MessageId":"...","TopicArn":"...","Message":"{\"eventId\":166,\"hmppsId\":\"A123456\",\"eventType\":\"PERSON_STATUS_CHANGED\",\"prisonId\":\"TRN\",\"url\":\"https://dev.integration-api.hmpps.service.justice.gov.uk/v1/persons/A123456\",\"lastModifiedDateTime\":\"2017-03-15T15:47:51.000000\"}","Timestamp":"2025-09-24T09:39:24.000Z","SignatureVersion":"1","Signature":"...","SigningCertURL":"...","UnsubscribeURL":"...","MessageAttributes":{"prisonId":{"Type":"String","Value":"TRN"},"eventType":{"Type":"String","Value":"PERSON_STATUS_CHANGED"}}}
