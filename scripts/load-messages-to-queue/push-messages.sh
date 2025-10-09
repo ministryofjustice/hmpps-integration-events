@@ -64,7 +64,7 @@ validateParams(){
 
 startPod(){
   namespace="hmpps-integration-api-$env"
-  pod_name="load-pnd-messages-$env"
+  pod_name="load-queue-messages-$env"
   queue_name="hmpps-integration-api-$env-$queueName"
 
   # Start service pod in background
