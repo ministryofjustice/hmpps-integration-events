@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.3"
   kotlin("plugin.spring") version "2.2.20"
   kotlin("plugin.jpa") version "2.2.20"
   kotlin("plugin.lombok") version "2.2.20"
@@ -30,7 +30,7 @@ dependencies {
   // Pinning to version 3.4.0 in the meantime
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.5.0") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
@@ -43,9 +43,9 @@ dependencies {
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
-  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.3")
-  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.3")
-  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.3")
+  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.4")
+  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.4")
+  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.4")
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
