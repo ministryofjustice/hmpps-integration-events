@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 @Service
 class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
   companion object {
+    val updateSubscription = false
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
@@ -48,7 +49,9 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       log.info("Filter list for ${clientConfig.key} updated")
 
       // This is not safe because the cloud-platform-environments Terraform would revert it
-      // integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+      if (updateSubscription) {
+        integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+      }
     }
   }
 
