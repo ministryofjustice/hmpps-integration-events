@@ -56,4 +56,4 @@ notifier:
 
 subscriber-checker:
   schedule:
-    rate: 3600000
+    rate: 600000
