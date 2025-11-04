@@ -47,7 +47,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
         val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
 
-        // Update value in Secrets Manager so it is available for future Terraform updates
+        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
         secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
 
         if (updateSubscription) {
