@@ -33,25 +33,33 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
-    val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("DEFAULT") }
-    val prisonIds = clientConfig.value.filters?.prisons
+    log.info("Checking filter list for ${clientConfig.key}...")
+    try {
+      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("DEFAULT") }
+      val prisonIds = clientConfig.value.filters?.prisons
 
-    val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
-    val existingFilterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
-    val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
+      val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
+      val existingFilterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+      val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
 
-    if (updatedFilterList != existingFilterList) {
-      log.info("Updating filter list for ${clientConfig.key} (${subscriber.secretId})")
+      if (updatedFilterList != existingFilterList) {
+        log.info("Updating filter list for ${clientConfig.key} (${subscriber.secretId})")
 
-      val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
-      secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
+        val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
 
-      log.info("Filter list for ${clientConfig.key} updated")
+        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
+        secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
 
-      // This is not safe because the cloud-platform-environments Terraform would revert it
-      if (updateSubscription) {
-        integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+        if (updateSubscription) {
+          // Update value in the SNS subscription itself
+          integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+        }
+
+        log.info("Filter list for ${clientConfig.key} updated")
       }
+      log.info("Finished checking filter list for ${clientConfig.key}")
+    } catch (e: Exception) {
+      log.error("Error checking filter list for ${clientConfig.key}", e)
     }
   }
 
