@@ -16,7 +16,7 @@ hmpps.sqs:
 hmpps.secret:
   secrets:
     MEGANEXUS:
-      secretId: ${PLP_FILTER_POLICY_SECRET_ID}
+      secretId: live-hmpps-integration-api-preprod-2fa8e4a7ee3726fc
       queueId: plpsubscriberqueue
 
 notifier:
