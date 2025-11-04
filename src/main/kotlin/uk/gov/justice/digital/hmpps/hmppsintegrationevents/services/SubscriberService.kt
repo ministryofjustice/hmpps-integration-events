@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 @Service
 class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
   companion object {
-    val updateSubscription = false
+    val updateSubscription = true
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
