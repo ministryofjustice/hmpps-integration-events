@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRequest
+import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse
 
 class SecretsmanagerServiceTests {
 
@@ -39,6 +40,8 @@ class SecretsmanagerServiceTests {
 
   @Test
   fun `setSecretValue call secretsMangerClient `() {
+    whenever(secretsManagerClient.putSecretValue(any<PutSecretValueRequest>())).thenReturn(PutSecretValueResponse.builder().versionId("MockVersionId").build())
+
     service.setSecretValue("MockSecret", "MockValue")
 
     argumentCaptor<PutSecretValueRequest>().apply {
