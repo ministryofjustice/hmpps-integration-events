@@ -18,8 +18,6 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  val DefaultFilter = SubscriberFilterList(eventType = listOf("default"), prisonId = null)
-
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
     log.info("Checking subscriber filter list...")
@@ -66,7 +64,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     if (secretValue != "")
       objectMapper.readValue<SubscriberFilterList>(secretValue)
     else
-      DefaultFilter
+      SubscriberFilterList(eventType = listOf("default"), prisonId = null)
 
   private val endpointMap: Map<String, IntegrationEventType> by lazy {
     mapOf(
