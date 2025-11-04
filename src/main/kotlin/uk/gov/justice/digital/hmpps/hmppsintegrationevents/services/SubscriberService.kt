@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
@@ -12,26 +13,26 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilt
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
 @Service
-class SubscriberService(
-  private val integrationApiGateway: IntegrationApiGateway,
-  private val subscriberProperties: HmppsSecretManagerProperties,
-  private val secretsManagerService: SecretsManagerService,
-  private val integrationEventTopicService: IntegrationEventTopicService,
-  private val objectMapper: ObjectMapper,
-) {
+class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
+  companion object {
+    val updateSubscription = false
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
+
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
+    log.info("Checking subscriber filter list...")
+
     val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
     val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
     apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
       .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
+
+    log.info("Subscriber filter list checked")
   }
 
-  private fun refreshClientFilter(
-    clientConfig: Map.Entry<String, ConfigAuthorisation>,
-    subscriber: HmppsSecretManagerProperties.SecretConfig,
-  ) {
+  private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("DEFAULT") }
     val prisonIds = clientConfig.value.filters?.prisons
 
@@ -40,9 +41,17 @@ class SubscriberService(
     val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
 
     if (updatedFilterList != existingFilterList) {
+      log.info("Updating filter list for ${clientConfig.key} (${subscriber.secretId})")
+
       val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
       secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
-      integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+
+      log.info("Filter list for ${clientConfig.key} updated")
+
+      // This is not safe because the cloud-platform-environments Terraform would revert it
+      if (updateSubscription) {
+        integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+      }
     }
   }
 

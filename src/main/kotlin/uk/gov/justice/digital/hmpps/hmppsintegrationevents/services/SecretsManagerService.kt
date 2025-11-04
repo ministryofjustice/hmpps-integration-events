@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
+import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
@@ -12,6 +13,9 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
   HmppsSecretManagerProperties::class,
 )
 class SecretsManagerService(private val secretsManagerClient: SecretsManagerClient) {
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
+  }
 
   fun getSecretValue(secretId: String): String {
     val getSecretValueRequest = GetSecretValueRequest.builder()
@@ -27,6 +31,8 @@ class SecretsManagerService(private val secretsManagerClient: SecretsManagerClie
       .secretString(secretValue)
       .build()
 
-    secretsManagerClient.putSecretValue(putSecretValueRequest)
+    val response = secretsManagerClient.putSecretValue(putSecretValueRequest)
+
+    log.info("Secret version created ${response.versionId()} for secret $secretId")
   }
 }

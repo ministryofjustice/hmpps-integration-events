@@ -117,9 +117,12 @@ class EventSubscriberTest {
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue(secretId)
       updatedSecretValue.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"],\"prisonId\":[\"$prisonId\"]}")
-      // subscriber filter update
-      val updatedFilterPolicy = getSubscriberFilterList()
-      updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"],\"prisonId\":[\"$prisonId\"]}")
+
+      if (SubscriberService.updateSubscription) {
+        // subscriber filter update
+        val updatedFilterPolicy = getSubscriberFilterList()
+        updatedFilterPolicy.shouldBe("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\",\"RISK_SCORE_CHANGED\"],\"prisonId\":[\"$prisonId\"]}")
+      }
     }
   }
 }
