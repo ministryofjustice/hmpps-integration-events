@@ -60,10 +60,12 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     }
   }
 
-  private fun unmarshalFilterList(secretValue: String): SubscriberFilterList = if (secretValue != "")
-      objectMapper.readValue<SubscriberFilterList>(secretValue)
-    else
-      SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+  private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
+    if (secretValue == "") {
+      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+    }
+    return objectMapper.readValue<SubscriberFilterList>(secretValue)
+  }
 
   private val endpointMap: Map<String, IntegrationEventType> by lazy {
     mapOf(
