@@ -50,4 +50,18 @@ class SecretsmanagerServiceTests {
       assertThat(firstValue.secretString()).isEqualTo("MockValue")
     }
   }
+
+  @Test
+  fun `getSecretValue call secretsMangerClient and return empty string, for secret value not yet set`() {
+    whenever(secretsManagerClient.getSecretValue(any<GetSecretValueRequest>())).thenReturn(null)
+
+    val response = service.getSecretValue("MockSecret")
+
+    argumentCaptor<GetSecretValueRequest>().apply {
+      verify(secretsManagerClient, times(1)).getSecretValue(capture())
+      assertThat(firstValue.secretId()).isEqualTo("MockSecret")
+    }
+    assertThat(response).isEqualTo("")
+  }
+
 }
