@@ -17,12 +17,19 @@ class SecretsManagerService(private val secretsManagerClient: SecretsManagerClie
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
+  /**
+   * Returns the value of the specified secret, or an empty string if no value is found.
+   */
   fun getSecretValue(secretId: String): String {
     val getSecretValueRequest = GetSecretValueRequest.builder()
       .secretId(secretId)
       .build()
 
-    return secretsManagerClient.getSecretValue(getSecretValueRequest).secretString()
+    val secret = secretsManagerClient.getSecretValue(getSecretValueRequest)
+    if (secret == null) {
+      return ""
+    }
+    return secret.secretString().orEmpty()
   }
 
   fun setSecretValue(secretId: String, secretValue: String) {

@@ -118,9 +118,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
   }
 
   @Test
@@ -139,9 +137,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(0)).setSecretValue(any(), any())
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(0)).updateSubscriptionAttributes(any(), any(), any())
-    }
+    verify(integrationEventTopicService, times(0)).updateSubscriptionAttributes(any(), any(), any())
   }
 
   @Test
@@ -164,9 +160,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
   }
 
   @Test
@@ -187,9 +181,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
   }
 
   @Test
@@ -212,9 +204,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
   }
 
   @ParameterizedTest
@@ -242,9 +232,7 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"$eventType\"]}")
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"$eventType\"]}")
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"$eventType\"]}")
   }
 
   @Test
@@ -265,8 +253,6 @@ class SubscriberServiceTests {
 
     // Assert
     verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"DEFAULT\"]}")
-    if (SubscriberService.updateSubscription) {
-      verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
-    }
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
   }
 }

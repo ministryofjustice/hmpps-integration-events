@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 @Service
 class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
   companion object {
-    val updateSubscription = true
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
@@ -39,7 +38,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
-      val existingFilterList = objectMapper.readValue<SubscriberFilterList>(secretValue)
+      val existingFilterList = unmarshalFilterList(secretValue)
       val updatedFilterList = SubscriberFilterList(eventType = events, prisonId = prisonIds)
 
       if (updatedFilterList != existingFilterList) {
@@ -50,10 +49,8 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
         // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
         secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
 
-        if (updateSubscription) {
-          // Update value in the SNS subscription itself
-          integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
-        }
+        // Update value in the SNS subscription itself
+        integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
 
         log.info("Filter list for ${clientConfig.key} updated")
       }
@@ -61,6 +58,13 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     } catch (e: Exception) {
       log.error("Error checking filter list for ${clientConfig.key}", e)
     }
+  }
+
+  private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
+    if (secretValue == "") {
+      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+    }
+    return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
 
   private val endpointMap: Map<String, IntegrationEventType> by lazy {
