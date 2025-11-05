@@ -63,5 +63,4 @@ class SecretsmanagerServiceTests {
     }
     assertThat(response).isEqualTo("")
   }
-
 }
