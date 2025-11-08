@@ -10,8 +10,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito.atLeast
-import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -112,7 +110,7 @@ class EventSubscriberTest {
     secretService.setSecretValue(secretId, originalFilterPolicy)
     integrationEventTopicService.updateSubscriptionAttributes("subscribertestqueue", "FilterPolicy", originalFilterPolicy)
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-      verify(subscriberService, atLeast(1)).checkSubscriberFilterList()
+      subscriberService.checkSubscriberFilterList()
       server.verify(moreThanOrExactly(1), getRequestedFor(urlEqualTo("/v2/config/authorisation")))
       // secret value updated
       val updatedSecretValue = secretService.getSecretValue(secretId)
