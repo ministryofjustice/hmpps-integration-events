@@ -11,6 +11,10 @@ hmpps.sqs:
       queueName: ${MAPPS_QUEUE_NAME}
       queueArn: ${MAPPS_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    plpsubscriberqueue:
+      queueName: ${PLP_QUEUE_NAME}
+      queueArn: ${PLP_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
     pndsubscriberqueue:
       queueName: ${PND_QUEUE_NAME}
       queueArn: ${PND_QUEUE_ARN}
