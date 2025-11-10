@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -20,15 +21,19 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
-    log.info("Checking subscriber filter list...")
+    try {
+      log.info("Checking subscriber filter list...")
 
-    val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
-    val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
+      val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
+      val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
-    apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
-      .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
+      apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
+        .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
 
-    log.info("Subscriber filter list checked")
+      log.info("Subscriber filter list checked")
+    } catch (e: Exception) {
+      logAndCapture("Error checking filter list", e)
+    }
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
@@ -46,17 +51,17 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
         val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
 
-        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
-        secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
-
         // Update value in the SNS subscription itself
         integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+
+        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
+        secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
 
         log.info("Filter list for ${clientConfig.key} updated")
       }
       log.info("Finished checking filter list for ${clientConfig.key}")
     } catch (e: Exception) {
-      log.error("Error checking filter list for ${clientConfig.key}", e)
+      logAndCapture("Error checking filter list for ${clientConfig.key}", e)
     }
   }
 
@@ -124,5 +129,13 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       "/v1/persons/[^/]+/prisoner-base-location" to IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED,
       "/v1/persons/.*/education/assessments" to IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED,
     )
+  }
+
+  private fun logAndCapture(
+    message: String,
+    e: Exception,
+  ) {
+    log.error(message, e.message)
+    Sentry.captureException(RuntimeException(message, e))
   }
 }
