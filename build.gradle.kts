@@ -30,14 +30,14 @@ dependencies {
   // Pinning to version 3.4.0 in the meantime
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.0") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.1") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.24.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
 
   testImplementation("org.testcontainers:localstack:1.21.3")
