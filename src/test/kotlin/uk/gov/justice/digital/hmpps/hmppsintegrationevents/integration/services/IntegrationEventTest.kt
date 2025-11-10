@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.StateEventNotifierService
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.LocalDateTime
@@ -42,6 +43,9 @@ class IntegrationEventTest {
 
   @Autowired
   private lateinit var objectMapper: ObjectMapper
+
+  @Autowired
+  private lateinit var stateEventNotifierService: StateEventNotifierService
 
   @Autowired
   private lateinit var eventRepository: EventNotificationRepository
@@ -102,6 +106,7 @@ class IntegrationEventTest {
   fun willPublishPrisonEvent(prisonId: String?) {
     await.atMost(5, TimeUnit.SECONDS).untilAsserted {
       eventRepository.save(getEvent(prisonId, UUID.randomUUID().toString()))
+      stateEventNotifierService.sentNotifications()
       Mockito.verify(integrationEventTopicService, Mockito.atLeast(1)).sendEvent(any())
       val prisonEventMessages = getMessagesCurrentlyOnTestQueue()
       Assertions.assertThat(prisonEventMessages)

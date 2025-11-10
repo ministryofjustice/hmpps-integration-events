@@ -14,8 +14,6 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -48,18 +46,9 @@ class StateEventNotifierServiceTest {
   @Autowired
   private lateinit var eventNotificationRepository: EventNotificationRepository
 
-  @Autowired
-  private lateinit var threadPoolTaskExecutor: ThreadPoolTaskExecutor
-
-  @Autowired
-  private lateinit var threadPoolTaskScheduler: ThreadPoolTaskScheduler
-
   @BeforeEach
   fun setup() {
     mockkStatic(Sentry::class)
-    // Stop the scheduled task executor, we are going to schedule the task manually in this test
-    threadPoolTaskExecutor.stop()
-    threadPoolTaskScheduler.stop()
     whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
       AdditionalAnswers.answersWithDelay(
         300,
