@@ -7,6 +7,14 @@ hmpps.sqs:
       queueArn: ${HMPPS_DOMAIN_QUEUE_ARN}
       dlqName: ${HMPPS_DOMAIN_DL_QUEUE_NAME}
       subscribeTopicId: domainevents
+    plpsubscriberqueue:
+      queueName: ${PLP_QUEUE_NAME}
+      queueArn: ${PLP_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
+    pndsubscriberqueue:
+      queueName: ${PND_QUEUE_NAME}
+      queueArn: ${PND_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     domainevents:
       arn: ${HMPPS_DOMAIN_TOPIC_ARN}
