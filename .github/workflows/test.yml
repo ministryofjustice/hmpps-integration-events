@@ -1,0 +1,127 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - 'HIA-856-gha-int-events'
+  pull_request:
+  workflow_call:
+jobs:
+  ktlint-check:
+    name: KtLintCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Run ktlintCheck
+        run: make lint
+  helm_lint:
+    strategy:
+      matrix:
+        environments: ['dev', 'preprod', 'prod']
+    name: helm lint
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2 # WORKFLOW_VERSION
+    secrets: inherit
+    with:
+      environment: ${{ matrix.environments }}
+  detekt:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Run detekt
+        run: ./gradlew detekt
+      - name: Upload raw test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: detekt results
+          path: |
+            build/reports/detekt
+  unit_test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    env:
+      DB_USER: "${{ secrets.TEST_DB_USER }}"
+      DB_PASS: "${{ secrets.TEST_DB_PASS }}"
+      API_KEY: "${{ secrets.TEST_API_KEY }}"
+      AWS_REGION: "eu-west-2"
+      AWS_ACCESS_KEY_ID: "${{ secrets.TEST_AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Serve Dependencies
+        run: docker compose up --build -d --wait
+      - name: Run Unit Tests
+        shell: bash
+        run: ./gradlew koverXmlReport koverHtmlReport
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage
+          path: |
+            build/reports/kover/html
+      - name: Add coverage report to PR
+        id: kover
+        uses: mi-kas/kover-report@v1.9
+        with:
+          path: |
+            ${{ github.workspace }}/build/reports/kover/report.xml
+          title: Code Coverage
+          update-comment: true
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+          coverage-counter-type: LINE
+        if: github.event_name == 'pull_request'
+      - name: Upload raw test reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: unit_test_results
+          path: |
+            build/classes
+            build/test-results
+            build/kover
+            build/reports/tests
+      - name: Publish Test Report
+        uses: ctrf-io/github-test-reporter@024bc4b64d997ca9da86833c6b9548c55c620e40
+        with:
+          report-path: './build/test-results/test/*.xml'
+          use-suite-name: true
+          integrations-config: |
+            {
+              "junit-to-ctrf": {
+                "enabled": true,
+                "action": "convert",
+                "options": {
+                  "output": "./ctrf-reports/ctrf-report.json",
+                  "toolname": "junit-to-ctrf",
+                  "useSuiteName": true,
+                  "env": {
+                    "appName": "hmpps-integration-events"
+                  }
+                }
+              }
+            }
+        if: always()
