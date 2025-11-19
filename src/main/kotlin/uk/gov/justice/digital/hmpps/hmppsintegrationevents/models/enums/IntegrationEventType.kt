@@ -537,6 +537,11 @@ enum class IntegrationEventType(
     lastModifiedDateTime = LocalDateTime.now(),
   )
 
+  /**
+   * match event URL with regex pattern (whole input)
+   */
+  fun matchesUrl(urlPattern: String) = Regex(urlPattern).matches("/${this.pathTemplate.removePrefix("/")}")
+
   protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
     if (replacedPath.contains("{hmppsId}")) {
@@ -563,5 +568,7 @@ enum class IntegrationEventType(
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
       it.ordinal == eventType.ordinal
     }
+
+    fun matchesUrlToEvents(urlPattern: String) = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
   }
 }
