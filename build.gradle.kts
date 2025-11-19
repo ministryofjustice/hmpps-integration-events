@@ -42,7 +42,6 @@ dependencies {
   }
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
-  implementation("org.jetbrains.kotlinx:kover-cli:0.9.3")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
