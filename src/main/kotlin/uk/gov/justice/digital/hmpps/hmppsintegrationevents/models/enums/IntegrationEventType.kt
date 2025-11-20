@@ -338,7 +338,7 @@ enum class IntegrationEventType(
     { false }, // Probably not needed
   ),
   PERSON_FUTURE_VISITS_CHANGED(
-    "v1/persons/{hmppsId}/visits/future",
+    "v1/persons/{hmppsId}/visit/future",
     { VISIT_CHANGED_EVENTS.contains(it.eventType) },
   ),
   PERSON_ALERTS_CHANGED(
@@ -454,11 +454,11 @@ enum class IntegrationEventType(
     { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_BALANCES_CHANGED(
-    "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/balances",
+    "v1/prison/{prisonId}/prisoners/{hmppsId}/accounts/{accountCode}/balances",
     { false }, // No specific event found
   ),
   PRISONER_ACCOUNT_TRANSACTIONS_CHANGED(
-    "v1/prison/{prisonId}/prisoners/{hmppsId}/account/{accountCode}/transactions",
+    "v1/prison/{prisonId}/prisoners/{hmppsId}/accounts/{accountCode}/transactions",
     { false }, // No specific event found
   ),
   PRISONER_NON_ASSOCIATIONS_CHANGED(
