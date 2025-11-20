@@ -11,8 +11,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 class IntegrationEventTypeTest {
   companion object {
     /**
-     * Testing URLs, matchable to External event type.
-     * Multiple URLs may match to same event type, e.g. `PERSON_IMAGES_CHANGED`;
+     * Testing URL patterns, matchable to External event type.
+     * Multiple URL patterns may match to same event type, e.g. `PRISONER_BASE_LOCATION_CHANGED`;
      * `PERSON_FUTURE_VISITS_CHANGED`, `PRISONER_ACCOUNT_BALANCES_CHANGED` and `PRISONER_ACCOUNT_TRANSACTIONS_CHANGED` have typos at `pathTemplate` and are currently excluded from tests.
      */
     private val urlToMostEventTypeMap by lazy {
