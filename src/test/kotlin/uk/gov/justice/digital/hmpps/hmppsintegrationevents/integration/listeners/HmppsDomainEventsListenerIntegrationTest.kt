@@ -346,7 +346,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     savedEvents.size.shouldBe(3)
     savedEvents[0].eventType.shouldBe(IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED)
     savedEvents[0].hmppsId.shouldBe(crn)
-    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/visits/future")
+    savedEvents[0].url.shouldBe("https://localhost:8443/v1/persons/$crn/visit/future")
     savedEvents[1].eventType.shouldBe(IntegrationEventType.PRISON_VISITS_CHANGED)
     savedEvents[1].hmppsId.shouldBe(crn)
     savedEvents[1].url.shouldBe("https://localhost:8443/v1/prison/$prisonId/visit/search")
