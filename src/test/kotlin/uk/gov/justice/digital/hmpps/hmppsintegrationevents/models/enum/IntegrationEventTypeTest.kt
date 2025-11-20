@@ -13,7 +13,6 @@ class IntegrationEventTypeTest {
     /**
      * Testing URL patterns, matchable to External event type.
      * Multiple URL patterns may match to same event type, e.g. `PRISONER_BASE_LOCATION_CHANGED`;
-     * `PERSON_FUTURE_VISITS_CHANGED`, `PRISONER_ACCOUNT_BALANCES_CHANGED` and `PRISONER_ACCOUNT_TRANSACTIONS_CHANGED` have typos at `pathTemplate` and are currently excluded from tests.
      */
     private val urlToMostEventTypeMap by lazy {
       listOf(
@@ -29,7 +28,7 @@ class IntegrationEventTypeTest {
         "/v1/persons/.*/cell-location" to IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
         "/v1/persons/.*/contacts[^/]*$" to IntegrationEventType.PERSON_CONTACTS_CHANGED,
         "/v1/persons/.*/education/assessments" to IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED,
-//        "/v1/persons/.*/visit/future" to IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
+        "/v1/persons/.*/visit/future" to IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
         "/v1/persons/.*/health-and-diet" to IntegrationEventType.PERSON_HEALTH_AND_DIET_CHANGED,
         "/v1/persons/.*/iep-level" to IntegrationEventType.PERSON_IEP_LEVEL_CHANGED,
         "/v1/persons/.*/images" to IntegrationEventType.PERSON_IMAGES_CHANGED,
@@ -54,8 +53,8 @@ class IntegrationEventTypeTest {
         "/v1/persons/.*/plp-review-schedule" to IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED,
         "/v1/prison/prisoners" to IntegrationEventType.PRISONERS_CHANGED,
         "/v1/prison/prisoners/[^/]*$" to IntegrationEventType.PRISONER_CHANGED,
-//        "/v1/prison/.*/prisoners/.*/accounts/.*/balances" to IntegrationEventType.PRISONER_ACCOUNT_BALANCES_CHANGED,
-//        "/v1/prison/.*/prisoners/.*/accounts/.*/transactions" to IntegrationEventType.PRISONER_ACCOUNT_TRANSACTIONS_CHANGED,
+        "/v1/prison/.*/prisoners/.*/accounts/.*/balances" to IntegrationEventType.PRISONER_ACCOUNT_BALANCES_CHANGED,
+        "/v1/prison/.*/prisoners/.*/accounts/.*/transactions" to IntegrationEventType.PRISONER_ACCOUNT_TRANSACTIONS_CHANGED,
         "/v1/prison/.*/prisoners/[^/]*/balances$" to IntegrationEventType.PRISONER_BALANCES_CHANGED,
         "/v1/persons/.*/prisoner-base-location" to IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED,
         "/v1/persons/[^/]+/prisoner-base-location" to IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED,
