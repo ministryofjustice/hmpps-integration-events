@@ -1,3 +1,4 @@
+import kotlinx.kover.gradle.plugin.dsl.tasks.KoverReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -6,6 +7,8 @@ plugins {
   kotlin("plugin.spring") version "2.2.21"
   kotlin("plugin.jpa") version "2.2.21"
   kotlin("plugin.lombok") version "2.2.21"
+  id("io.gitlab.arturbosch.detekt") version "1.23.8"
+  id("org.jetbrains.kotlinx.kover") version "0.9.3"
 }
 
 configurations {
@@ -39,7 +42,6 @@ dependencies {
   }
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
-
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
@@ -58,10 +60,50 @@ kotlin {
 }
 
 tasks {
+
+  val classesToBeExcluded =
+    arrayOf(
+      "uk.gov.justice.digital.hmpps.hmppsintegrationevents.HmppsIntegrationEventsKt",
+    )
+
+  withType<KoverReport>().configureEach {
+    kover {
+      reports {
+        filters {
+          excludes {
+            classes(*classesToBeExcluded)
+          }
+        }
+      }
+    }
+  }
+
   withType<KotlinCompile> {
     compilerOptions {
       jvmTarget = JvmTarget.JVM_21
       freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+  }
+
+  withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    source = source.asFileTree
+  }
+}
+
+detekt {
+  config.setFrom("./detekt.yml")
+  buildUponDefaultConfig = true
+  ignoreFailures = true
+  baseline = file("./detekt-baseline.xml")
+}
+
+configurations.matching { it.name == "detekt" }.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.jetbrains.kotlin") {
+      useVersion(
+        io.gitlab.arturbosch.detekt
+          .getSupportedKotlinVersion(),
+      )
     }
   }
 }
