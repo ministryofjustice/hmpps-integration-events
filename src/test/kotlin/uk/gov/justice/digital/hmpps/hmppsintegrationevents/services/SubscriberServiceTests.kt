@@ -226,7 +226,7 @@ class SubscriberServiceTests {
   @ParameterizedTest
   @CsvSource(
     "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED,",
-    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED,",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED, PRISONER_MERGE",
   )
   fun `grant access to risk score events if client has access to risk score endpoint`(
     clientConsumerPath: String,
@@ -308,6 +308,7 @@ class SubscriberServiceTests {
         "PLP_REVIEW_SCHEDULE_CHANGED",
         "PERSON_STATUS_CHANGED",
         "PRISONER_BASE_LOCATION_CHANGED",
+        "PRISONER_MERGE",
       )
 
       testSubscriptionFilter(endpoints, expectedEventTypes, consumer, secretId, queueName)
@@ -334,7 +335,7 @@ class SubscriberServiceTests {
         "/v1/status",
       )
       val expectedFilter =
-        """{"eventType":["PERSON_ADDRESS_CHANGED","LICENCE_CONDITION_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","DYNAMIC_RISKS_CHANGED","RISK_SCORE_CHANGED","RISK_OF_SERIOUS_HARM_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PROBATION_STATUS_CHANGED","PERSON_STATUS_CHANGED","PERSON_PND_ALERTS_CHANGED"]}"""
+        """{"eventType":["PERSON_ADDRESS_CHANGED","LICENCE_CONDITION_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","DYNAMIC_RISKS_CHANGED","RISK_SCORE_CHANGED","RISK_OF_SERIOUS_HARM_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PROBATION_STATUS_CHANGED","PERSON_STATUS_CHANGED","PERSON_PND_ALERTS_CHANGED","PRISONER_MERGE"]}"""
 
       testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName)
     }
@@ -388,6 +389,7 @@ class SubscriberServiceTests {
         "MAPPA_DETAIL_CHANGED",
         "PERSON_RISK_CATEGORIES_CHANGED",
         "PERSON_RESPONSIBLE_OFFICER_CHANGED",
+        "PRISONER_MERGE",
       )
 
       testSubscriptionFilter(endpoints, expectedEventTypes, consumer, secretId, queueName)
