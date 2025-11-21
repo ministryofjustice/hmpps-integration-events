@@ -16,6 +16,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.test.context.ActiveProfiles
@@ -35,6 +36,8 @@ class SubscriberServiceTests {
   private lateinit var hmppsSecretManagerProperties: HmppsSecretManagerProperties
   private val objectMapper = ObjectMapper()
   private lateinit var subscriberService: SubscriberService
+
+  private val defaultEventFilter = """{"eventType":["DEFAULT"]}"""
 
   @BeforeEach
   fun setUp() {
@@ -74,7 +77,7 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client3" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = null,
       ),
     )
@@ -84,9 +87,9 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(0)).getSecretValue(any())
-    verify(secretsManagerService, times(0)).setSecretValue(any(), any())
-    verify(integrationEventTopicService, times(0)).updateSubscriptionAttributes(any(), any(), any())
+    verify(secretsManagerService, never()).getSecretValue(any())
+    verify(secretsManagerService, never()).setSecretValue(any(), any())
+    verify(integrationEventTopicService, never()).updateSubscriptionAttributes(any(), any(), any())
   }
 
   @Test
@@ -94,12 +97,12 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = null,
       ),
     )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(convertEventTypesToFilter("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"))
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -113,22 +116,22 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = listOf("MKI"),
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
+    val expectedFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"), "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -136,12 +139,13 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(prisons = listOf("MKI")),
       ),
     )
+    val currentFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"), "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(currentFilter)
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -155,22 +159,24 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = listOf("MKI"),
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
+    val eventTypes = listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED")
+    val currentFilter = convertEventTypesToFilter(eventTypes, prisonId = "ABC")
+    val expectedFilter = convertEventTypesToFilter(eventTypes, prisonId = "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(currentFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -178,11 +184,11 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = null,
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    val expectedFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
 
@@ -190,8 +196,8 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -199,32 +205,33 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = null,
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    val expectedFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @ParameterizedTest
   @CsvSource(
-    "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED",
-    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED",
+    "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED,",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED,",
   )
   fun `grant access to risk score events if client has access to risk score endpoint`(
     clientConsumerPath: String,
     eventType: String,
+    eventType2: String?,
   ) {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
@@ -234,15 +241,15 @@ class SubscriberServiceTests {
       ),
     )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1"))
-      .thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
+    val expectedFilter = convertEventTypesToFilter(listOfNotNull(eventType, eventType2))
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"$eventType\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"$eventType\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -262,15 +269,13 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"DEFAULT\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", defaultEventFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", defaultEventFilter)
   }
 
   @Nested
   @DisplayName("Given client with specific role")
   inner class GivenClientWithSpecificRole {
-    private val defaultEventFilter = """{"eventType":["DEFAULT"]}"""
-
     @Test
     fun `grant access to events for curious`() {
       val consumer = "curious1" // with role "curious"
@@ -458,10 +463,12 @@ class SubscriberServiceTests {
         "/v1/activities/schedule/.*/waiting-list-applications",
         "/v1/status",
       )
+      val consumerFilters = ConsumerFilters(prisons = listOf("MKI"))
+
       val expectedFilter =
         """{"eventType":["CONTACT_CHANGED","PERSON_ADDRESS_CHANGED","PERSON_ALERTS_CHANGED","PERSON_CARE_NEEDS_CHANGED","PERSON_CASE_NOTES_CHANGED","PERSON_CELL_LOCATION_CHANGED","PERSON_CONTACTS_CHANGED","PERSON_HEALTH_AND_DIET_CHANGED","PERSON_IEP_LEVEL_CHANGED","PERSON_IMAGES_CHANGED","PERSON_IMAGE_CHANGED","PERSON_LANGUAGES_CHANGED","PERSON_NAME_CHANGED","PERSON_NUMBER_OF_CHILDREN_CHANGED","PERSON_OFFENCES_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","PERSON_PHYSICAL_CHARACTERISTICS_CHANGED","PERSON_PROTECTED_CHARACTERISTICS_CHANGED","PERSON_REPORTED_ADJUDICATIONS_CHANGED","PERSON_RISK_CATEGORIES_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PERSON_VISIT_ORDERS_CHANGED","PERSON_VISIT_RESTRICTIONS_CHANGED","PERSON_FUTURE_VISITS_CHANGED","PERSON_VISITOR_RESTRICTIONS_CHANGED","PRISON_CAPACITY_CHANGED","PRISON_LOCATION_CHANGED","PRISONER_ACCOUNT_BALANCES_CHANGED","PRISONER_ACCOUNT_TRANSACTIONS_CHANGED","PRISONER_NON_ASSOCIATIONS_CHANGED","PRISONER_BALANCES_CHANGED","PRISON_RESIDENTIAL_DETAILS_CHANGED","PRISON_RESIDENTIAL_HIERARCHY_CHANGED","PRISON_VISITS_CHANGED","PRISONERS_CHANGED","PRISONER_CHANGED","VISIT_CHANGED","VISIT_FROM_EXTERNAL_SYSTEM_CREATED"],"prisonId":["MKI"]}"""
 
-      testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName)
+      testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName, consumerFilters)
     }
 
     private fun testSubscriptionFilter(
@@ -470,12 +477,14 @@ class SubscriberServiceTests {
       consumer: String = "client1",
       secretId: String = "secret1",
       queueName: String = "queue1",
+      consumerFilters: ConsumerFilters? = null,
     ) = testSubscriptionFilter(
       endpoints,
       expectedEventTypes = extractEventTypesFrom(expectedFilter),
       consumer,
       secretId,
       queueName,
+      consumerFilters,
     )
 
     private fun testSubscriptionFilter(
@@ -484,10 +493,11 @@ class SubscriberServiceTests {
       consumer: String = "client1",
       secretId: String = "secret1",
       queueName: String = "queue1",
+      consumerFilters: ConsumerFilters? = null,
     ) {
       // Arrange
       val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
-        consumer to ConfigAuthorisation(endpoints, filters = null),
+        consumer to ConfigAuthorisation(endpoints, filters = consumerFilters),
       )
       whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
       whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(defaultEventFilter)
@@ -516,4 +526,12 @@ class SubscriberServiceTests {
 
   // filter is in this format: {"eventType":["eventType1", "eventType2, ...]}
   private fun extractEventTypesFrom(filter: String) = objectMapper.readTree(filter)["eventType"].map { it.textValue() }.toSet()
+  private fun convertEventTypesToFilter(vararg eventType: String) = convertEventTypesToFilter(eventType.toList())
+  private fun convertEventTypesToFilter(eventTypes: List<String>) = """{"eventType":[${eventTypes.joinToString(separator = ",") { "\"$it\"" }}]}"""
+  private fun convertEventTypesToFilter(eventTypes: List<String>, prisonId: String) = """
+  {
+    "eventType": [${eventTypes.joinToString(separator = ",") { "\"$it\"" }}],
+    "prisonId": ["$prisonId"]
+  }
+  """.trimIndent().replace("\n", "").replace(" ", "")
 }
