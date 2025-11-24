@@ -60,6 +60,19 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     @Param("eventId") eventId: Long,
   )
 
+  @Transactional
+  @Modifying
+  @Query(
+    """
+    update EventNotification a
+    set a.status = "PENDING", a.claimId = null
+    where a.status = "PROCESSING" and a.eventId = :eventId
+  """,
+  )
+  fun setPending(
+    @Param("eventId") eventId: Long,
+  )
+
   @Modifying
   @Query(
     """

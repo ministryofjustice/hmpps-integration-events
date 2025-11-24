@@ -46,6 +46,9 @@ class StateEventNotifierService(
       } catch (e: Exception) {
         log.error("Error caught with msg ${e.message} for claim id $claimId", e)
         Sentry.captureException(e)
+        // If we encounter any exceptions then reset the event record to pending so it can be retried by another claim
+        log.info("Reset failed event back to PENDING with claim id ${it.claimId}")
+        eventRepository.setPending(it.eventId!!)
       }
     }
     log.info("Successfully sent $sentEvents out of ${events.size} events for claim id $claimId")
