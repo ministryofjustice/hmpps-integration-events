@@ -517,12 +517,12 @@ enum class IntegrationEventType(
     "v1/persons/{hmppsId}/languages",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
-  PRISONER_MERGE(
+  PRISONER_MERGED(
     "v1/persons/{hmppsId}",
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ) {
     override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification {
-      val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGE event")
+      val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
       return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation)
     }
