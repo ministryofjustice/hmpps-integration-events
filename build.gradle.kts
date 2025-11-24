@@ -31,7 +31,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.13.2")
   // This needs to be fixed in hmpps-sqs-spring-boot-starter so the version is made available there
   // Pinning to version 3.4.0 in the meantime
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.1")
   implementation("software.amazon.awssdk:secretsmanager")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.1") {
     exclude("org.springframework.security", "spring-security-config")
@@ -40,17 +40,17 @@ dependencies {
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.27.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
-  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.4")
-  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.4")
-  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.4")
+  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.5")
+  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.5")
+  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.5")
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
-  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.mockk:mockk:1.14.6")
   testImplementation("io.mockk:mockk-agent-jvm:1.14.6")
 }
