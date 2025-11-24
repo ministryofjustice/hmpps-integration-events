@@ -37,16 +37,18 @@ class StateEventNotifierService(
     val events = eventRepository.findAllProcessingEvents(claimId)
 
     log.info("Sending ${events.size} events for claim id $claimId")
+    var sentEvents = 0
     events.forEach {
       try {
         integrationEventTopicService.sendEvent(it)
         eventRepository.setProcessed(it.eventId!!)
+        sentEvents++
       } catch (e: Exception) {
         log.error("Error caught with msg ${e.message} for claim id $claimId", e)
         Sentry.captureException(e)
       }
     }
-    log.info("Successfully sent ${events.size} events for claim id $claimId")
+    log.info("Successfully sent $sentEvents out of ${events.size} events for claim id $claimId")
   }
 
   private fun alertForAnyStuckMessages() {
