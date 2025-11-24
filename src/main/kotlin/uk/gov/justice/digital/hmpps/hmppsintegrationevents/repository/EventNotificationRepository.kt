@@ -66,7 +66,7 @@ interface EventNotificationRepository : JpaRepository<EventNotification, Long> {
     """
     update EventNotification a
     set a.status = "PENDING", a.claimId = null
-    where a.status = "PROCESSING" and a.eventId = :eventId
+    where a.eventId = :eventId
   """,
   )
   fun setPending(
