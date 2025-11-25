@@ -39,7 +39,7 @@ hmpps.sqs:
 
 hmpps.secret:
   secrets:
-    mapps-client-org:
+    MAPPS:
       secretId: ${MAPPS_FILTER_POLICY_SECRET_ID}
       queueId: mappssubscriberqueue
     PND:
