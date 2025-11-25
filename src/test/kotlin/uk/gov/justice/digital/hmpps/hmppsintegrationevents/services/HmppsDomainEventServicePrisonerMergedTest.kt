@@ -56,12 +56,12 @@ class HmppsDomainEventServicePrisonerMergedTest {
 
     val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
 
-    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGE, IntegrationEventType.PERSON_STATUS_CHANGED))
+    hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGED, IntegrationEventType.PERSON_STATUS_CHANGED))
 
     verify(exactly = 1) {
       eventNotificationRepository.insertOrUpdate(
         EventNotification(
-          eventType = IntegrationEventType.PRISONER_MERGE,
+          eventType = IntegrationEventType.PRISONER_MERGED,
           hmppsId = removedNomisNumber,
           url = "$baseUrl/v1/persons/$removedNomisNumber",
           lastModifiedDateTime = currentTime,
@@ -89,7 +89,7 @@ class HmppsDomainEventServicePrisonerMergedTest {
     val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
 
     assertThrows<IllegalStateException> {
-      hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGE, IntegrationEventType.PERSON_STATUS_CHANGED))
+      hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGED, IntegrationEventType.PERSON_STATUS_CHANGED))
     }
 
     verify(exactly = 0) {
