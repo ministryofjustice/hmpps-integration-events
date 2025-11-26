@@ -39,8 +39,12 @@ hmpps.sqs:
 
 hmpps.secret:
   secrets:
+    # Used to bind to an unwanted env variable (to be removed)
     mapps-client-org:
       secretId: ${MAPPS_FILTER_POLICY_SECRET_ID}
+      queueId: mappssubscriberqueue
+    MAPPS:
+      secretId: live-hmpps-integration-api-dev-68707bf16962536e
       queueId: mappssubscriberqueue
     PND:
       secretId: ${PND_FILTER_POLICY_SECRET_ID}
