@@ -32,8 +32,6 @@ hmpps.sqs:
       queueArn: ${KILCO_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
   topics:
-    domainevents:
-      arn: ${HMPPS_DOMAIN_TOPIC_ARN}
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
 
