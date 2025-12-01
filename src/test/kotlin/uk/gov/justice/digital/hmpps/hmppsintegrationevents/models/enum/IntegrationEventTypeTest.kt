@@ -46,7 +46,7 @@ class IntegrationEventTypeTest {
         "/v1/persons/.*/risks/categories" to IntegrationEventType.PERSON_RISK_CATEGORIES_CHANGED,
         "/v1/persons/.*/sentences" to IntegrationEventType.PERSON_SENTENCES_CHANGED,
         "/v1/persons/[^/]*$" to IntegrationEventType.PERSON_STATUS_CHANGED,
-        "/v1/persons/[^/]*$" to IntegrationEventType.PRISONER_MERGE,
+        "/v1/persons/[^/]*$" to IntegrationEventType.PRISONER_MERGED,
         "/v1/persons/.*/visitor/.*/restrictions" to IntegrationEventType.PERSON_VISITOR_RESTRICTIONS_CHANGED,
         "/v1/persons/.*/visit-orders" to IntegrationEventType.PERSON_VISIT_ORDERS_CHANGED,
         "/v1/persons/.*/visit-restrictions" to IntegrationEventType.PERSON_VISIT_RESTRICTIONS_CHANGED,
@@ -122,7 +122,7 @@ class IntegrationEventTypeTest {
     urlPattern = "/v1/persons/[^/]*$",
     expectedEvents = setOf(
       IntegrationEventType.PERSON_STATUS_CHANGED,
-      IntegrationEventType.PRISONER_MERGE,
+      IntegrationEventType.PRISONER_MERGED,
     ),
   )
 
