@@ -26,6 +26,7 @@ class IntegrationEventTypeTest {
         "/v1/persons/.*/care-needs" to IntegrationEventType.PERSON_CARE_NEEDS_CHANGED,
         "/v1/persons/.*/case-notes" to IntegrationEventType.PERSON_CASE_NOTES_CHANGED,
         "/v1/persons/.*/cell-location" to IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
+        "/v1/persons/.*/contacts" to IntegrationEventType.PERSON_CONTACTS_CHANGED,
         "/v1/persons/.*/contacts[^/]*$" to IntegrationEventType.PERSON_CONTACTS_CHANGED,
         "/v1/persons/.*/education/assessments" to IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED,
         "/v1/persons/.*/visit/future" to IntegrationEventType.PERSON_FUTURE_VISITS_CHANGED,
@@ -63,6 +64,7 @@ class IntegrationEventTypeTest {
         "/v1/prison/.*/location/[^/]*$" to IntegrationEventType.PRISON_LOCATION_CHANGED,
         "/v1/prison/.*/residential-details" to IntegrationEventType.PRISON_RESIDENTIAL_DETAILS_CHANGED,
         "/v1/prison/.*/residential-hierarchy" to IntegrationEventType.PRISON_RESIDENTIAL_HIERARCHY_CHANGED,
+        "/v1/prison/.*/visit/search" to IntegrationEventType.PRISON_VISITS_CHANGED,
         "/v1/prison/.*/visit/search[^/]*$" to IntegrationEventType.PRISON_VISITS_CHANGED,
         "/v1/persons/.*/status-information" to IntegrationEventType.PROBATION_STATUS_CHANGED,
         "/v1/persons/.*/risks/serious-harm" to IntegrationEventType.RISK_OF_SERIOUS_HARM_CHANGED,
@@ -130,9 +132,9 @@ class IntegrationEventTypeTest {
   )
 
   @Test
-  fun `should match wildcard URL to ALL event types`() = assertMatchesUrlToEvents(
+  fun `should not match wildcard URL`() = assertMatchesUrlToEvents(
     urlPattern = "/.*",
-    expectedEvents = IntegrationEventType.entries.toSet(),
+    expectedEvents = emptySet(),
   )
 
   @ParameterizedTest

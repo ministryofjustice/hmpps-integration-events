@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.normaliseUrl
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
@@ -538,9 +539,9 @@ enum class IntegrationEventType(
   )
 
   /**
-   * match event URL with regex pattern (whole input)
+   * match event URL pattern with URL pattern (comparing normalised URL)
    */
-  fun matchesUrl(urlPattern: String) = Regex(urlPattern).matches("/${this.pathTemplate.removePrefix("/")}")
+  fun matchesUrl(urlPattern: String) = normaliseUrl(urlPattern) == normaliseUrl(pathTemplate)
 
   protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
