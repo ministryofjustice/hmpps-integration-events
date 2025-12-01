@@ -217,6 +217,15 @@ class UrlMatchingTests {
         urlPattern = "/v1/persons/[^/]*$",
       )
 
+      @Test
+      fun `should normalise, ignoring wildcard suffix`() {
+        val pattern = "[^/]*$"
+        assertNormaliseUrlEquals(
+          expectedUrlPattern = "/v1/prison/$PARAM/visit/search",
+          urlPattern = "/v1/prison/.*/visit/search$pattern",
+        )
+      }
+
       @ParameterizedTest
       @CsvSource(
         textBlock = """
@@ -229,10 +238,10 @@ class UrlMatchingTests {
           /v1/persons/.*/images                                 , /v1/persons/$PARAM/images
           /v1/persons/.*/images/.*                              , /v1/persons/$PARAM/images/$PARAM
           /v1/persons/.*/contacts                               , /v1/persons/$PARAM/contacts
-          /v1/persons/.*/contacts[^/]*$                         , /v1/persons/$PARAM/contacts$PARAM                                     , is this desired suffix?
+          /v1/persons/.*/contacts[^/]*$                         , /v1/persons/$PARAM/contacts
           /v1/prison/prisoners/[^/]*$                           , /v1/prison/prisoners/$PARAM
           /v1/prison/.*/visit/search                            , /v1/prison/$PARAM/visit/search
-          /v1/prison/.*/visit/search[^/]*$                      , /v1/prison/$PARAM/visit/search$PARAM                                  , is this desired suffix?
+          /v1/prison/.*/visit/search[^/]*$                      , /v1/prison/$PARAM/visit/search
           /v1/prison/.*/prisoners/[^/]*/balances$               , /v1/prison/$PARAM/prisoners/$PARAM/balances
           /v1/prison/.*/prisoners/.*/non-associations           , /v1/prison/$PARAM/prisoners/$PARAM/non-associations
           /v1/prison/.*/prisoners/.*/accounts/.*/balances       , /v1/prison/$PARAM/prisoners/$PARAM/accounts/$PARAM/balances

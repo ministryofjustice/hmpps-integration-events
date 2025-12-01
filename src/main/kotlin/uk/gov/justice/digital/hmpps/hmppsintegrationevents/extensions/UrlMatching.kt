@@ -37,14 +37,7 @@ fun normaliseUrl(urlPattern: String) = when (determinePatternType(urlPattern)) {
   "PathTemplate" -> urlPattern.normalisedFromCanonicalUrl()
   "Mixed" -> throw IllegalArgumentException("Invalid URL pattern: $urlPattern")
   else -> urlPattern
-}.addPrefixIfMissing().cleansedFromNormalisedUrl()
-
-/**
- * This is for compatability: A leading slash `/` is expected, but it may be absent.
- *
- * @receiver A string of URL pattern
- */
-fun String.addPrefixIfMissing(prefix: String = "/") = if (this.startsWith(prefix)) this else "/$this"
+}.addPrefixIfMissing("/").cleansedFromNormalisedUrl()
 
 private val regexWildcards by lazy {
   listOf(
@@ -90,6 +83,7 @@ private fun determinePatternType(input: String): String {
  * @receiver A string of Regex URL pattern
  */
 private fun String.normalisedFromRegex() = this.removePrefix("^").removeSuffix("$")
+  .removeWildcardSuffix("\\[\\^/]\\*", "[^/]*")
   .replace(regexWildcards, URL_PARAM_ALLOWLIST)
   .replace(regexQuantifiers, URL_PARAM_QUANTIFIER)
 
@@ -109,3 +103,20 @@ private fun String.normalisedFromCanonicalUrl() = replace(Regex("""\{[^}]+}"""),
 private fun String.cleansedFromNormalisedUrl(): String = this.substringBefore('?')
   .substringBefore('#')
   .trimEnd('/')
+
+/**
+ * This is for compatibility: A leading slash `/` is expected, but it may be absent.
+ *
+ * @receiver A string of URL pattern
+ */
+private fun String.addPrefixIfMissing(prefix: String) = if (startsWith(prefix)) this else "/$this"
+
+/**
+ * This is for compatibility: remove undesired wildcard suffix that is not mappable to named parameter
+ *  e.g. /v1/prison/.+/visit/search[^/]*$  ===> /v1/prison/.+/visit/search
+ */
+private fun String.removeWildcardSuffix(pattern: String, suffix: String) = if (endsWith(suffix)) {
+  this.replace(Regex("[^/]$pattern")) { it.value.removeSuffix(suffix) }
+} else {
+  this
+}
