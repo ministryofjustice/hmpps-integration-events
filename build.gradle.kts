@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
   kotlin("plugin.spring") version "2.2.21"
   kotlin("plugin.jpa") version "2.2.21"
   kotlin("plugin.lombok") version "2.2.21"
@@ -31,26 +31,26 @@ dependencies {
   implementation("com.google.code.gson:gson:2.13.2")
   // This needs to be fixed in hmpps-sqs-spring-boot-starter so the version is made available there
   // Pinning to version 3.4.0 in the meantime
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.2")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.1") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.27.1")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
-  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.4")
-  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.4")
-  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.4")
+  testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.7")
+  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.7")
+  testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.7")
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
-  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.mockk:mockk:1.14.6")
   testImplementation("io.mockk:mockk-agent-jvm:1.14.6")
 }

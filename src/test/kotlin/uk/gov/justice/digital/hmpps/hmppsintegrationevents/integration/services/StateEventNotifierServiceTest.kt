@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.sentry.Sentry
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.AdditionalAnswers
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -95,5 +97,26 @@ class StateEventNotifierServiceTest {
     // Await until all are processed
     Awaitility.await().until { eventNotificationRepository.findAll().map { it.status?.name }.toSet() == setOf("PROCESSED") }
     io.mockk.verify(exactly = 0) { Sentry.captureException(any()) }
+  }
+
+  @Test
+  fun `Concurrent Event Notifier services reads the DB records and processes them with exceptions`() {
+    // Run a claim with exceptions
+    whenever(integrationEventTopicService.sendEvent(argThat<EventNotification> { url == "MockUrl2" || url == "MockUrl4" })).thenThrow(
+      RuntimeException("Some AWS exception"),
+    )
+    eventNotifierService.sentNotifications()
+
+    // Run a claim without exceptions
+    whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
+      AdditionalAnswers.answersWithDelay(
+        300,
+        { "SUCCESS" },
+      ),
+    )
+    eventNotifierService.sentNotifications()
+    // Check all are processed
+    assertThat(eventNotificationRepository.findAll().map { it.status?.name }.toSet()).isEqualTo(setOf("PROCESSED"))
+    io.mockk.verify(exactly = 2) { Sentry.captureException(any()) }
   }
 }
