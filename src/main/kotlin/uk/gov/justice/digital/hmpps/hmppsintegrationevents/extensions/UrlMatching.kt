@@ -116,7 +116,7 @@ private fun String.addPrefixIfMissing(prefix: String) = if (startsWith(prefix)) 
  *  e.g. /v1/prison/.+/visit/search[^/]*$  ===> /v1/prison/.+/visit/search
  */
 private fun String.removeWildcardSuffix(pattern: String, suffix: String) = if (endsWith(suffix)) {
-  this.replace(Regex("[^/]$pattern")) { it.value.removeSuffix(suffix) }
+  this.replace(Regex("[^/]$pattern$")) { it.value.removeSuffix(suffix) }
 } else {
   this
 }

@@ -226,6 +226,15 @@ class UrlMatchingTests {
         )
       }
 
+      @Test
+      fun `should normalise, with a wildcard in middle`() {
+        val pattern = "[^/]*"
+        assertNormaliseUrlEquals(
+          expectedUrlPattern = "/v1/prison/$PARAM/visit$PARAM/search",
+          urlPattern = "/v1/prison/.*/visit$pattern/search$pattern",
+        )
+      }
+
       @ParameterizedTest
       @CsvSource(
         textBlock = """
