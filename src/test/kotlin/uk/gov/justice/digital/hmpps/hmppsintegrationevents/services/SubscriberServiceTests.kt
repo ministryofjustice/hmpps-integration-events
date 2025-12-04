@@ -1,13 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
+import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -26,6 +34,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
+import io.mockk.verify as verifyK
 
 @ActiveProfiles("test")
 @JsonTest
@@ -274,24 +284,99 @@ class SubscriberServiceTests {
     verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", defaultEventFilter)
   }
 
+  @Test
+  fun `set filter list if current filter is empty`() = testSubscriptionFilter(
+    endpoints = listOf("/v1/persons/[^/]*$"),
+    expectedEventTypes = listOf("PERSON_STATUS_CHANGED", "PRISONER_MERGED"),
+    currentFilter = "",
+  )
+
+  @Test
+  fun `does not update filter, if current filter is empty and no matching event`() = testSubscriptionFilterHasNoUpdate(
+    endpoints = listOf("/v1/status"),
+    currentFilter = "",
+  )
+
+  @Nested
+  @DisplayName("Given error, while checking subscriber filter list")
+  inner class GivenErrorCheckingSubscriberFilter {
+    @BeforeEach
+    internal fun setUp() {
+      // for spying Sentry.captureException(exception) , a static java method
+      mockkStatic(Sentry::class)
+      every { Sentry.captureException(any<RuntimeException>()) }.answers { callOriginal() }
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+      unmockkStatic(Sentry::class)
+    }
+
+    @Test
+    fun `log exception to Sentry, when fail to obtain authorization configuration`() {
+      // Arrange
+      val errorMessage = "Error checking filter list"
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenThrow(RuntimeException::class.java)
+
+      // Act
+      subscriberService.checkSubscriberFilterList()
+
+      // Assert
+      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+    }
+
+    @Test
+    fun `log exception to Sentry, when fail to refreshing a client filter`() {
+      // Arrange
+      val client = "client1"
+      val apiResponse: Map<String, ConfigAuthorisation> = mapOf(client to ConfigAuthorisation(emptyList(), null))
+      val secretId = "secret1"
+      val errorMessage = "Error checking filter list for $client"
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+      // error when getting secret
+      whenever(secretsManagerService.getSecretValue(secretId)).thenThrow(RuntimeException::class.java)
+
+      // Act
+      subscriberService.checkSubscriberFilterList()
+
+      // Assert
+      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+    }
+  }
+
   @Nested
   @DisplayName("Given a few clients")
   inner class GivenMultipleClients {
+    @BeforeEach
+    internal fun setUp() {
+      mockkObject(IntegrationEventType.Companion)
+      every { IntegrationEventType.matchesUrlToEvents(any()) } answers { callOriginal() }
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+      unmockkObject(IntegrationEventType.Companion)
+    }
+
     @Test
-    fun `should update secret and subscription, with cached mapping for repeating patterns`() {
+    fun `should update secret and subscription, with repeating URLs`() {
       // Arrange
-      val client1Endpoints = listOf(
+      val repeatingUrls = listOf(
         "/v1/persons/[^/]*$",
-        "/v1/persons/[^/]+/prisoner-base-location",
-        "/v1/persons/.*/education/assessments",
         "/v1/status",
       )
+      val client1Endpoints = listOf(
+        repeatingUrls[0],
+        "/v1/persons/[^/]+/prisoner-base-location",
+        "/v1/persons/.*/education/assessments",
+        repeatingUrls[1],
+      )
       val client2Endpoints = listOf(
-        "/v1/persons/[^/]*$",
+        repeatingUrls[0],
         "/v1/persons/.*/addresses",
         "/v1/persons/.*/status-information",
         "/v1/hmpps/reference-data",
-        "/v1/status",
+        repeatingUrls[1],
       )
       val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
         "client1" to ConfigAuthorisation(client1Endpoints, null),
@@ -299,6 +384,7 @@ class SubscriberServiceTests {
       )
       val secretNames = listOf("secret1", "secret2")
       val queueNames = listOf("queue1", "queue2")
+      val urlsToMatch = (client1Endpoints + client2Endpoints).toSet()
       whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
       secretNames.forEach { whenever(secretsManagerService.getSecretValue(it)).thenReturn(defaultEventFilter) }
 
@@ -310,6 +396,14 @@ class SubscriberServiceTests {
       verify(secretsManagerService, times(2)).setSecretValue(argThat { this in secretNames }, any())
       // 2) Filter has been updated to subscription
       verify(integrationEventTopicService, times(2)).updateSubscriptionAttributes(argThat { this in queueNames }, eq("FilterPolicy"), any())
+      // 3) Repeating URL patterns will be matched only once (as cached)
+      repeatingUrls.forEach {
+        verifyK(exactly = 1) { IntegrationEventType.matchesUrlToEvents(eq(it)) }
+      }
+      // 4) Matching call count shall be same as number of URL patterns
+      verifyK(exactly = urlsToMatch.size) {
+        IntegrationEventType.matchesUrlToEvents(match { urlsToMatch.contains(it) })
+      }
     }
   }
 
@@ -492,66 +586,97 @@ class SubscriberServiceTests {
 
       testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName, consumerFilters)
     }
+  }
 
-    private fun testSubscriptionFilter(
-      endpoints: List<String> = emptyList(),
-      expectedFilter: String = defaultEventFilter,
-      consumer: String = "client1",
-      secretId: String = "secret1",
-      queueName: String = "queue1",
-      consumerFilters: ConsumerFilters? = null,
-    ) = testSubscriptionFilter(
-      endpoints,
-      expectedEventTypes = extractEventTypesFrom(expectedFilter),
-      consumer,
-      secretId,
-      queueName,
-      consumerFilters,
+  private fun testSubscriptionFilter(
+    endpoints: List<String> = emptyList(),
+    expectedFilter: String = defaultEventFilter,
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) = testSubscriptionFilter(
+    endpoints,
+    expectedEventTypes = extractEventTypesFrom(expectedFilter),
+    consumer,
+    secretId,
+    queueName,
+    consumerFilters,
+    currentFilter,
+  )
+
+  private fun testSubscriptionFilter(
+    endpoints: List<String> = emptyList(),
+    expectedEventTypes: List<String> = emptyList(),
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      consumer to ConfigAuthorisation(
+        endpoints = endpoints.sorted(), // API response endpoints are sorted
+        filters = consumerFilters,
+      ),
     )
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(currentFilter)
 
-    private fun testSubscriptionFilter(
-      endpoints: List<String> = emptyList(),
-      expectedEventTypes: List<String> = emptyList(),
-      consumer: String = "client1",
-      secretId: String = "secret1",
-      queueName: String = "queue1",
-      consumerFilters: ConsumerFilters? = null,
-    ) {
-      // Arrange
-      val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
-        consumer to ConfigAuthorisation(
-          endpoints = endpoints.sorted(), // API response endpoints are sorted
-          filters = consumerFilters,
-        ),
-      )
-      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-      whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(defaultEventFilter)
+    // Act
+    subscriberService.checkSubscriberFilterList()
 
-      // Act
-      subscriberService.checkSubscriberFilterList()
-
-      // Assert
-      val assertFilterString: (KArgumentCaptor<String>, List<String>) -> Unit = { filterCaptor, expectedEventTypes ->
-        extractEventTypesFrom(filterCaptor.singleValue).also {
-          // All event types are expected
-          assertThat(it.toSet()).hasSameElementsAs(expectedEventTypes.toSet())
-          // Event types are in stable order
-          assertThat(it).isEqualTo(expectedEventTypes)
-        }
-      }
-      // 1) correct secret has been set to the consumer filter
-      argumentCaptor<String>().let { filterCaptor ->
-        verify(secretsManagerService, times(1))
-          .setSecretValue(eq(secretId), filterCaptor.capture())
-        assertFilterString(filterCaptor, expectedEventTypes)
-      }
-      // 2) correct filter has been updated to subscription
-      argumentCaptor<String>().let { filterCaptor ->
-        verify(integrationEventTopicService, times(1))
-          .updateSubscriptionAttributes(eq(queueName), eq("FilterPolicy"), filterCaptor.capture())
-        assertFilterString(filterCaptor, expectedEventTypes)
+    // Assert
+    val assertFilterString: (KArgumentCaptor<String>, List<String>) -> Unit = { filterCaptor, expectedEventTypes ->
+      extractEventTypesFrom(filterCaptor.singleValue).also {
+        // All event types are expected
+        assertThat(it.toSet()).hasSameElementsAs(expectedEventTypes.toSet())
+        // Event types are in stable order
+        assertThat(it).isEqualTo(expectedEventTypes)
       }
     }
+    // 1) correct secret has been set to the consumer filter
+    argumentCaptor<String>().let { filterCaptor ->
+      verify(secretsManagerService, times(1))
+        .setSecretValue(eq(secretId), filterCaptor.capture())
+      assertFilterString(filterCaptor, expectedEventTypes)
+    }
+    // 2) correct filter has been updated to subscription
+    argumentCaptor<String>().let { filterCaptor ->
+      verify(integrationEventTopicService, times(1))
+        .updateSubscriptionAttributes(eq(queueName), eq("FilterPolicy"), filterCaptor.capture())
+      assertFilterString(filterCaptor, expectedEventTypes)
+    }
+  }
+
+  private fun testSubscriptionFilterHasNoUpdate(
+    endpoints: List<String> = emptyList(),
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      consumer to ConfigAuthorisation(
+        endpoints = endpoints.sorted(), // API response endpoints are sorted
+        filters = consumerFilters,
+      ),
+    )
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(currentFilter)
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    // 1) Consumer filter has not been updated
+    verify(secretsManagerService, never()).setSecretValue(eq(secretId), anyString())
+    // 2) Subscription's filter has not been updated
+    verify(integrationEventTopicService, never()).updateSubscriptionAttributes(eq(queueName), eq("FilterPolicy"), anyString())
   }
 
   // filter is in this format: {"eventType":["eventType1", "eventType2", ...]}

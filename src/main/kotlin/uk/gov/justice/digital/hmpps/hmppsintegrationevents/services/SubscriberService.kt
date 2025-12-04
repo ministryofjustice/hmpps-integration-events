@@ -84,7 +84,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
-      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+      return SubscriberFilterList(eventType = defaultEventTypeList, prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
@@ -99,7 +99,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   // Least-Recently-Used cache using LinkedHashMap with accessOrder
   private fun <K, V> lruCache(
-    capacity: Int = MAPPING_CACHE_CAPACITY,
+    capacity: Int,
     loadFactor: Float = MAPPING_CACHE_LOAD_FACTOR,
   ): MutableMap<K, V> = object : LinkedHashMap<K, V>(capacity, loadFactor, true) {
     override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>) = size > capacity
