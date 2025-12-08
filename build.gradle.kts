@@ -40,7 +40,7 @@ dependencies {
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.27.1")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.28.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
@@ -51,8 +51,8 @@ dependencies {
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
-  testImplementation("io.mockk:mockk:1.14.6")
-  testImplementation("io.mockk:mockk-agent-jvm:1.14.6")
+  testImplementation("io.mockk:mockk:1.14.7")
+  testImplementation("io.mockk:mockk-agent-jvm:1.14.7")
 }
 
 kotlin {
