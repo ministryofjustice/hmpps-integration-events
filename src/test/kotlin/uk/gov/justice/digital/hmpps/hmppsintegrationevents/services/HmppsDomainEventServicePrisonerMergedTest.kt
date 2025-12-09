@@ -88,7 +88,7 @@ class HmppsDomainEventServicePrisonerMergedTest {
 
     val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
 
-    assertThrows<IllegalStateException> {
+    assertThrows<IllegalArgumentException> {
       hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGED, IntegrationEventType.PERSON_STATUS_CHANGED))
     }
 
