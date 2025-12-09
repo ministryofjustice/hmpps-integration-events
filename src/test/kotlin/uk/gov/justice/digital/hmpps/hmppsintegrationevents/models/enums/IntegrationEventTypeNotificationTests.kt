@@ -203,7 +203,7 @@ class IntegrationEventTypeNotificationTests {
     private val allEventTypeCodes = IntegrationEventType.entries.map { it.name }.sorted().toSet()
 
     /**
-     * All active/current event type codes in enum `IntegrationEventType` shall be tested
+     * All event types shall be tested, including deleted/renamed event type codes
      *
      * It may be unsafe to
      *   i) Rename current type code(s), e.g. PRISONER_MERGE to `PRISONER_MERGED`
