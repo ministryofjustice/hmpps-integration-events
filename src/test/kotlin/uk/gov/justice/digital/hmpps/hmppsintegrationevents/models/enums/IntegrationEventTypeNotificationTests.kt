@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -90,6 +91,9 @@ class IntegrationEventTypeNotificationTests {
      *  @see IntegrationEventType.path
      */
     private val notYetSupportedEventTypeTestFixtures by lazy {
+      // These are actually not ready to use.
+      // The named parameter(s) are not supported, and the relevant event types are not in use.
+      // The generated path will not (yet) resolve "unknown" parameter(s).
       listOf(
         // {imageId} is NOT supported yet! Event type not in use
         testFixture("PERSON_IMAGE_CHANGED", crn, "$baseUrl/v1/persons/$crn/images/{imageId}"),
@@ -106,6 +110,7 @@ class IntegrationEventTypeNotificationTests {
      * Event type codes deprecated/to be removed
      */
     private val deprecatedEventTypeTestFixtures by lazy {
+      // This is for event type codes deprecated and to be removed in future (after transition period), such as PRISONER_MERGE in current failed tests.
       listOf(
         TestFixture("PRISONER_MERGE", nomsNumber, removedNomsNumber, "$baseUrl/v1/persons/$removedNomsNumber", AdditionalInformation(removedNomsNumber = removedNomsNumber)),
       )
@@ -199,8 +204,78 @@ class IntegrationEventTypeNotificationTests {
   @Nested
   @DisplayName("Given all event type codes")
   inner class GivenAllEventTypeCodes {
-    private val expectedEventTypes = eventTypeTestFixtures.map { it.eventTypeCode }.sorted().toSet()
-    private val allEventTypeCodes = IntegrationEventType.entries.map { it.name }.sorted().toSet()
+    private val allEventTypeCodesSorted = IntegrationEventType.entries.map { it.name }.sorted()
+
+    /**
+     * This test will fail when there is unexpected enum value(s)
+     *
+     * - Please read comments in [IntegrationEventType] before making changes to the enum.
+     * - Please update `expectedEventTypeCodesJoined` when making changes
+     */
+    @Test
+    fun `should have all event types expected`() {
+      val expectedEventTypeCodesJoined = listOf(
+        "CONTACT_CHANGED",
+        "DYNAMIC_RISKS_CHANGED",
+        "KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE",
+        "LICENCE_CONDITION_CHANGED",
+        "MAPPA_DETAIL_CHANGED",
+        "PERSON_ADDRESS_CHANGED",
+        "PERSON_ALERTS_CHANGED",
+        "PERSON_CARE_NEEDS_CHANGED",
+        "PERSON_CASE_NOTES_CHANGED",
+        "PERSON_CELL_LOCATION_CHANGED",
+        "PERSON_CONTACTS_CHANGED",
+        "PERSON_EDUCATION_ASSESSMENTS_CHANGED",
+        "PERSON_FUTURE_VISITS_CHANGED",
+        "PERSON_HEALTH_AND_DIET_CHANGED",
+        "PERSON_IEP_LEVEL_CHANGED",
+        "PERSON_IMAGES_CHANGED",
+        "PERSON_IMAGE_CHANGED",
+        "PERSON_LANGUAGES_CHANGED",
+        "PERSON_NAME_CHANGED",
+        "PERSON_NUMBER_OF_CHILDREN_CHANGED",
+        "PERSON_OFFENCES_CHANGED",
+        "PERSON_PHYSICAL_CHARACTERISTICS_CHANGED",
+        "PERSON_PND_ALERTS_CHANGED",
+        "PERSON_PROTECTED_CHARACTERISTICS_CHANGED",
+        "PERSON_REPORTED_ADJUDICATIONS_CHANGED",
+        "PERSON_RESPONSIBLE_OFFICER_CHANGED",
+        "PERSON_RISK_CATEGORIES_CHANGED",
+        "PERSON_SENTENCES_CHANGED",
+        "PERSON_STATUS_CHANGED",
+        "PERSON_VISITOR_RESTRICTIONS_CHANGED",
+        "PERSON_VISIT_ORDERS_CHANGED",
+        "PERSON_VISIT_RESTRICTIONS_CHANGED",
+        "PLP_INDUCTION_SCHEDULE_CHANGED",
+        "PLP_REVIEW_SCHEDULE_CHANGED",
+        "PRISONERS_CHANGED",
+        "PRISONER_ACCOUNT_BALANCES_CHANGED",
+        "PRISONER_ACCOUNT_TRANSACTIONS_CHANGED",
+        "PRISONER_BALANCES_CHANGED",
+        "PRISONER_BASE_LOCATION_CHANGED",
+        "PRISONER_CHANGED",
+        "PRISONER_MERGE",
+        "PRISONER_MERGED",
+        "PRISONER_NON_ASSOCIATIONS_CHANGED",
+        "PRISON_CAPACITY_CHANGED",
+        "PRISON_LOCATION_CHANGED",
+        "PRISON_RESIDENTIAL_DETAILS_CHANGED",
+        "PRISON_RESIDENTIAL_HIERARCHY_CHANGED",
+        "PRISON_VISITS_CHANGED",
+        "PROBATION_STATUS_CHANGED",
+        "RISK_OF_SERIOUS_HARM_CHANGED",
+        "RISK_SCORE_CHANGED",
+        "SAN_PLAN_CREATION_SCHEDULE_CHANGED",
+        "SAN_REVIEW_SCHEDULE_CHANGED",
+        "VISIT_CHANGED",
+        "VISIT_FROM_EXTERNAL_SYSTEM_CREATED",
+      ).joinToString(",") { "\"$it\"" }
+
+      val actualEventTypeCodesJoined = allEventTypeCodesSorted.joinToString(",") { "\"$it\"" }
+
+      assertEquals(expectedEventTypeCodesJoined, actualEventTypeCodesJoined)
+    }
 
     /**
      * All event types shall be tested, including deleted/renamed event type codes
@@ -216,16 +291,15 @@ class IntegrationEventTypeNotificationTests {
     @Test
     fun `should have not deleted or renamed current event type codes in use`() {
       // No unexpected deletion or renaming
-      assertThat(allEventTypeCodes).containsAll(expectedEventTypes)
-    }
+      val expectedEventTypes = eventTypeTestFixtures.map { it.eventTypeCode }.sorted().toSet()
 
-    /**
-     * All active/current event type codes in enum `IntegrationEventType` shall be tested
-     */
-    @Test
-    fun `should have tested all event type codes`() {
-      // All active event type codes in enum `IntegrationEventType` shall be tested
-      assertThat(allEventTypeCodes).isEqualTo(expectedEventTypes)
+      val allEventTypeCodes = allEventTypeCodesSorted.toSet()
+
+      assertThat(allEventTypeCodes).containsAll(expectedEventTypes)
+      // This test will fail when the test fixture has no corresponding code defined in the enum IntegrationEventType (cases of renaming, deleting)
+      // When failed, please consider either:
+      // i) adding back the old type code (`deprecatedEventTypeTestFixtures`)
+      // ii) remove it from test fixtures (`activeEventTypeTestFixtures` or `notYetSupportedEventTypeTestFixtures`)
     }
   }
 }

@@ -243,6 +243,19 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
   PrisonerChangedCategory.LOCATION.name,
 )
 
+/**
+ * Integration Event Type
+ *
+ * This enum is persisted to DB, and please consider these while making changes
+ * - Adding new value is safe
+ * - Renaming current value is unsafe
+ * - Removing current value is unsafe
+ *
+ * For renaming or removal of current value, please provide transition period
+ * i) Mark deprecated
+ * ii) Wait for transition period over
+ * iii) Finally remove it
+ */
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEventMessage) -> Boolean,
@@ -518,6 +531,7 @@ enum class IntegrationEventType(
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
 
+  // Keep the deprecated `PRISONER_MERGE` for testing event type renaming
   @Deprecated("Renamed to `PRISONER_MERGED`")
   PRISONER_MERGE("v1/persons/{hmppsId}", { false }) { // Deprecated
     override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?) = super.getNotification(baseUrl, extractRemovedNomisNumber(this, additionalInformation), prisonId, additionalInformation)
