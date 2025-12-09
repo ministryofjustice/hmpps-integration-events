@@ -7,15 +7,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
 
 private const val CLASS_NAME = "uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventTypeNotificationTests"
 
 class IntegrationEventTypeNotificationTests {
   companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-
     private val prisonId = "MDI"
     private val baseUrl = ""
     private val crn = "X777776"
@@ -25,7 +22,11 @@ class IntegrationEventTypeNotificationTests {
     private val locationKey = "$prisonId-001-01"
     private val visitReference = "ab-cd-ef-gh"
 
-    private val eventTypeTestFixtures by lazy {
+    /**
+     * Event Type code, all test fixtures
+     */
+    private val eventTypeTestFixtures by lazy { activeEventTypeTestFixtures + notYetSupportedEventTypeTestFixtures + deprecatedEventTypeTestFixtures }
+    private val activeEventTypeTestFixtures by lazy {
       listOf(
         testFixture("CONTACT_CHANGED", "$baseUrl/v1/contacts/$contactPersonId", AdditionalInformation(contactPersonId = contactPersonId)),
         testFixture("DYNAMIC_RISKS_CHANGED", crn, "$baseUrl/v1/persons/$crn/risks/dynamic"),
@@ -43,8 +44,6 @@ class IntegrationEventTypeNotificationTests {
         testFixture("PERSON_HEALTH_AND_DIET_CHANGED", crn, "$baseUrl/v1/persons/$crn/health-and-diet"),
         testFixture("PERSON_IEP_LEVEL_CHANGED", crn, "$baseUrl/v1/persons/$crn/iep-level"),
         testFixture("PERSON_IMAGES_CHANGED", crn, "$baseUrl/v1/persons/$crn/images"),
-        // {imageId} is NOT supported yet! Event type not in use
-        testFixture("PERSON_IMAGE_CHANGED", crn, "$baseUrl/v1/persons/$crn/images/{imageId}"),
         testFixture("PERSON_LANGUAGES_CHANGED", crn, "$baseUrl/v1/persons/$crn/languages"),
         testFixture("PERSON_NAME_CHANGED", crn, "$baseUrl/v1/persons/$crn/name"),
         testFixture("PERSON_NUMBER_OF_CHILDREN_CHANGED", crn, "$baseUrl/v1/persons/$crn/number-of-children"),
@@ -64,15 +63,9 @@ class IntegrationEventTypeNotificationTests {
         testFixture("PLP_INDUCTION_SCHEDULE_CHANGED", nomsNumber, "$baseUrl/v1/persons/$nomsNumber/plp-induction-schedule/history"),
         testFixture("PLP_REVIEW_SCHEDULE_CHANGED", nomsNumber, "$baseUrl/v1/persons/$nomsNumber/plp-review-schedule"),
         testFixture("PRISONERS_CHANGED", "$baseUrl/v1/prison/prisoners"),
-        // {accountCode} is NOT supported yet! Event type not in use
-        testFixture("PRISONER_ACCOUNT_BALANCES_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/accounts/{accountCode}/balances"),
-        // {accountCode} is NOT supported yet! Event type not in use
-        testFixture("PRISONER_ACCOUNT_TRANSACTIONS_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/accounts/{accountCode}/transactions"),
         testFixture("PRISONER_BALANCES_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/balances"),
         testFixture("PRISONER_BASE_LOCATION_CHANGED", nomsNumber, "$baseUrl/v1/persons/$nomsNumber/prisoner-base-location"),
         testFixture("PRISONER_CHANGED", nomsNumber, "$baseUrl/v1/prison/prisoners/$nomsNumber"),
-        // deprecated event type code
-        TestFixture("PRISONER_MERGE", nomsNumber, removedNomsNumber, "$baseUrl/v1/persons/$removedNomsNumber", AdditionalInformation(removedNomsNumber = removedNomsNumber)),
         TestFixture("PRISONER_MERGED", nomsNumber, removedNomsNumber, "$baseUrl/v1/persons/$removedNomsNumber", AdditionalInformation(removedNomsNumber = removedNomsNumber)),
         testFixture("PRISONER_NON_ASSOCIATIONS_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/non-associations"),
         testFixture("PRISON_CAPACITY_CHANGED", "$baseUrl/v1/prison/$prisonId/capacity"),
@@ -86,8 +79,35 @@ class IntegrationEventTypeNotificationTests {
         testFixture("SAN_PLAN_CREATION_SCHEDULE_CHANGED", nomsNumber, "$baseUrl/v1/persons/$nomsNumber/education/san/plan-creation-schedule"),
         testFixture("SAN_REVIEW_SCHEDULE_CHANGED", nomsNumber, "$baseUrl/v1/persons/$nomsNumber/education/san/review-schedule"),
         testFixture("VISIT_CHANGED", "$baseUrl/v1/visit/$visitReference", AdditionalInformation(reference = visitReference)),
+      )
+    }
+
+    /**
+     * Event type codes NOT yet supported:
+     *  - {imageId}
+     *  - {accountCode}
+     *  - {clientVisitReference}
+     *  @see IntegrationEventType.path
+     */
+    private val notYetSupportedEventTypeTestFixtures by lazy {
+      listOf(
+        // {imageId} is NOT supported yet! Event type not in use
+        testFixture("PERSON_IMAGE_CHANGED", crn, "$baseUrl/v1/persons/$crn/images/{imageId}"),
+        // {accountCode} is NOT supported yet! Event type not in use
+        testFixture("PRISONER_ACCOUNT_BALANCES_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/accounts/{accountCode}/balances"),
+        // {accountCode} is NOT supported yet! Event type not in use
+        testFixture("PRISONER_ACCOUNT_TRANSACTIONS_CHANGED", nomsNumber, "$baseUrl/v1/prison/$prisonId/prisoners/$nomsNumber/accounts/{accountCode}/transactions"),
         // {clientVisitReference} is NOT supported! Event type not in use
         testFixture("VISIT_FROM_EXTERNAL_SYSTEM_CREATED", "$baseUrl/v1/visit/id/by-client-ref/{clientVisitReference}"),
+      )
+    }
+
+    /**
+     * Event type codes deprecated/to be removed
+     */
+    private val deprecatedEventTypeTestFixtures by lazy {
+      listOf(
+        TestFixture("PRISONER_MERGE", nomsNumber, removedNomsNumber, "$baseUrl/v1/persons/$removedNomsNumber", AdditionalInformation(removedNomsNumber = removedNomsNumber)),
       )
     }
 
@@ -176,23 +196,37 @@ class IntegrationEventTypeNotificationTests {
     }
   }
 
-  @Test
-  fun `should have all event type codes covered in test`() {
-    val expectedEventTypes = eventTypeTestFixtures.map { it.eventTypeCode }.toSet()
+  @Nested
+  @DisplayName("Given all event type codes")
+  inner class GivenAllEventTypeCodes {
+    private val expectedEventTypes = eventTypeTestFixtures.map { it.eventTypeCode }.sorted().toSet()
+    private val allEventTypeCodes = IntegrationEventType.entries.map { it.name }.sorted().toSet()
 
-    val allEventTypeCodes = IntegrationEventType.entries.map { it.name }.sorted()
-    log.info("All event type codes = [${allEventTypeCodes.joinToString(",") { "\"$it\"" }}]")
+    /**
+     * All active/current event type codes in enum `IntegrationEventType` shall be tested
+     *
+     * It may be unsafe to
+     *   i) Rename current type code(s), e.g. PRISONER_MERGE to `PRISONER_MERGED`
+     *   ii) Delete current type code(s), e.g. retiring unused type code `PERSON_IMAGE_CHANGED`
+     * Please consult the dev team for any need/demand
+     *
+     * It is safe to:
+     * - Add a new event type code
+     */
+    @Test
+    fun `should have not deleted or renamed current event type codes in use`() {
+      // No unexpected deletion or renaming
+      assertThat(allEventTypeCodes).containsAll(expectedEventTypes)
+    }
 
-    // All active event type codes in enum `IntegrationEventType` shall be tested
-    // It may be unsafe to
-    //    i) Rename current type code(s), e.g. PRISONER_MERGE to `PRISONER_MERGED`
-    //    ii) Delete current type code(s), e.g. retiring unused type code `PERSON_IMAGE_CHANGED`
-    // Please consult the dev team for any need/demand
-
-    // It is safe to:
-    //    - Add a new event type code
-    // (Unnamed type code will not fail here)
-    assertThat(allEventTypeCodes.toSet()).containsAll(expectedEventTypes)
+    /**
+     * All active/current event type codes in enum `IntegrationEventType` shall be tested
+     */
+    @Test
+    fun `should have tested all event type codes`() {
+      // All active event type codes in enum `IntegrationEventType` shall be tested
+      assertThat(allEventTypeCodes).isEqualTo(expectedEventTypes)
+    }
   }
 }
 
