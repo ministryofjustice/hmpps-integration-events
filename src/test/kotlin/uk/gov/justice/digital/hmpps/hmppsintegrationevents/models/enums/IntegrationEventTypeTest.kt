@@ -1,0 +1,76 @@
+package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class IntegrationEventTypeTest {
+  /**
+   * This test will fail when there is unexpected enum value(s)
+   *
+   * - Please read comments in [IntegrationEventType] before making changes to the enum.
+   */
+  @Test
+  fun `should have all event types expected`() {
+    val expectedEventTypeCodesJoined = listOf(
+      "CONTACT_CHANGED",
+      "DYNAMIC_RISKS_CHANGED",
+      "KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE",
+      "LICENCE_CONDITION_CHANGED",
+      "MAPPA_DETAIL_CHANGED",
+      "PERSON_ADDRESS_CHANGED",
+      "PERSON_ALERTS_CHANGED",
+      "PERSON_CARE_NEEDS_CHANGED",
+      "PERSON_CASE_NOTES_CHANGED",
+      "PERSON_CELL_LOCATION_CHANGED",
+      "PERSON_CONTACTS_CHANGED",
+      "PERSON_EDUCATION_ASSESSMENTS_CHANGED",
+      "PERSON_FUTURE_VISITS_CHANGED",
+      "PERSON_HEALTH_AND_DIET_CHANGED",
+      "PERSON_IEP_LEVEL_CHANGED",
+      "PERSON_IMAGES_CHANGED",
+      "PERSON_IMAGE_CHANGED",
+      "PERSON_LANGUAGES_CHANGED",
+      "PERSON_NAME_CHANGED",
+      "PERSON_NUMBER_OF_CHILDREN_CHANGED",
+      "PERSON_OFFENCES_CHANGED",
+      "PERSON_PHYSICAL_CHARACTERISTICS_CHANGED",
+      "PERSON_PND_ALERTS_CHANGED",
+      "PERSON_PROTECTED_CHARACTERISTICS_CHANGED",
+      "PERSON_REPORTED_ADJUDICATIONS_CHANGED",
+      "PERSON_RESPONSIBLE_OFFICER_CHANGED",
+      "PERSON_RISK_CATEGORIES_CHANGED",
+      "PERSON_SENTENCES_CHANGED",
+      "PERSON_STATUS_CHANGED",
+      "PERSON_VISITOR_RESTRICTIONS_CHANGED",
+      "PERSON_VISIT_ORDERS_CHANGED",
+      "PERSON_VISIT_RESTRICTIONS_CHANGED",
+      "PLP_INDUCTION_SCHEDULE_CHANGED",
+      "PLP_REVIEW_SCHEDULE_CHANGED",
+      "PRISONERS_CHANGED",
+      "PRISONER_ACCOUNT_BALANCES_CHANGED",
+      "PRISONER_ACCOUNT_TRANSACTIONS_CHANGED",
+      "PRISONER_BALANCES_CHANGED",
+      "PRISONER_BASE_LOCATION_CHANGED",
+      "PRISONER_CHANGED",
+      "PRISONER_MERGE",
+      "PRISONER_MERGED",
+      "PRISONER_NON_ASSOCIATIONS_CHANGED",
+      "PRISON_CAPACITY_CHANGED",
+      "PRISON_LOCATION_CHANGED",
+      "PRISON_RESIDENTIAL_DETAILS_CHANGED",
+      "PRISON_RESIDENTIAL_HIERARCHY_CHANGED",
+      "PRISON_VISITS_CHANGED",
+      "PROBATION_STATUS_CHANGED",
+      "RISK_OF_SERIOUS_HARM_CHANGED",
+      "RISK_SCORE_CHANGED",
+      "SAN_PLAN_CREATION_SCHEDULE_CHANGED",
+      "SAN_REVIEW_SCHEDULE_CHANGED",
+      "VISIT_CHANGED",
+      "VISIT_FROM_EXTERNAL_SYSTEM_CREATED",
+    ).joinToString(",") { "\"$it\"" }
+
+    val actualEventTypeCodesJoined = IntegrationEventType.entries.map { it.name }.sorted().joinToString(",") { "\"$it\"" }
+
+    assertEquals(expectedEventTypeCodesJoined, actualEventTypeCodesJoined)
+  }
+}

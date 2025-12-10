@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import java.lang.IllegalStateException
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -87,7 +88,7 @@ class HmppsDomainEventServicePrisonerMergedTest {
 
     val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
 
-    assertThrows<IllegalArgumentException> {
+    assertThrows<IllegalStateException> {
       hmppsDomainEventService.execute(event, listOf(IntegrationEventType.PRISONER_MERGED, IntegrationEventType.PERSON_STATUS_CHANGED))
     }
 

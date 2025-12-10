@@ -530,17 +530,15 @@ enum class IntegrationEventType(
     "v1/persons/{hmppsId}/languages",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
   ),
-
-  // Keep the deprecated `PRISONER_MERGE` for testing event type renaming
-  @Deprecated("Renamed to `PRISONER_MERGED`")
-  PRISONER_MERGE("v1/persons/{hmppsId}", { false }) { // Deprecated
-    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?) = super.getNotification(baseUrl, extractRemovedNomisNumber(this, additionalInformation), prisonId, additionalInformation)
-  },
   PRISONER_MERGED(
     "v1/persons/{hmppsId}",
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
   ) {
-    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?) = super.getNotification(baseUrl, extractRemovedNomisNumber(this, additionalInformation), prisonId, additionalInformation)
+    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification {
+      val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
+
+      return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation)
+    }
   },
   ;
 
@@ -552,16 +550,6 @@ enum class IntegrationEventType(
     lastModifiedDateTime = LocalDateTime.now(),
   )
 
-  /**
-   * Generate path from canonical path template
-   *
-   * Supporting these named parameters:
-   * - {hmppsId}
-   * - {prisonId}
-   * - {contactId}
-   * - {visitReference}
-   * - {locationKey}
-   */
   protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
     if (replacedPath.contains("{hmppsId}")) {
@@ -583,11 +571,6 @@ enum class IntegrationEventType(
     }
     return replacedPath
   }
-
-  protected fun extractRemovedNomisNumber(
-    eventType: IntegrationEventType,
-    additionalInformation: AdditionalInformation?,
-  ) = requireNotNull(additionalInformation?.removedNomsNumber) { "removedNomsNumber is required for ${eventType.name} event" }
 
   companion object {
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
