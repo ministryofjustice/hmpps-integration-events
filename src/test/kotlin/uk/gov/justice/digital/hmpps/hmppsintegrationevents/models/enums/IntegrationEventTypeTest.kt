@@ -7,7 +7,15 @@ class IntegrationEventTypeTest {
   /**
    * This test will fail when there is unexpected enum value(s)
    *
-   * - Please read comments in [IntegrationEventType] before making changes to the enum.
+   * The enum [IntegrationEventType] is persisted to DB, and please consider these while making changes
+   * - Adding new value is safe
+   * - Renaming current value is unsafe
+   * - Removing current value is unsafe
+   *
+   * For renaming or removal of current value, please provide transition period
+   * i) Mark deprecated
+   * ii) Wait for transition period over
+   * iii) Finally remove it
    */
   @Test
   fun `should have all event types expected`() {
