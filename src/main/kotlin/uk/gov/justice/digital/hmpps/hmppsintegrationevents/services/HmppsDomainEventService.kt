@@ -29,17 +29,21 @@ class HmppsDomainEventService(
 
   fun execute(hmppsDomainEvent: SQSMessage, integrationEventTypes: List<IntegrationEventType>) {
     val hmppsEvent: HmppsDomainEvent = objectMapper.readValue(hmppsDomainEvent.message)
+    // Matching domain event to integration event type(s)
+    val integrationEventTypes = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }
 
-    val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsEvent)
-    val prisonId = domainEventIdentitiesResolver.getPrisonId(hmppsEvent)
+    if (integrationEventTypes.isNotEmpty()) {
+      val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsEvent)
+      val prisonId = domainEventIdentitiesResolver.getPrisonId(hmppsEvent)
 
-    for (integrationEventType in integrationEventTypes) {
-      try {
-        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation)
+      for (integrationEventType in integrationEventTypes) {
+        try {
+          val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation)
 
-        eventNotificationRepository.insertOrUpdate(eventNotification)
-      } catch (ume: UnmappableUrlException) {
-        log.warn(ume.message)
+          eventNotificationRepository.insertOrUpdate(eventNotification)
+        } catch (ume: UnmappableUrlException) {
+          log.warn(ume.message)
+        }
       }
     }
   }
