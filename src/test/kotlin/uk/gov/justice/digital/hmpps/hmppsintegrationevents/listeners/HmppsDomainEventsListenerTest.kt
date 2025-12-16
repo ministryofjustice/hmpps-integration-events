@@ -1,16 +1,24 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
 import com.fasterxml.jackson.core.JsonParseException
+import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
+import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import io.sentry.Sentry
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.autoconfigure.json.JsonTest
+import org.springframework.messaging.support.GenericMessage
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
@@ -18,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.concurrent.CompletionException
 
 @ActiveProfiles("test")
 @JsonTest
@@ -94,5 +103,52 @@ class HmppsDomainEventsListenerTest {
 
     verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent) }
     verify { deadLetterQueueService wasNot Called }
+  }
+
+  @Nested
+  inner class GivenErrorOfEventExecution {
+    private val error = IllegalStateException("Something went wrong")
+    private val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent()
+    private val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
+    private val wrappedErrorMessage = "Error executing HmppsDomainEvent"
+
+    @BeforeEach
+    internal fun setUp() {
+      mockkStatic(Sentry::class)
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+      unmockkStatic(Sentry::class)
+    }
+
+    @Test
+    fun `when there is CompletionException, the error cause shall be extracted and logged`() = executeEventWithError(
+      wrappedError = CompletionException(wrappedErrorMessage, error),
+    )
+
+    @Test
+    fun `when there is AsyncAdapterBlockingExecutionFailedException, the error cause shall be extracted and logged`() = executeEventWithError(
+      wrappedError = AsyncAdapterBlockingExecutionFailedException(wrappedErrorMessage, error),
+    )
+
+    @Test
+    fun `when there is ListenerExecutionFailedException, the error cause shall be extracted and logged`() = executeEventWithError(
+      wrappedError = ListenerExecutionFailedException(wrappedErrorMessage, error, GenericMessage(rawMessage)),
+    )
+
+    private inline fun <reified T : Throwable> executeEventWithError(
+      wrappedError: T,
+      unwrappedError: Throwable = error,
+    ) {
+      // Arrange
+      every { hmppsDomainEventService.execute(hmppsDomainEvent) } throws wrappedError
+
+      // Act, Assert (error)
+      assertThrows<T> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
+
+      // Assert (verify)
+      verify(exactly = 1) { Sentry.captureException(match { it.message == unwrappedError.message }) }
+    }
   }
 }
