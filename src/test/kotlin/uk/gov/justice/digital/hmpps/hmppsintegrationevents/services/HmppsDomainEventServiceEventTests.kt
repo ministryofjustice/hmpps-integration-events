@@ -6,7 +6,9 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
@@ -444,9 +446,22 @@ abstract class HmppsDomainEventServiceEventTestCase {
   protected val currentTime: LocalDateTime = LocalDateTime.now()
   protected val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    internal fun setupAll() {
+      mockkStatic(LocalDateTime::class)
+    }
+
+    @AfterAll
+    @JvmStatic
+    internal fun tearDownAll() {
+      unmockkStatic(LocalDateTime::class)
+    }
+  }
+
   @BeforeEach
   open fun setup() {
-    mockkStatic(LocalDateTime::class)
     every { LocalDateTime.now() } returns currentTime
 
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
@@ -455,7 +470,6 @@ abstract class HmppsDomainEventServiceEventTestCase {
   @AfterEach
   fun cleanup() {
     clearAllMocks()
-    unmockkStatic(LocalDateTime::class)
   }
 
   protected fun executeShouldSaveEventNotificationOfPerson(

@@ -7,7 +7,9 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -47,9 +49,23 @@ class HmppsDomainEventServiceTest {
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    fun setUpAll() {
+      mockkStatic(LocalDateTime::class)
+    }
+
+    @AfterAll
+    @JvmStatic
+    internal fun tearDownAll() {
+      // This static-mock cleanup is slow
+      unmockkStatic(LocalDateTime::class)
+    }
+  }
+
   @BeforeEach
   fun setup() {
-    mockkStatic(LocalDateTime::class)
     every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
     every { domainEventIdentitiesResolver.getPrisonId(any()) } returns null
     every { LocalDateTime.now() } returns currentTime
@@ -60,7 +76,6 @@ class HmppsDomainEventServiceTest {
   @AfterEach
   internal fun cleanup() {
     clearAllMocks()
-    unmockkStatic(LocalDateTime::class)
   }
 
   @ParameterizedTest
