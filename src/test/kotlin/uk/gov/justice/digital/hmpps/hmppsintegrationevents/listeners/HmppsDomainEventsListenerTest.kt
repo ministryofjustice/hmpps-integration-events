@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
 import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import io.mockk.Called
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -12,7 +13,9 @@ import io.mockk.runs
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.sentry.Sentry
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,9 +39,28 @@ class HmppsDomainEventsListenerTest {
   private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService)
   private val currentTime: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
 
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    internal fun setUpAll() {
+      mockkStatic(Sentry::class)
+    }
+
+    @AfterAll
+    @JvmStatic
+    internal fun tearDownAll() {
+      unmockkStatic(Sentry::class)
+    }
+  }
+
   @BeforeEach
   fun setup() {
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+  }
+
+  @AfterEach
+  internal fun tearDown() {
+    clearAllMocks()
   }
 
   @Test
@@ -112,14 +134,9 @@ class HmppsDomainEventsListenerTest {
     private val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
     private val wrappedErrorMessage = "Error executing HmppsDomainEvent"
 
-    @BeforeEach
-    internal fun setUp() {
-      mockkStatic(Sentry::class)
-    }
-
     @AfterEach
     internal fun tearDown() {
-      unmockkStatic(Sentry::class)
+      clearAllMocks()
     }
 
     @Test
