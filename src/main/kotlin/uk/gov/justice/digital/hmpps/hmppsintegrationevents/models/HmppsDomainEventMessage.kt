@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class HmppsDomainEvent(
+data class HmppsDomainEventMessage(
   @JsonProperty("eventType") val eventType: String,
   @JsonProperty("occurredAt") val occurredAt: String,
   @JsonProperty("personReference") val personReference: PersonReference?,
