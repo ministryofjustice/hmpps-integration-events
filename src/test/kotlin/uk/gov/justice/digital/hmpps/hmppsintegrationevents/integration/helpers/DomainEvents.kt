@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.DomainEventMessageAttributes
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.EventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.Message
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.MessageAttributes
 
 object DomainEvents {
 
@@ -58,10 +58,10 @@ object DomainEvents {
     }    
   """.trimIndent()
 
-  fun generateHmppsDomainEvent(eventType: String, message: String) = HmppsDomainEvent(
+  fun generateHmppsDomainEvent(eventType: String, message: String) = Message(
     type = "Notification",
     message = message,
     messageId = "d4419bdd-2079-598c-b608-c4f2ddb1bcd1",
-    messageAttributes = DomainEventMessageAttributes(EventType(eventType)),
+    messageAttributes = MessageAttributes(EventType(eventType)),
   )
 }

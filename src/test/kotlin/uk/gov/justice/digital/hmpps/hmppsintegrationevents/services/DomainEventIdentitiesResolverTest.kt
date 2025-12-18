@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundEx
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.Message
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import java.time.LocalDateTime
@@ -36,7 +36,7 @@ class DomainEventIdentitiesResolverTest {
   @Test
   fun `should throw exception for a domain registration event message where CRN does not exist in delius`() {
     val crn = "X123456"
-    val domainEvent: HmppsDomainEvent =
+    val domainEvent: Message =
       SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"CRN\",\"value\":\"$crn\"}]")
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, false)
 

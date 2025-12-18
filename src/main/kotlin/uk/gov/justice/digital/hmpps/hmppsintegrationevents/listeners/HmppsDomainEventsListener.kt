@@ -36,7 +36,7 @@ class HmppsDomainEventsListener(
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
     try {
-      val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(rawMessage)
+      val hmppsDomainEvent: Message = objectMapper.readValue(rawMessage)
       val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
       val matchingIntegrationEventTypes = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }
       if (matchingIntegrationEventTypes.isNotEmpty()) {
