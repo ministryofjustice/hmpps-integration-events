@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.DomainEventMessageAttributes
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.EventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.DomainEventMessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.EventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEvent
 
 object DomainEvents {
 
