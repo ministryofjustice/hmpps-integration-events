@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.UnmappableUrlException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.Message
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 
@@ -28,7 +28,7 @@ class HmppsDomainEventService(
   private val objectMapper = ObjectMapper()
 
   fun execute(hmppsDomainEvent: Message, integrationEventTypes: List<IntegrationEventType>) {
-    val hmppsEvent: HmppsDomainEventMessage = objectMapper.readValue(hmppsDomainEvent.message)
+    val hmppsEvent: HmppsDomainEvent = objectMapper.readValue(hmppsDomainEvent.message)
 
     val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsEvent)
     val prisonId = domainEventIdentitiesResolver.getPrisonId(hmppsEvent)
