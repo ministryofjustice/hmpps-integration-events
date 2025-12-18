@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.EventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.Message
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.MessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessageAttributes
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -180,11 +180,11 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     registerTypeCode: String = "MAPP",
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"},{\"type\":\"NOMS\",\"value\":\"A1234BC\"}]",
     attributeEventTypes: String = eventType,
-  ) = Message(
+  ) = SQSMessage(
     type = "Notification",
     message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
 
   fun createHmppsDomainEventWithPrisonId(
@@ -193,11 +193,11 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
     prisonId: String = "MDI",
-  ) = Message(
+  ) = SQSMessage(
     type = "Notification",
     message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"prisonId\":\"$prisonId\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
 
   fun createHmppsMergedDomainEvent(
@@ -206,17 +206,17 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     attributeEventTypes: String = eventType,
     nomisNumber: String,
     removedNomisNumber: String? = null,
-  ): Message {
+  ): SQSMessage {
     val removedNomisAttribute = if (removedNomisNumber != null) {
       ", \"removedNomsNumber\": \"$removedNomisNumber\""
     } else {
       ""
     }
-    return Message(
+    return SQSMessage(
       type = "Notification",
       message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A prisoner has been merged from $removedNomisNumber to $nomisNumber\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\": {\"bookingId\": \"1216772\", \"nomsNumber\": \"$nomisNumber\", \"reason\": \"MERGE\" $removedNomisAttribute}}",
       messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-      messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+      messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
     )
   }
 
@@ -224,11 +224,11 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     eventType: String,
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
-  ) = Message(
+  ) = SQSMessage(
     type = "Notification",
     message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
 
   fun createHmppsDomainEventWithAlertCode(
@@ -236,11 +236,11 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
     alertCode: String,
-  ) = Message(
+  ) = SQSMessage(
     type = "Notification",
     message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"alertCode\":\"$alertCode\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
 
   fun createHmppsDomainEventWithReason(
@@ -249,10 +249,10 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",
     attributeEventTypes: String = eventType,
     reason: String = "RELEASED",
-  ) = Message(
+  ) = SQSMessage(
     type = "Notification",
     message = "{\"eventType\":\"$eventType\",\"version\":1,\"occurredAt\":\"$isoInstantTimestamp\",\"reason\":\"$reason\",\"description\":\"A new registration has been added to the probation case\",\"personReference\":{\"identifiers\":$identifiers},\"additionalInformation\":{\"registrationLevelDescription\":\"MAPPA Level 3\",\"registerTypeDescription\":\"MAPPA\",\"registrationCategoryCode\":\"M1\",\"registrationId\":\"1234567890\",\"registrationDate\":\"$readableTimestamp\",\"registerTypeCode\":\"$registerTypeCode\",\"createdDateAndTime\":\"$readableTimestamp\",\"registrationCategoryDescription\":\"MAPPA Cat 1\",\"registrationLevelCode\":\"M3\"}}",
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
-    messageAttributes = MessageAttributes(eventType = EventType(value = attributeEventTypes)),
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
 }
