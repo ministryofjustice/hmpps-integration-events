@@ -12,6 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 import java.util.concurrent.CompletionException
@@ -34,7 +35,8 @@ class HmppsDomainEventsListener(
   fun onDomainEvent(rawMessage: String) {
     log.info("Received message: $rawMessage")
     try {
-      val hmppsDomainEvent: SQSMessage = objectMapper.readValue(rawMessage)
+      val hmppsDomainEventMessage: SQSMessage = objectMapper.readValue(rawMessage)
+      val hmppsDomainEvent: HmppsDomainEvent = objectMapper.readValue(hmppsDomainEventMessage.message)
       hmppsDomainEventService.execute(hmppsDomainEvent)
     } catch (e: Exception) {
       Sentry.captureException(unwrapSqsExceptions(e))

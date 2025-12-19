@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.extractDomainEventFrom
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
@@ -446,6 +449,8 @@ abstract class HmppsDomainEventServiceEventTestCase {
   protected val currentTime: LocalDateTime = LocalDateTime.now()
   protected val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
+  protected val objectMapper by lazy { jacksonObjectMapper() }
+
   companion object {
     @BeforeAll
     @JvmStatic
@@ -480,7 +485,7 @@ abstract class HmppsDomainEventServiceEventTestCase {
     expectedUrl: String,
   ) {
     // Arrange
-    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage)
+    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage).domainEvent()
     val expectedEventNotification = generateEventNotification(expectedNotificationType, expectedUrl, hmppsId)
     stubDomainEventIdentitiesResolver(hmppsId = hmppsId)
 
@@ -534,7 +539,7 @@ abstract class HmppsDomainEventServiceEventTestCase {
     expectedUrl: String,
   ) {
     // Arrange
-    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage)
+    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage).domainEvent()
     val expectedEventNotification = generateEventNotificationOfPrison(expectedNotificationType, expectedUrl, prisonId, hmppsId)
     stubDomainEventIdentitiesResolver(hmppsId = hmppsId, prisonId = prisonId)
 
@@ -550,7 +555,7 @@ abstract class HmppsDomainEventServiceEventTestCase {
     expectedUrl: String,
   ) {
     // Arrange
-    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage)
+    val hmppsDomainEvent = generateHmppsDomainEvent(hmppsEventType, hmppsMessage).domainEvent()
     val expectedEventNotification = generateEventNotificationOfPrison(expectedNotificationType, expectedUrl, prisonId)
     stubDomainEventIdentitiesResolver(prisonId = prisonId)
 
@@ -562,7 +567,7 @@ abstract class HmppsDomainEventServiceEventTestCase {
     hmppsEventType: String,
     hmppsMessage: String,
     expectedEventNotifications: List<EventNotification>,
-  ) = executeShouldSaveEventNotification(generateHmppsDomainEvent(hmppsEventType, hmppsMessage), expectedEventNotifications)
+  ) = executeShouldSaveEventNotification(generateHmppsDomainEvent(hmppsEventType, hmppsMessage).domainEvent(), expectedEventNotifications)
 
   protected fun executeShouldSaveEventNotification(
     hmppsDomainEvent: HmppsDomainEvent,
@@ -609,6 +614,8 @@ abstract class HmppsDomainEventServiceEventTestCase {
     every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
     every { domainEventIdentitiesResolver.getPrisonId(any()) } returns prisonId
   }
+
+  protected fun SQSMessage.domainEvent(): HmppsDomainEvent = extractDomainEventFrom(this, objectMapper)
 }
 
 /**

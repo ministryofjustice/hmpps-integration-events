@@ -15,6 +15,8 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceEventTe
   private val hmppsId = "hmpps-1234"
   private val prisonId = "MDI"
 
+  private val sqlHelper by lazy { SqsNotificationGeneratingHelper(zonedCurrentDateTime) }
+
   @BeforeEach
   internal fun setUp() {
     stubDomainEventIdentitiesResolver(hmppsId, prisonId)
@@ -31,7 +33,7 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceEventTe
       IntegrationEventType.PERSON_STATUS_CHANGED to hmppsId,
     ).map { generateEventNotificationOfPrison(it.key, "$baseUrl/v1/persons/${it.value}", prisonId, it.value) }
 
-    val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
+    val event = sqlHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
 
     // Act, Assert
     executeShouldSaveEventNotification(event, expectedNotifications)
@@ -43,7 +45,7 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceEventTe
     val removedNomisNumber = null
     val updatedNomisNumber = "AA0002A"
 
-    val event = SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
+    val event = sqlHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
 
     // Assert
     assertThrows<IllegalStateException> {

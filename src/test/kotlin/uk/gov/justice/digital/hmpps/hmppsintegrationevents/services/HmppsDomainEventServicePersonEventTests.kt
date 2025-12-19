@@ -173,7 +173,7 @@ class HmppsDomainEventServicePersonStatusEventTest : HmppsDomainEventServiceEven
       eventType = eventType,
       registerTypeCode = registerTypeCode,
       identifiers = """[{"type":"CRN","value":"$crn"},{"type":"NOMS","value":"$nomsNumber"}]""",
-    )
+    ).domainEvent()
     stubDomainEventIdentitiesResolver(hmppsId = hmppsId)
 
     // Act
