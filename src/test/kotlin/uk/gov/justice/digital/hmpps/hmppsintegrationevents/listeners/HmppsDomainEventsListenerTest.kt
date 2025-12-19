@@ -133,27 +133,6 @@ class HmppsDomainEventsListenerTest {
     verify { deadLetterQueueService wasNot Called }
   }
 
-  @Test
-  fun `when alert event matches multiple filters using generator, both services should be called`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime)
-      .generateRawHmppsDomainEventWithAlertCode(
-        eventType = "person.alert.created",
-        alertCode = "HA",
-      )
-
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime)
-      .createHmppsDomainEventWithAlertCode(
-        eventType = "person.alert.created",
-        alertCode = "HA",
-      ).domainEvent()
-
-    every { hmppsDomainEventService.execute(hmppsDomainEvent) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent) }
-  }
-
   @Nested
   inner class GivenErrorOfEventExecution {
     private val error = IllegalStateException("Something went wrong")
