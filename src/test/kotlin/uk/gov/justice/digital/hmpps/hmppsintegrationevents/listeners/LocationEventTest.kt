@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class LocationEventTest : HmppsDomainEventsListenerEventTestCase() {
+class LocationEventTest : HmppsDomainEventsListenerTestCase() {
   private val locationKey = "MDI-001-01"
   private val prisonId = "MDI"
 

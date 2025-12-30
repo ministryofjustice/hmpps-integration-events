@@ -5,7 +5,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class HmppsDomainEventsListenerLicenceConditionTest : HmppsDomainEventsListenerEventTestCase() {
+class HmppsDomainEventsListenerLicenceConditionTest : HmppsDomainEventsListenerTestCase() {
   private val crn = "X777776"
   private val nomsNumber = "A1234BC"
 

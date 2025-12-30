@@ -36,7 +36,7 @@ import java.util.concurrent.CompletionException
 /**
  * Sociable unit tests for [HmppsDomainEventsListener]
  */
-class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerEventTestCase() {
+class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
   private val crn = "X777776"
 
   @Test
@@ -230,7 +230,7 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerEventTestCase() {
 /**
  * Base class for Sociable unit tests of [HmppsDomainEventsListener]
  */
-abstract class HmppsDomainEventsListenerEventTestCase {
+abstract class HmppsDomainEventsListenerTestCase {
   companion object {
     protected val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
 

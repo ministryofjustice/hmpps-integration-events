@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class HmppsDomainEventsListenerSANPlanCreationScheduleUpdatedTest : HmppsDomainEventsListenerEventTestCase() {
+class HmppsDomainEventsListenerSANPlanCreationScheduleUpdatedTest : HmppsDomainEventsListenerTestCase() {
   private val nomsNumber = "A1234BC"
 
   private val eventType = "san.plan-creation-schedule.updated"

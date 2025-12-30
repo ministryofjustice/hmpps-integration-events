@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.ASSESSMENT_SUMMARY_PRODUCED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class HmppsDomainEventsListenerROSHTest : HmppsDomainEventsListenerEventTestCase() {
+class HmppsDomainEventsListenerROSHTest : HmppsDomainEventsListenerTestCase() {
   private val crn = "X777776"
 
   @Test

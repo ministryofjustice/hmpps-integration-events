@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import java.util.stream.Stream
 
-class HmppsDomainEventsListenerPNDAlertsTest : HmppsDomainEventsListenerEventTestCase() {
+class HmppsDomainEventsListenerPNDAlertsTest : HmppsDomainEventsListenerTestCase() {
   private val nomsNumber = "A1234BC"
 
   @BeforeEach

@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class AdjudicationEventTest : HmppsDomainEventsListenerEventTestCase() {
+class AdjudicationEventTest : HmppsDomainEventsListenerTestCase() {
   private val nomsNumber = "A1234BC"
 
   @ParameterizedTest

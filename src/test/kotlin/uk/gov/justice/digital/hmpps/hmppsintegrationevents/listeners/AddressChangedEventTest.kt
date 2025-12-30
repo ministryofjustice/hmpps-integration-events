@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.crn
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class AddressChangedEventTest : HmppsDomainEventsListenerEventTestCase() {
+class AddressChangedEventTest : HmppsDomainEventsListenerTestCase() {
 
   @ParameterizedTest
   @ValueSource(
