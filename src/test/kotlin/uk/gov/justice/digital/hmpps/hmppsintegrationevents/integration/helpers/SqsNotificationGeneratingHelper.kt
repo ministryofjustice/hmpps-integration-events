@@ -224,6 +224,20 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     ).domainEvent()
   }
 
+  fun createHmppsPrisonerReceivedDomainEvent(
+    eventType: String = "prison-offender-events.prisoner.received",
+    nomsNumber: String = "A1234AA",
+    prisonId: String = "MDI",
+    reason: String = "ADMISSION",
+    nomisMovementReasonCode: String = "N",
+    attributeEventTypes: String = eventType,
+  ) = SQSMessage(
+    type = "Notification",
+    message = "{\"version\":1,\"eventType\":\"$eventType\",\"description\":\"A prisoner has been received into prison\",\"occurredAt\":\"$isoInstantTimestamp\",\"publishedAt\":\"$isoInstantTimestamp\",\"personReference\":{\"identifiers\":[{\"type\":\"NOMS\",\"value\":\"$nomsNumber\"}]},\"additionalInformation\":{\"nomsNumber\":\"$nomsNumber\",\"reason\":\"$reason\",\"details\":\"ACTIVE IN:ADM-$nomisMovementReasonCode\",\"currentLocation\":\"IN_PRISON\",\"prisonId\":\"$prisonId\",\"nomisMovementReasonCode\":\"$nomisMovementReasonCode\",\"currentPrisonStatus\":\"UNDER_PRISON_CARE\"}}",
+    messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
+    messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
+  ).domainEvent()
+
   fun createHmppsDomainEventWithoutRegisterType(
     eventType: String,
     identifiers: String = "[{\"type\":\"CRN\",\"value\":\"X777776\"}]",

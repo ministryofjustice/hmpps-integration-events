@@ -79,3 +79,8 @@ notifier:
 subscriber-checker:
   schedule:
     rate: 1000
+
+feature-flag:
+  person-languages-changed-notifications-enabled: true
+  prisoner-merge-notifications-enabled: true
+  prisoner-base-location-changed-notifications-enabled: true

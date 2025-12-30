@@ -2,14 +2,21 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
 class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCase() {
   private val hmppsId = "hmpps-1234"
+  private val featureFlagTestConfig: FeatureFlagTestConfig = FeatureFlagTestConfig()
+
+  override val featureFlagConfig get() = featureFlagTestConfig.featureFlagConfig
 
   @BeforeEach
   internal fun setup() {
     assumeIdentities(hmppsId = hmppsId)
+
+    // Enable the feature for event testing
+    featureFlagTestConfig.assumeFeatureFlag(FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED, true)
   }
 
   @Test

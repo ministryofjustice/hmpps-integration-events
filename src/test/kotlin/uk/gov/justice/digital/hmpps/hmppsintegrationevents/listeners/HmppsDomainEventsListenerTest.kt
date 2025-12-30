@@ -21,12 +21,13 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.messaging.support.GenericMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventIdentitiesResolver
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.FeatureFlagTestConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -257,11 +258,20 @@ abstract class HmppsDomainEventsListenerTestCase {
   protected val eventNotificationRepository = mockk<EventNotificationRepository>()
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
 
-  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl)
+  protected val featureFlagTestConfig = FeatureFlagTestConfig()
+  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, featureFlagTestConfig.featureFlagConfig)
   protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService)
 
   @BeforeEach
   open fun setupEventTest() {
+    // Enable all associated event types, for listener event testing
+    val enabledFeatureFlags = listOf(
+      FeatureFlagConfig.PERSON_LANGUAGES_CHANGED_NOTIFICATIONS_ENABLED,
+      FeatureFlagConfig.PRISONER_BASE_LOCATION_CHANGED_NOTIFICATIONS_ENABLED,
+      FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED,
+    )
+    enabledFeatureFlags.forEach { featureFlagTestConfig.assumeFeatureFlag(it, true) }
+
     every { LocalDateTime.now() } returns currentTime
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 
@@ -313,6 +323,4 @@ abstract class HmppsDomainEventsListenerTestCase {
     every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
     every { domainEventIdentitiesResolver.getPrisonId(any()) } returns prisonId
   }
-
-  protected fun SQSMessage.domainEvent(): HmppsDomainEvent = sqsNotificationHelper.extractDomainEventFrom(this)
 }
