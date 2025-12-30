@@ -1,31 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners
 
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.boot.test.autoconfigure.json.JsonTest
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 
-@ActiveProfiles("test")
-@JsonTest
-class PrisonerEventTest {
-  private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
-  private val deadLetterQueueService = mockk<DeadLetterQueueService>()
-
-  private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService)
-
+class PrisonerEventTest : HmppsDomainEventsListenerTestCase() {
   private val nomsNumber = "A1234BC"
+
+  @BeforeEach
+  internal fun setupPrisonerTest() {
+    assumeIdentities(hmppsId = nomsNumber, prisonId = "MDI")
+  }
 
   @ParameterizedTest
   @ValueSource(
@@ -36,6 +25,7 @@ class PrisonerEventTest {
     ],
   )
   fun `will process prisoner events`(eventType: String) {
+    // Arrange
     val message =
       """
       {
@@ -58,26 +48,14 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PRISONER_CHANGED,
-              IntegrationEventType.PRISONERS_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PRISONER_CHANGED,
+      IntegrationEventType.PRISONERS_CHANGED,
+    )
   }
 
   @ParameterizedTest
@@ -88,6 +66,7 @@ class PrisonerEventTest {
     ],
   )
   fun `will process new prisoner events`(eventType: String) {
+    // Arrange
     val message =
       """
       {
@@ -110,31 +89,20 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PRISONER_CHANGED,
-              IntegrationEventType.PRISONERS_CHANGED,
-              IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PRISONER_CHANGED,
+      IntegrationEventType.PRISONERS_CHANGED,
+      IntegrationEventType.PRISONER_NON_ASSOCIATIONS_CHANGED,
+    )
   }
 
   @Test
   fun `will process an prisoner personal details changed event`() {
+    // Arrange
     val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
     val message =
       """
@@ -158,29 +126,18 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PERSON_NAME_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PERSON_NAME_CHANGED,
+    )
   }
 
   @Test
   fun `will process an prisoner sentence changed event`() {
+    // Arrange
     val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
     val message =
       """
@@ -204,29 +161,18 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PERSON_SENTENCES_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PERSON_SENTENCES_CHANGED,
+    )
   }
 
   @Test
   fun `will process an prisoner location changed notification`() {
+    // Arrange
     val eventType = HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.UPDATED
     val message =
       """
@@ -250,25 +196,13 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PERSON_CELL_LOCATION_CHANGED,
+    )
   }
 
   @Test
@@ -296,24 +230,12 @@ class PrisonerEventTest {
       """.trimIndent().replace("\n", "")
 
     val payload = DomainEvents.generateDomainEvent(eventType, message.replace("\"", "\\\""))
-    val hmppsDomainEvent = generateHmppsDomainEvent(eventType, message)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(payload)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_STATUS_CHANGED,
-              IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    // Act, Assert
+    onDomainEventShouldCreateEventNotifications(
+      hmppsEventRawMessage = payload,
+      IntegrationEventType.PERSON_STATUS_CHANGED,
+      IntegrationEventType.PERSON_PHYSICAL_CHARACTERISTICS_CHANGED,
+    )
   }
 }
