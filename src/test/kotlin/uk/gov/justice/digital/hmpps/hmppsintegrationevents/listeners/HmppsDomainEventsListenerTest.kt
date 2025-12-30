@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -41,14 +40,102 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerEventTestCase() {
   private val crn = "X777776"
 
   @Test
-  fun `when a valid SQS message (domain event) is received it should create notification`() {
-    val rawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
-    val expectedEvent = IntegrationEventType.MAPPA_DETAIL_CHANGED
+  fun `when risk-assessment scores determined event is received, it should create event notification RISK_SCORE_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithoutRegisterType(
+      eventType = "risk-assessment.scores.determined",
+      messageEventType = "risk-assessment.scores.ogrs.determined",
+    )
+    val expectedNotificationType = IntegrationEventType.RISK_SCORE_CHANGED
     assumeIdentities(hmppsId = crn)
 
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
+  }
 
-    verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(match { it.eventType == expectedEvent }) }
+  @ParameterizedTest
+  @CsvSource(
+    "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED",
+    "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED",
+
+    "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED",
+
+    "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED",
+    "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED",
+  )
+  fun `will process and save a person status event`(
+    eventType: String,
+    registerTypeCode: String,
+    integrationEvent: String,
+  ) {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+    val expectedNotificationType = IntegrationEventType.valueOf(integrationEvent)
+    assumeIdentities(hmppsId = crn)
+
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
+  }
+
+  @Test
+  fun `when a valid registration added sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
+    val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
+
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
+  }
+
+  @Test
+  fun `when a valid registration updated sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent("probation-case.registration.updated")
+    val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
+
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
   }
 
   @Test
@@ -60,130 +147,30 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerEventTestCase() {
     verify { eventNotificationRepository wasNot Called }
   }
 
-  @Nested
-  @DisplayName("Given an expected event and a person")
-  inner class GivenExpectedEventAndPerson {
-    private val hmppsId = crn
+  @Test
+  fun `when an unexpected event type is received, it should not create event notification`() {
+    val unexpectedEventType = "unexpected.event.type"
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType = unexpectedEventType)
+    assumeIdentities(hmppsId = crn)
 
-    @BeforeEach
-    internal fun setUp() {
-      assumeIdentities(hmppsId)
-    }
+    onDomainEventShouldNotCreateEventNotification(hmppsEventRawMessage)
+  }
 
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.when a valid registration added sqs event is received it should call the hmppsDomainEventService
-    @Test
-    fun `when a valid registration added sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() = onDomainEventShouldCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(),
-      expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
-    )
+  @Test
+  fun `will not process and save a domain registration event message of none MAPP type`() = onDomainEventShouldNotCreateEventNotification(
+    hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP"),
+  )
 
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.when a valid registration updated sqs event is received it should call the hmppsDomainEventService
-    @Test
-    fun `when a valid registration updated sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() = onDomainEventShouldCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent("probation-case.registration.updated"),
-      IntegrationEventType.MAPPA_DETAIL_CHANGED,
-    )
-
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.when risk-assessment scores determined event is received it should call the hmppsDomainEventService
-    @Test
-    fun `when risk-assessment scores determined event is received, it should create event notification RISK_SCORE_CHANGED`() = onDomainEventShouldCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithoutRegisterType(
-        eventType = "risk-assessment.scores.determined",
-        messageEventType = "risk-assessment.scores.ogrs.determined",
-      ),
-      expectedNotificationType = IntegrationEventType.RISK_SCORE_CHANGED,
-    )
-
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest#will process and save a person status event
-    @ParameterizedTest
-    @CsvSource(
-      "probation-case.registration.added, ASFO, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.deleted, ASFO, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.deregistered, ASFO, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.updated, ASFO, PROBATION_STATUS_CHANGED",
-
-      "probation-case.registration.added, WRSM, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.deleted, WRSM, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.deregistered, WRSM, PROBATION_STATUS_CHANGED",
-      "probation-case.registration.updated, WRSM, PROBATION_STATUS_CHANGED",
-
-      "probation-case.registration.added, RCCO, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RCCO, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RCCO, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RCCO, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, RCPR, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RCPR, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RCPR, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RCPR, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, RVAD, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RVAD, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RVAD, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RVAD, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, STRG, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, STRG, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, STRG, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, STRG, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, AVIS, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, AVIS, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, AVIS, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, AVIS, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, WEAP, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, WEAP, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, WEAP, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, WEAP, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, RLRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RLRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RLRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RLRH, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, RMRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RMRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RMRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RMRH, DYNAMIC_RISKS_CHANGED",
-
-      "probation-case.registration.added, RHRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deleted, RHRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED",
-      "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED",
-    )
-    fun `will process and save a person status event`(
-      eventType: String,
-      registerTypeCode: String,
-      integrationEvent: String,
-    ) = onDomainEventShouldCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode),
-      expectedNotificationType = IntegrationEventType.valueOf(integrationEvent),
-    )
-
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.when alert event matches multiple filters using generator, both services should be called
-    @Test
-    fun `when alert event matches multiple filters using generator, both services should be called`() = onDomainEventShouldCreateEventNotifications(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithAlertCode(eventType = "person.alert.created", alertCode = "HA"),
+  @Test
+  fun `when alert event matches multiple filters using generator, both services should be called`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithAlertCode(eventType = "person.alert.created", alertCode = "HA")
+    val expectedNotificationTypes = arrayOf(
       IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
       IntegrationEventType.PERSON_ALERTS_CHANGED,
     )
-  }
+    assumeIdentities(hmppsId = crn)
 
-  @Nested
-  @DisplayName("Given an unexpected event")
-  inner class GivenAnUnexpectedDomainEvent {
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.when an unexpected event type is received it should be sent to the dead letter queue
-    @Test
-    fun `when an unexpected event type is received, it should not create event notification`() = onDomainEventShouldNotCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType = "unexpected.event.type"),
-    )
-
-    // From: uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.HmppsDomainEventsListenerTest.will not process and save a domain registration event message of none MAPP type
-    @Test
-    fun `will not process and save a domain registration event message of none MAPP type`() = onDomainEventShouldNotCreateEventNotification(
-      hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP"),
-    )
+    onDomainEventShouldCreateEventNotifications(hmppsEventRawMessage, *expectedNotificationTypes)
   }
 
   @Nested
@@ -226,6 +213,17 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerEventTestCase() {
       // Assert (verify)
       verify(exactly = 1) { Sentry.captureException(match { it.message == unwrappedError.message }) }
     }
+  }
+
+  @Test
+  fun `when a valid SQS message (domain event) is received it should create notification`() {
+    val rawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
+    val expectedEvent = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(match { it.eventType == expectedEvent }) }
   }
 }
 
