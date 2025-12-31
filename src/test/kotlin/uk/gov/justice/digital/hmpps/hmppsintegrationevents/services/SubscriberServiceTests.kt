@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -8,7 +9,9 @@ import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -27,8 +30,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.autoconfigure.json.JsonTest
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.ConsumerFilters
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
@@ -37,9 +38,23 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthoris
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import io.mockk.verify as verifyK
 
-@ActiveProfiles("test")
-@JsonTest
 class SubscriberServiceTests {
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    internal fun setUpAll() {
+      mockkObject(IntegrationEventType.Companion)
+      // for spying Sentry.captureException(exception) , a static java method
+      mockkStatic(Sentry::class)
+    }
+
+    @AfterAll
+    @JvmStatic
+    internal fun tearDownAll() {
+      unmockkObject(IntegrationEventType.Companion)
+      unmockkStatic(Sentry::class)
+    }
+  }
 
   val integrationApiGateway: IntegrationApiGateway = mock()
   val secretsManagerService: SecretsManagerService = mock()
@@ -81,6 +96,13 @@ class SubscriberServiceTests {
       integrationEventTopicService,
       objectMapper,
     )
+
+    every { IntegrationEventType.matchesUrlToEvents(any()) } answers { callOriginal() }
+  }
+
+  @AfterEach
+  internal fun tearDown() {
+    clearAllMocks()
   }
 
   @Test
@@ -302,14 +324,7 @@ class SubscriberServiceTests {
   inner class GivenErrorCheckingSubscriberFilter {
     @BeforeEach
     internal fun setUp() {
-      // for spying Sentry.captureException(exception) , a static java method
-      mockkStatic(Sentry::class)
       every { Sentry.captureException(any<RuntimeException>()) }.answers { callOriginal() }
-    }
-
-    @AfterEach
-    internal fun tearDown() {
-      unmockkStatic(Sentry::class)
     }
 
     @Test
@@ -347,17 +362,6 @@ class SubscriberServiceTests {
   @Nested
   @DisplayName("Given a few clients")
   inner class GivenMultipleClients {
-    @BeforeEach
-    internal fun setUp() {
-      mockkObject(IntegrationEventType.Companion)
-      every { IntegrationEventType.matchesUrlToEvents(any()) } answers { callOriginal() }
-    }
-
-    @AfterEach
-    internal fun tearDown() {
-      unmockkObject(IntegrationEventType.Companion)
-    }
-
     @Test
     fun `should update secret and subscription, with repeating URLs`() {
       // Arrange

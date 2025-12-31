@@ -17,12 +17,9 @@ import kotlin.math.min
 @Service
 class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
   private val defaultEventTypeList by lazy { listOf("DEFAULT") }
-  private val eventTypeMappingCacheCapacity by lazy { min(IntegrationEventType.entries.count(), MAPPING_CACHE_CAPACITY) }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
-    private const val MAPPING_CACHE_CAPACITY = 100
-    private const val MAPPING_CACHE_LOAD_FACTOR = 0.75f
   }
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
@@ -34,7 +31,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
       // Mappings' Cache (endpoints to events)
-      val endpointToEventCache: MutableMap<String, List<String>> = lruCache(capacity = eventTypeMappingCacheCapacity)
+      val endpointToEventCache: EndpointToEventCache = MappingCache.create()
 
       apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
         .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!, endpointToEventCache) }
@@ -48,7 +45,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
   private fun refreshClientFilter(
     clientConfig: Map.Entry<String, ConfigAuthorisation>,
     subscriber: HmppsSecretManagerProperties.SecretConfig,
-    endpointToEventCache: MutableMap<String, List<String>>,
+    endpointToEventCache: EndpointToEventCache,
   ) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
@@ -96,12 +93,29 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     log.error(message, e.message)
     Sentry.captureException(RuntimeException(message, e))
   }
+}
 
-  // Least-Recently-Used cache using LinkedHashMap with accessOrder
-  private fun <K, V> lruCache(
-    capacity: Int,
-    loadFactor: Float = MAPPING_CACHE_LOAD_FACTOR,
-  ): MutableMap<K, V> = object : LinkedHashMap<K, V>(capacity, loadFactor, true) {
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>) = size > capacity
+/**
+ * EndpointToEventCache: Mapping Endpoint URL to a list of Event types
+ */
+typealias EndpointToEventCache = MutableMap<String, List<String>>
+
+private class MappingCache private constructor() {
+  companion object {
+    private object MappingCacheConfiguration {
+      const val CAPACITY = 100
+      const val LOAD_FACTOR = 0.75f
+    }
+    private val defaultCapacity by lazy { min(IntegrationEventType.entries.count(), MappingCacheConfiguration.CAPACITY) }
+
+    fun create(): EndpointToEventCache = lruCache(capacity = defaultCapacity)
+
+    // Least-Recently-Used cache using LinkedHashMap with accessOrder
+    private fun <K, V> lruCache(
+      capacity: Int,
+      loadFactor: Float = MappingCacheConfiguration.LOAD_FACTOR,
+    ): MutableMap<K, V> = object : LinkedHashMap<K, V>(capacity, loadFactor, true) {
+      override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>) = size > capacity
+    }
   }
 }
