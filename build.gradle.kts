@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
-  kotlin("plugin.spring") version "2.2.21"
-  kotlin("plugin.jpa") version "2.2.21"
-  kotlin("plugin.lombok") version "2.2.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
+  kotlin("plugin.spring") version "2.3.0"
+  kotlin("plugin.jpa") version "2.3.0"
+  kotlin("plugin.lombok") version "2.3.0"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlinx.kover") version "0.9.3"
+  id("org.jetbrains.kotlinx.kover") version "0.9.4"
 }
 
 configurations {
@@ -40,9 +40,9 @@ dependencies {
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.27.1")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.29.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
-  testImplementation("org.testcontainers:localstack:1.21.3")
+  testImplementation("org.testcontainers:localstack:1.21.4")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
   testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.7")
@@ -51,8 +51,8 @@ dependencies {
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
-  testImplementation("io.mockk:mockk:1.14.6")
-  testImplementation("io.mockk:mockk-agent-jvm:1.14.6")
+  testImplementation("io.mockk:mockk:1.14.7")
+  testImplementation("io.mockk:mockk-agent-jvm:1.14.7")
 }
 
 kotlin {

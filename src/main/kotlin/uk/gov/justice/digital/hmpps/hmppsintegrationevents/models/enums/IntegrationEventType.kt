@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.normaliseUrl
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.AdditionalInformation
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName.PrisonOffenderEvents
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.CHILD_CONCERNS_CODE
@@ -17,8 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Register
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.VISOR_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WARRANT_SUMMONS_CODE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.RegisterTypes.WEAPONS_CODE
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.AdditionalInformation
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.registration.HmppsDomainEventMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
 import java.time.LocalDateTime
 
@@ -246,7 +246,7 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
 
 enum class IntegrationEventType(
   private val pathTemplate: String,
-  val predicate: (HmppsDomainEventMessage) -> Boolean,
+  val predicate: (HmppsDomainEvent) -> Boolean,
 ) {
   DYNAMIC_RISKS_CHANGED(
     "v1/persons/{hmppsId}/risks/dynamic",
