@@ -49,11 +49,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
   ) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = clientConfig.value.endpoints.map { urlPattern ->
-        endpointToEventCache[urlPattern] ?: IntegrationEventType.matchesUrlToEvents(urlPattern).map { it.name }
-          .also { endpointToEventCache[urlPattern] = it }
-      }.asSequence().distinct().flatten().toList()
-        .ifEmpty { defaultEventTypeList }
+      val events = matchesUrlToEvents(clientConfig.value.endpoints, endpointToEventCache)
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -78,6 +74,20 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       logAndCapture("Error checking filter list for ${clientConfig.key}", e)
     }
   }
+
+  /**
+   * Match endpoints' URL to event types
+   * - The sequence of resolved events is consistent according to inputs (endpoint URLs).
+   * - The resolved events are distinct (deduplicated when needed).
+   *
+   * Caching at `endpointToEventCache` for repeating endpoints; (transactional per refresh)
+   * - return cached result when found, or call [IntegrationEventType.matchesUrlToEvents] to resolve (and cache)
+   */
+  private fun matchesUrlToEvents(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> = endpoints.map { urlPattern ->
+    endpointToEventCache[urlPattern] ?: IntegrationEventType.matchesUrlToEvents(urlPattern).map { it.name }
+      .also { endpointToEventCache[urlPattern] = it }
+  }.asSequence().distinct().flatten().toList()
+    .ifEmpty { defaultEventTypeList }
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
