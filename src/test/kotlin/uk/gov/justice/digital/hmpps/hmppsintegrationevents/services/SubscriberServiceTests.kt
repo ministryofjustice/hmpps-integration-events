@@ -1,27 +1,55 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.sentry.Sentry
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.autoconfigure.json.JsonTest
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.ConsumerFilters
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
+import io.mockk.verify as verifyK
 
-@ActiveProfiles("test")
-@JsonTest
 class SubscriberServiceTests {
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    internal fun setUpAll() {
+      // for spying Sentry.captureException(exception) , a static java method
+      mockkStatic(Sentry::class)
+    }
+
+    @AfterAll
+    @JvmStatic
+    internal fun tearDownAll() {
+      unmockkStatic(Sentry::class)
+    }
+  }
 
   val integrationApiGateway: IntegrationApiGateway = mock()
   val secretsManagerService: SecretsManagerService = mock()
@@ -29,6 +57,8 @@ class SubscriberServiceTests {
   private lateinit var hmppsSecretManagerProperties: HmppsSecretManagerProperties
   private val objectMapper = ObjectMapper()
   private lateinit var subscriberService: SubscriberService
+
+  private val defaultEventFilter = """{"eventType":["DEFAULT"]}"""
 
   @BeforeEach
   fun setUp() {
@@ -47,6 +77,10 @@ class SubscriberServiceTests {
       secrets = mapOf(
         "client1" to SecretConfig("secret1", "queue1"),
         "client2" to SecretConfig("secret2", "queue2"),
+        "curious1" to SecretConfig("curious1-filter", "curious1-queue"),
+        "police1" to SecretConfig("police1-filter", "police1-queue"),
+        "mappa1" to SecretConfig("mappa1-filter", "mappa1-queue"),
+        "privateprison1" to SecretConfig("privateprison1-filter", "privateprison1-queue"),
       ),
     )
 
@@ -59,12 +93,17 @@ class SubscriberServiceTests {
     )
   }
 
+  @AfterEach
+  internal fun tearDown() {
+    clearAllMocks()
+  }
+
   @Test
   fun `does not update secret if client not have secrets setup`() {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client3" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = null,
       ),
     )
@@ -74,9 +113,9 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(0)).getSecretValue(any())
-    verify(secretsManagerService, times(0)).setSecretValue(any(), any())
-    verify(integrationEventTopicService, times(0)).updateSubscriptionAttributes(any(), any(), any())
+    verify(secretsManagerService, never()).getSecretValue(any())
+    verify(secretsManagerService, never()).setSecretValue(any(), any())
+    verify(integrationEventTopicService, never()).updateSubscriptionAttributes(any(), any(), any())
   }
 
   @Test
@@ -84,12 +123,12 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = null,
       ),
     )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(convertEventTypesToFilter("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"))
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -103,22 +142,22 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = listOf("MKI"),
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
+    val expectedFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"), "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -126,12 +165,13 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(prisons = listOf("MKI")),
       ),
     )
+    val currentFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"), "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(currentFilter)
     // Act
     subscriberService.checkSubscriberFilterList()
 
@@ -145,22 +185,24 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = listOf("MKI"),
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"MKI\"]}"
+    val eventTypes = listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED")
+    val currentFilter = convertEventTypesToFilter(eventTypes, prisonId = "ABC")
+    val expectedFilter = convertEventTypesToFilter(eventTypes, prisonId = "MKI")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(currentFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -168,11 +210,11 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/addresses"),
         filters = null,
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    val expectedFilter = convertEventTypesToFilter("MAPPA_DETAIL_CHANGED", "PERSON_ADDRESS_CHANGED")
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
     whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"],\"prisonId\":[\"ABC\"]}")
 
@@ -180,8 +222,8 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -189,32 +231,33 @@ class SubscriberServiceTests {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
       "client1" to ConfigAuthorisation(
-        endpoints = listOf("/v1/persons/.*/risks/mappadetail"),
+        endpoints = listOf("/v1/persons/.*/risks/mappadetail", "/v1/persons/.*/name"),
         filters = ConsumerFilters(
           prisons = null,
         ),
       ),
     )
-    val expectedMessageAttributes = "{\"eventType\":[\"MAPPA_DETAIL_CHANGED\"]}"
+    val expectedFilter = convertEventTypesToFilter(listOf("MAPPA_DETAIL_CHANGED", "PERSON_NAME_CHANGED"))
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedMessageAttributes)
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedMessageAttributes)
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @ParameterizedTest
   @CsvSource(
-    "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED",
-    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED",
+    "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED,",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED,",
   )
   fun `grant access to risk score events if client has access to risk score endpoint`(
     clientConsumerPath: String,
     eventType: String,
+    eventType2: String?,
   ) {
     // Arrange
     val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
@@ -224,15 +267,15 @@ class SubscriberServiceTests {
       ),
     )
     whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
-    whenever(secretsManagerService.getSecretValue("secret1"))
-      .thenReturn("{\"eventType\":[\"DEFAULT\"]}")
+    whenever(secretsManagerService.getSecretValue("secret1")).thenReturn(defaultEventFilter)
+    val expectedFilter = convertEventTypesToFilter(listOfNotNull(eventType, eventType2))
 
     // Act
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"$eventType\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"$eventType\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", expectedFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", expectedFilter)
   }
 
   @Test
@@ -252,7 +295,385 @@ class SubscriberServiceTests {
     subscriberService.checkSubscriberFilterList()
 
     // Assert
-    verify(secretsManagerService, times(1)).setSecretValue("secret1", "{\"eventType\":[\"DEFAULT\"]}")
-    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", "{\"eventType\":[\"DEFAULT\"]}")
+    verify(secretsManagerService, times(1)).setSecretValue("secret1", defaultEventFilter)
+    verify(integrationEventTopicService, times(1)).updateSubscriptionAttributes("queue1", "FilterPolicy", defaultEventFilter)
   }
+
+  @Test
+  fun `set filter list if current filter is empty`() = testSubscriptionFilter(
+    endpoints = listOf("/v1/persons/[^/]*$"),
+    expectedEventTypes = listOf("PERSON_STATUS_CHANGED"),
+    currentFilter = "",
+  )
+
+  @Test
+  fun `does not update filter, if current filter is empty and no matching event`() = testSubscriptionFilterHasNoUpdate(
+    endpoints = listOf("/v1/status"),
+    currentFilter = "",
+  )
+
+  @Nested
+  @DisplayName("Given error, while checking subscriber filter list")
+  inner class GivenErrorCheckingSubscriberFilter {
+    @BeforeEach
+    internal fun setUp() {
+      every { Sentry.captureException(any<RuntimeException>()) }.answers { callOriginal() }
+    }
+
+    @Test
+    fun `log exception to Sentry, when fail to obtain authorization configuration`() {
+      // Arrange
+      val errorMessage = "Error checking filter list"
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenThrow(RuntimeException::class.java)
+
+      // Act
+      subscriberService.checkSubscriberFilterList()
+
+      // Assert
+      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+    }
+
+    @Test
+    fun `log exception to Sentry, when fail to refreshing a client filter`() {
+      // Arrange
+      val client = "client1"
+      val apiResponse: Map<String, ConfigAuthorisation> = mapOf(client to ConfigAuthorisation(emptyList(), null))
+      val secretId = "secret1"
+      val errorMessage = "Error checking filter list for $client"
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+      // error when getting secret
+      whenever(secretsManagerService.getSecretValue(secretId)).thenThrow(RuntimeException::class.java)
+
+      // Act
+      subscriberService.checkSubscriberFilterList()
+
+      // Assert
+      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+    }
+  }
+
+  @Nested
+  @DisplayName("Given a few clients")
+  inner class GivenMultipleClients {
+    @Test
+    fun `should update secret and subscription, with repeating URLs`() {
+      // Arrange
+      val repeatingUrls = listOf(
+        "/v1/persons/[^/]*$",
+        "/v1/status",
+      )
+      val client1Endpoints = listOf(
+        repeatingUrls[0],
+        "/v1/persons/[^/]+/prisoner-base-location",
+        "/v1/persons/.*/education/assessments",
+        repeatingUrls[1],
+      )
+      val client2Endpoints = listOf(
+        repeatingUrls[0],
+        "/v1/persons/.*/addresses",
+        "/v1/persons/.*/status-information",
+        "/v1/hmpps/reference-data",
+        repeatingUrls[1],
+      )
+      val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+        "client1" to ConfigAuthorisation(client1Endpoints, null),
+        "client2" to ConfigAuthorisation(client2Endpoints, null),
+      )
+      val secretNames = listOf("secret1", "secret2")
+      val queueNames = listOf("queue1", "queue2")
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+      secretNames.forEach { whenever(secretsManagerService.getSecretValue(it)).thenReturn(defaultEventFilter) }
+
+      // Act
+      subscriberService.checkSubscriberFilterList()
+
+      // Assert
+      // 1) Secret has been set to the consumer filter
+      verify(secretsManagerService, times(2)).setSecretValue(argThat { this in secretNames }, any())
+      // 2) Filter has been updated to subscription
+      verify(integrationEventTopicService, times(2)).updateSubscriptionAttributes(argThat { this in queueNames }, eq("FilterPolicy"), any())
+    }
+  }
+
+  @Nested
+  @DisplayName("Given client with specific role")
+  inner class GivenClientWithSpecificRole {
+    @Test
+    fun `should grant access to events for curious`() {
+      val consumer = "curious1" // with role "curious"
+      val secretId = "curious1-filter"
+      val queueName = "curious1-queue"
+      val endpoints = listOf(
+        "/v1/persons/.*/plp-induction-schedule",
+        "/v1/persons/.*/plp-induction-schedule/history",
+        "/v1/persons/.*/plp-review-schedule",
+        "/v1/persons/[^/]+/expression-of-interest/jobs/[^/]+$",
+        "/v1/hmpps/id/by-nomis-number/[^/]*$",
+        "/v1/hmpps/id/nomis-number/by-hmpps-id/[^/]*$",
+        "/v1/persons/.*/education/assessments/status",
+        "/v1/persons/[^/]*$",
+        "/v1/persons/[^/]+/prisoner-base-location",
+        "/v1/persons/.*/education/assessments",
+        "/v1/status",
+        "/v1/persons/.*/education/san/plan-creation-schedule",
+        "/v1/persons/.*/education/san/review-schedule",
+        "/v1/persons/.*/education/status",
+        "/v1/persons/.*/education/aln-assessment",
+      )
+      val expectedEventTypes = listOf(
+        "PERSON_EDUCATION_ASSESSMENTS_CHANGED",
+        "SAN_PLAN_CREATION_SCHEDULE_CHANGED",
+        "SAN_REVIEW_SCHEDULE_CHANGED",
+        "PLP_INDUCTION_SCHEDULE_CHANGED",
+        "PLP_REVIEW_SCHEDULE_CHANGED",
+        "PERSON_STATUS_CHANGED",
+        "PRISONER_BASE_LOCATION_CHANGED",
+      )
+
+      testSubscriptionFilter(endpoints, expectedEventTypes, consumer, secretId, queueName)
+    }
+
+    @Test
+    fun `should grant access to events for police`() {
+      val consumer = "police1" // with role "police"
+      val secretId = "police1-filter"
+      val queueName = "police1-queue"
+      val endpoints = listOf(
+        "/v1/persons/[^/]*$",
+        "/v1/persons/.*/addresses",
+        "/v1/pnd/persons/.*/alerts",
+        "/v1/persons/.*/sentences",
+        "/v1/persons/.*/sentences/latest-key-dates-and-adjustments",
+        "/v1/persons/.*/risks/scores",
+        "/v1/persons/.*/risks/serious-harm",
+        "/v1/persons/.*/risks/dynamic",
+        "/v1/persons/.*/licences/conditions",
+        "/v1/persons/.*/person-responsible-officer",
+        "/v1/persons/.*/status-information",
+        "/v1/hmpps/reference-data",
+        "/v1/status",
+      )
+      val expectedFilter =
+        """{"eventType":["PERSON_ADDRESS_CHANGED","LICENCE_CONDITION_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","DYNAMIC_RISKS_CHANGED","RISK_SCORE_CHANGED","RISK_OF_SERIOUS_HARM_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PROBATION_STATUS_CHANGED","PERSON_STATUS_CHANGED","PERSON_PND_ALERTS_CHANGED"]}"""
+
+      testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName)
+    }
+
+    @Test
+    fun `should grant access to events for mappa`() {
+      val consumer = "mappa1" // with role "mappa"
+      val secretId = "mappa1-filter"
+      val queueName = "mappa1-queue"
+      val endpoints = listOf(
+        "/v1/persons",
+        "/v1/persons/[^/]*$",
+        "/v1/persons/.*/images",
+        "/v1/images/.*",
+        "/v1/persons/.*/addresses",
+        "/v1/persons/.*/offences",
+        "/v1/persons/.*/alerts",
+        "/v1/persons/.*/sentences",
+        "/v1/persons/.*/sentences/latest-key-dates-and-adjustments",
+        "/v1/persons/.*/risks/scores",
+        "/v1/persons/.*/needs",
+        "/v1/persons/.*/risks/serious-harm",
+        "/v1/persons/.*/reported-adjudications",
+        "/v1/persons/.*/adjudications",
+        "/v1/persons/.*/licences/conditions",
+        "/v1/persons/.*/case-notes",
+        "/v1/persons/.*/protected-characteristics",
+        "/v1/persons/.*/risks/mappadetail",
+        "/v1/persons/.*/risks/categories",
+        "/v1/persons/.*/person-responsible-officer",
+        "/v1/persons/.*/risk-management-plan",
+        "/v1/persons/.*/contact-events",
+        "/v1/persons/.*/contact-events/.*",
+        "/v1/hmpps/reference-data",
+        "/v1/status",
+      )
+      val expectedFilter = """{"eventType":["PERSON_ADDRESS_CHANGED","PERSON_ALERTS_CHANGED","PERSON_CASE_NOTES_CHANGED","PERSON_IMAGES_CHANGED","LICENCE_CONDITION_CHANGED","PERSON_OFFENCES_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","PERSON_PROTECTED_CHARACTERISTICS_CHANGED","PERSON_REPORTED_ADJUDICATIONS_CHANGED","PERSON_RISK_CATEGORIES_CHANGED","MAPPA_DETAIL_CHANGED","RISK_SCORE_CHANGED","RISK_OF_SERIOUS_HARM_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PERSON_STATUS_CHANGED"]}"""
+
+      testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName)
+    }
+
+    @Test
+    fun `should grant access to events for private-prison`() {
+      val consumer = "privateprison1" // with role "private-prison"
+      val secretId = "privateprison1-filter"
+      val queueName = "privateprison1-queue"
+      val endpoints = listOf(
+        "/v1/hmpps/id/by-nomis-number/[^/]*$",
+        "/v1/hmpps/id/nomis-number/by-hmpps-id/[^/]*$",
+        "/v1/persons/.*/addresses",
+        "/v1/persons/.*/contacts[^/]*$",
+        "/v1/persons/.*/iep-level",
+        "/v1/persons/.*/visitor/.*/restrictions",
+        "/v1/persons/.*/visit-restrictions",
+        "/v1/persons/.*/visit-orders",
+        "/v1/persons/.*/visit/future",
+        "/v1/persons/.*/alerts",
+        "/v1/persons/.*/case-notes",
+        "/v1/persons/.*/name",
+        "/v1/persons/.*/cell-location",
+        "/v1/persons/.*/risks/categories",
+        "/v1/persons/.*/sentences",
+        "/v1/persons/.*/sentences/latest-key-dates-and-adjustments",
+        "/v1/persons/.*/offences",
+        "/v1/persons/.*/person-responsible-officer",
+        "/v1/persons/.*/protected-characteristics",
+        "/v1/persons/.*/reported-adjudications",
+        "/v1/persons/.*/number-of-children",
+        "/v1/persons/.*/physical-characteristics",
+        "/v1/persons/.*/images",
+        "/v1/persons/.*/images/.*",
+        "/v1/prison/prisoners",
+        "/v1/prison/prisoners/[^/]*$",
+        "/v1/prison/.*/prisoners/[^/]*/balances$",
+        "/v1/prison/.*/prisoners/.*/accounts/.*/balances",
+        "/v1/prison/.*/prisoners/.*/accounts/.*/transactions",
+        "/v1/prison/.*/prisoners/.*/transactions/[^/]*$",
+        "/v1/prison/.*/prisoners/.*/transactions",
+        "/v1/prison/.*/prisoners/.*/non-associations",
+        "/v1/prison/.*/visit/search[^/]*$",
+        "/v1/prison/.*/residential-hierarchy",
+        "/v1/prison/.*/location/[^/]*$",
+        "/v1/prison/.*/residential-details",
+        "/v1/prison/.*/capacity",
+        "/v1/prison/.*/prison-regime",
+        "/v1/prison/.*/appointments/search",
+        "/v1/activities/.*/schedules",
+        "/v1/activities/schedule/[^/]*$",
+        "/v1/activities/schedule/.*/suitability-criteria",
+        "/v1/prison/.*/activities",
+        "/v1/prison/.*/prison-pay-bands",
+        "/v1/visit/[^/]*$",
+        "/v1/visit",
+        "/v1/visit/id/by-client-ref/[^/]*$",
+        "/v1/visit/.*/cancel",
+        "/v1/contacts/[^/]*$",
+        "/v1/prison/.*/location/.*/deactivate",
+        "/v1/persons/.*/health-and-diet",
+        "/v1/persons/.*/care-needs",
+        "/v1/persons/.*/languages",
+        "/v1/persons/.*/education",
+        "/v1/activities/schedule/attendance",
+        "/v1/activities/attendance-reasons",
+        "/v1/activities/schedule/.*/deallocate",
+        "/v1/prison/.*/.*/scheduled-instances",
+        "/v1/activities/deallocation-reasons",
+        "/v1/activities/schedule/.*/allocate",
+        "/v1/prison/prisoners/.*/activities/attendances",
+        "/v1/activities/schedule/.*/waiting-list-applications",
+        "/v1/status",
+      )
+      val consumerFilters = ConsumerFilters(prisons = listOf("MKI"))
+
+      val expectedFilter =
+        """{"eventType":["CONTACT_CHANGED","PERSON_ADDRESS_CHANGED","PERSON_ALERTS_CHANGED","PERSON_CARE_NEEDS_CHANGED","PERSON_CASE_NOTES_CHANGED","PERSON_CELL_LOCATION_CHANGED","PERSON_CONTACTS_CHANGED","PERSON_HEALTH_AND_DIET_CHANGED","PERSON_IEP_LEVEL_CHANGED","PERSON_IMAGES_CHANGED","PERSON_IMAGE_CHANGED","PERSON_LANGUAGES_CHANGED","PERSON_NAME_CHANGED","PERSON_NUMBER_OF_CHILDREN_CHANGED","PERSON_OFFENCES_CHANGED","PERSON_RESPONSIBLE_OFFICER_CHANGED","PERSON_PHYSICAL_CHARACTERISTICS_CHANGED","PERSON_PROTECTED_CHARACTERISTICS_CHANGED","PERSON_REPORTED_ADJUDICATIONS_CHANGED","PERSON_RISK_CATEGORIES_CHANGED","PERSON_SENTENCES_CHANGED","KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE","PERSON_VISIT_ORDERS_CHANGED","PERSON_VISIT_RESTRICTIONS_CHANGED","PERSON_FUTURE_VISITS_CHANGED","PERSON_VISITOR_RESTRICTIONS_CHANGED","PRISON_CAPACITY_CHANGED","PRISON_LOCATION_CHANGED","PRISONER_ACCOUNT_BALANCES_CHANGED","PRISONER_ACCOUNT_TRANSACTIONS_CHANGED","PRISONER_NON_ASSOCIATIONS_CHANGED","PRISONER_BALANCES_CHANGED","PRISON_RESIDENTIAL_DETAILS_CHANGED","PRISON_RESIDENTIAL_HIERARCHY_CHANGED","PRISON_VISITS_CHANGED","PRISONERS_CHANGED","PRISONER_CHANGED","VISIT_CHANGED","VISIT_FROM_EXTERNAL_SYSTEM_CREATED"],"prisonId":["MKI"]}"""
+
+      testSubscriptionFilter(endpoints, expectedFilter, consumer, secretId, queueName, consumerFilters)
+    }
+  }
+
+  private fun testSubscriptionFilter(
+    endpoints: List<String> = emptyList(),
+    expectedFilter: String = defaultEventFilter,
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) = testSubscriptionFilter(
+    endpoints,
+    expectedEventTypes = extractEventTypesFrom(expectedFilter),
+    consumer,
+    secretId,
+    queueName,
+    consumerFilters,
+    currentFilter,
+  )
+
+  private fun testSubscriptionFilter(
+    endpoints: List<String> = emptyList(),
+    expectedEventTypes: List<String> = emptyList(),
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      consumer to ConfigAuthorisation(
+        endpoints = endpoints.sorted(), // API response endpoints are sorted
+        filters = consumerFilters,
+      ),
+    )
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(currentFilter)
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    val assertFilterString: (KArgumentCaptor<String>, List<String>) -> Unit = { filterCaptor, expectedEventTypes ->
+      extractEventTypesFrom(filterCaptor.singleValue).also {
+        // All event types are expected
+        assertThat(it.toSet()).hasSameElementsAs(expectedEventTypes.toSet())
+        // Event types are in stable order
+        assertThat(it).isEqualTo(expectedEventTypes)
+      }
+    }
+    // 1) correct secret has been set to the consumer filter
+    argumentCaptor<String>().let { filterCaptor ->
+      verify(secretsManagerService, times(1))
+        .setSecretValue(eq(secretId), filterCaptor.capture())
+      assertFilterString(filterCaptor, expectedEventTypes)
+    }
+    // 2) correct filter has been updated to subscription
+    argumentCaptor<String>().let { filterCaptor ->
+      verify(integrationEventTopicService, times(1))
+        .updateSubscriptionAttributes(eq(queueName), eq("FilterPolicy"), filterCaptor.capture())
+      assertFilterString(filterCaptor, expectedEventTypes)
+    }
+  }
+
+  private fun testSubscriptionFilterHasNoUpdate(
+    endpoints: List<String> = emptyList(),
+    consumer: String = "client1",
+    secretId: String = "secret1",
+    queueName: String = "queue1",
+    consumerFilters: ConsumerFilters? = null,
+    currentFilter: String = defaultEventFilter,
+  ) {
+    // Arrange
+    val apiResponse: Map<String, ConfigAuthorisation> = mapOf(
+      consumer to ConfigAuthorisation(
+        endpoints = endpoints.sorted(), // API response endpoints are sorted
+        filters = consumerFilters,
+      ),
+    )
+    whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
+    whenever(secretsManagerService.getSecretValue(secretId)).thenReturn(currentFilter)
+
+    // Act
+    subscriberService.checkSubscriberFilterList()
+
+    // Assert
+    // 1) Consumer filter has not been updated
+    verify(secretsManagerService, never()).setSecretValue(eq(secretId), anyString())
+    // 2) Subscription's filter has not been updated
+    verify(integrationEventTopicService, never()).updateSubscriptionAttributes(eq(queueName), eq("FilterPolicy"), anyString())
+  }
+
+  // filter is in this format: {"eventType":["eventType1", "eventType2", ...]}
+  private fun extractEventTypesFrom(filter: String) = objectMapper.readTree(filter)["eventType"].map { it.textValue() }.toList()
+  private fun convertEventTypesToFilter(vararg eventType: String) = convertEventTypesToFilter(eventType.toList())
+  private fun convertEventTypesToFilter(eventTypes: List<String>) = """{"eventType":[${eventTypes.joinToString(separator = ",") { "\"$it\"" }}]}"""
+  private fun convertEventTypesToFilter(eventTypes: List<String>, prisonId: String) = """
+  {
+    "eventType": [${eventTypes.joinToString(separator = ",") { "\"$it\"" }}],
+    "prisonId": ["$prisonId"]
+  }
+  """.trimIndent().replace("\n", "").replace(" ", "")
 }
