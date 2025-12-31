@@ -67,7 +67,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
-      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+      return SubscriberFilterList(eventType = listOf("DEFAULT"), prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
