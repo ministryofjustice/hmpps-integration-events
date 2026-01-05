@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val defaultEventTypeList = listOf("default")
   }
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
@@ -39,7 +40,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("default") }
+      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { defaultEventTypeList }
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -67,7 +68,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
-      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+      return SubscriberFilterList(eventType = defaultEventTypeList, prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
