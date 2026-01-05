@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import io.sentry.Sentry
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
@@ -13,6 +12,7 @@ import java.time.LocalDateTime
 @Configuration
 class DeleteProcessedService(
   val eventRepository: EventNotificationRepository,
+  private val telemetryService: TelemetryService,
 ) {
 
   companion object {
@@ -28,7 +28,7 @@ class DeleteProcessedService(
       eventRepository.deleteEvents(cutOff)
     } catch (e: Exception) {
       log.error("Error deleting processed events", e)
-      Sentry.captureException(e)
+      telemetryService.captureException(e)
     }
     log.info("Successfully deleted processed events")
   }

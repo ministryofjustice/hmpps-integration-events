@@ -26,13 +26,14 @@ class EventNotifierServiceTest {
 
   private val integrationEventTopicService: IntegrationEventTopicService = mock()
   private val eventRepository: EventNotificationRepository = mock()
+  private val telemetryService: TelemetryService = mock()
   private val currentTime: LocalDateTime = LocalDateTime.now()
 
   @BeforeEach
   fun setUp() {
     Mockito.reset(eventRepository)
 
-    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository)
+    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository, telemetryService)
   }
 
   @Test

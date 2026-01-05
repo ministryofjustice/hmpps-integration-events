@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
 import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
-import io.sentry.Sentry
 import io.sentry.spring.jakarta.tracing.SentryTransaction
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
@@ -16,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.util.concurrent.CompletionException
 
 @Service
@@ -23,6 +23,7 @@ import java.util.concurrent.CompletionException
 class HmppsDomainEventsListener(
   @Autowired val hmppsDomainEventService: HmppsDomainEventService,
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
+  private val telemetryService: TelemetryService,
 ) {
 
   private companion object {
@@ -43,7 +44,7 @@ class HmppsDomainEventsListener(
         hmppsDomainEventService.execute(hmppsDomainEvent, matchingIntegrationEventTypes)
       }
     } catch (e: Exception) {
-      Sentry.captureException(unwrapSqsExceptions(e))
+      telemetryService.captureException(unwrapSqsExceptions(e))
       throw e
     }
   }

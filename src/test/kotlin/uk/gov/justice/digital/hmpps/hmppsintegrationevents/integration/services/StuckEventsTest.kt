@@ -1,18 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 
-import io.mockk.mockkStatic
-import io.mockk.slot
-import io.mockk.unmockkStatic
-import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.AdditionalAnswers
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.StateEventNotifierService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
@@ -48,9 +47,11 @@ class StuckEventsTest {
   @MockitoSpyBean
   private lateinit var eventNotificationRepository: EventNotificationRepository
 
+  @MockitoSpyBean
+  private lateinit var telemetryService: TelemetryService
+
   @BeforeEach
   fun setup() {
-    mockkStatic(Sentry::class)
     Mockito.doNothing().`when`(eventNotificationRepository).setProcessing(any(), any(), any())
     whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
       AdditionalAnswers.answersWithDelay(
@@ -70,10 +71,6 @@ class StuckEventsTest {
     eventNotificationRepository.save(makeEvent("MockUrl16", "claimId3", IntegrationEventStatus.PENDING, baseDate.plusDays(-1).plusHours(5)))
   }
 
-  @AfterEach
-  fun teardown() {
-    unmockkStatic(Sentry::class)
-  }
   fun makeEvent(
     url: String,
     claimId: String? = null,
@@ -94,10 +91,10 @@ class StuckEventsTest {
     val expectedExceptionMessage = """
       stuck events with status PROCESSING
     """.trimIndent()
-    val message = slot<String>()
+    val message = argumentCaptor<String>()
     val thread1 = Thread { eventNotifierService.sentNotifications() }
     thread1.start()
-    io.mockk.verify(atLeast = 1, timeout = 10000) { Sentry.captureMessage(capture(message)) }
-    assertThat(message.captured).contains(expectedExceptionMessage)
+    verify(telemetryService, timeout(10_000).atLeast(1)).captureMessage(message.capture())
+    assertThat(message.firstValue).contains(expectedExceptionMessage)
   }
 }
