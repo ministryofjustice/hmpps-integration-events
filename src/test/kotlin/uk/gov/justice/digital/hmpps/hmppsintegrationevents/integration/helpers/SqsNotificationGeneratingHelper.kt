@@ -1,8 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.EventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessageAttributes
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -14,6 +17,7 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
   private val isoInstantTimestamp = DateTimeFormatter.ISO_INSTANT.format(timestamp)
   private val readableTimestamp = readableTimestampPatten.format(timestamp)
   private val millis: Long = timestamp.toInstant().toEpochMilli()
+  private val objectMapper by lazy { jacksonObjectMapper() }
 
   fun generateRawGenericEvent(
     eventTypeValue: String = "probation-case.registration.added",
@@ -255,4 +259,16 @@ class SqsNotificationGeneratingHelper(timestamp: ZonedDateTime = LocalDateTime.n
     messageId = "1a2345bc-de67-890f-1g01-11h21314h151",
     messageAttributes = SQSMessageAttributes(eventType = EventType(value = attributeEventTypes)),
   )
+
+  fun extractDomainEventFrom(sqsMessage: SQSMessage): HmppsDomainEvent {
+    val domainEvent: HmppsDomainEvent = objectMapper.readValue(sqsMessage.message)
+    return domainEvent.let {
+      // Do not default categoriesChanged to empty list
+      if (it.additionalInformation?.categoriesChanged?.isEmpty() ?: false) {
+        it.copy(additionalInformation = it.additionalInformation.copy(categoriesChanged = null)) // make categoriesChanged null, if it is empty
+      } else {
+        it
+      }
+    }
+  }
 }
