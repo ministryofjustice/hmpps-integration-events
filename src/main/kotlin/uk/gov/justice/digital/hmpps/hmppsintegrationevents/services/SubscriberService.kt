@@ -39,7 +39,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("DEFAULT") }
+      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("default") }
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -67,7 +67,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
-      return SubscriberFilterList(eventType = listOf("DEFAULT"), prisonId = null)
+      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
