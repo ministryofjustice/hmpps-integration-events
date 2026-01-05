@@ -1,41 +1,32 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.springframework.context.annotation.Configuration
-import org.springframework.test.context.ActiveProfiles
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-@Configuration
-@ActiveProfiles("test")
-class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceEventTestCase() {
+class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCase() {
   private val hmppsId = "hmpps-1234"
-  private val prisonId = "MDI"
-  private val sqsHelper = SqsNotificationGeneratingHelper(zonedCurrentDateTime)
 
   @BeforeEach
-  internal fun setUp() {
-    stubDomainEventIdentitiesResolver(hmppsId, prisonId)
+  internal fun setup() {
+    assumeIdentities(hmppsId = hmppsId)
   }
 
   @Test
   fun `will process and save a prisoner merged notification`() {
-    // Merging "AA0001A" into "AA0002A" (associated with hmppsId "hmpps-1234")
     // Arrange
     val removedNomisNumber = "AA0001A"
     val updatedNomisNumber = "AA0002A"
-    val expectedNotifications = mapOf(
-      IntegrationEventType.PRISONER_MERGED to removedNomisNumber,
-      IntegrationEventType.PERSON_STATUS_CHANGED to hmppsId,
-    ).map { generateEventNotificationOfPrison(it.key, "$baseUrl/v1/persons/${it.value}", prisonId, it.value) }
 
-    val event = sqsHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
+    val integrationEventTypes = listOf(IntegrationEventType.PERSON_STATUS_CHANGED, IntegrationEventType.PRISONER_MERGED)
+    val expectedEventNotifications = listOf(
+      generateEventNotification(IntegrationEventType.PERSON_STATUS_CHANGED, "$baseUrl/v1/persons/$hmppsId", hmppsId),
+      generateEventNotification(IntegrationEventType.PRISONER_MERGED, "$baseUrl/v1/persons/$removedNomisNumber", removedNomisNumber),
+    )
 
     // Act, Assert
-    executeShouldSaveEventNotification(event, expectedNotifications)
+    executeShouldSaveEventNotifications(hmppsDomainEvent, integrationEventTypes, expectedEventNotifications)
   }
 
   @Test
@@ -44,19 +35,11 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceEventTe
     val removedNomisNumber = null
     val updatedNomisNumber = "AA0002A"
 
-    val event = sqsHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
+    val integrationEventTypes = listOf(IntegrationEventType.PERSON_STATUS_CHANGED, IntegrationEventType.PRISONER_MERGED)
+    val error = IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
-    // Assert
-    assertThrows<IllegalStateException> {
-      // Act
-      hmppsDomainEventService.execute(event)
-    }
-
-    // Assert
-    val verifyEventPersistence: (IntegrationEventType, Int) -> Unit = { eventType, occurrence ->
-      verify(exactly = occurrence) { eventNotificationRepository.insertOrUpdate(match { eventNotification -> eventNotification.eventType == eventType }) }
-    }
-    verifyEventPersistence(IntegrationEventType.PRISONER_MERGED, 0)
-    verifyEventPersistence(IntegrationEventType.PERSON_STATUS_CHANGED, 1)
+    // Act, Assert
+    executeEventShouldThrowError<IllegalStateException>(hmppsDomainEvent, integrationEventTypes, error)
   }
 }
