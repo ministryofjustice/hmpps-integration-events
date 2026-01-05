@@ -18,15 +18,14 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCas
     val removedNomisNumber = "AA0001A"
     val updatedNomisNumber = "AA0002A"
 
-    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
-    val integrationEventTypes = listOf(IntegrationEventType.PERSON_STATUS_CHANGED, IntegrationEventType.PRISONER_MERGED)
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
     val expectedEventNotifications = listOf(
       generateEventNotification(IntegrationEventType.PERSON_STATUS_CHANGED, "$baseUrl/v1/persons/$hmppsId", hmppsId),
       generateEventNotification(IntegrationEventType.PRISONER_MERGED, "$baseUrl/v1/persons/$removedNomisNumber", removedNomisNumber),
     )
 
     // Act, Assert
-    executeShouldSaveEventNotifications(hmppsDomainEvent, integrationEventTypes, expectedEventNotifications)
+    executeShouldSaveEventNotifications(hmppsDomainEvent, expectedEventNotifications)
   }
 
   @Test
@@ -35,11 +34,10 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCas
     val removedNomisNumber = null
     val updatedNomisNumber = "AA0002A"
 
-    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
-    val integrationEventTypes = listOf(IntegrationEventType.PERSON_STATUS_CHANGED, IntegrationEventType.PRISONER_MERGED)
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
     val error = IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
     // Act, Assert
-    executeEventShouldThrowError<IllegalStateException>(hmppsDomainEvent, integrationEventTypes, error)
+    executeEventShouldThrowError<IllegalStateException>(hmppsDomainEvent, error)
   }
 }
