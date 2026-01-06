@@ -6,13 +6,15 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import java.time.Clock
+import java.time.LocalDateTime
 
 @Service
 @Configuration
 class DeleteProcessedService(
   val eventRepository: EventNotificationRepository,
   private val telemetryService: TelemetryService,
-  private val dateTimeService: DateTimeService,
+  private val clock: Clock,
 ) {
 
   companion object {
@@ -22,7 +24,7 @@ class DeleteProcessedService(
   @Scheduled(fixedRateString = "\${notifier.schedule.rate}")
   @Transactional
   fun deleteProcessedEvents() {
-    val cutOff = dateTimeService.now().minusHours(24)
+    val cutOff = LocalDateTime.now(clock).minusHours(24)
     try {
       log.info("Deleting processed events older than $cutOff")
       eventRepository.deleteEvents(cutOff)

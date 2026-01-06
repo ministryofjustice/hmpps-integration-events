@@ -12,6 +12,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import java.time.Clock
+import java.time.LocalDateTime
 
 @Service
 @Configuration
@@ -20,7 +22,7 @@ class HmppsDomainEventService(
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
   @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
   @Value("\${services.integration-api.url}") val baseUrl: String,
-  private val dateTimeService: DateTimeService,
+  private val clock: Clock,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -36,7 +38,7 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       try {
-        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation, dateTimeService.now())
+        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation, LocalDateTime.now(clock))
 
         eventNotificationRepository.insertOrUpdate(eventNotification)
       } catch (ume: UnmappableUrlException) {

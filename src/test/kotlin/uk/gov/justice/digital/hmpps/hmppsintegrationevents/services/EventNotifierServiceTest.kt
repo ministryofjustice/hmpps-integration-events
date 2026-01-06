@@ -33,13 +33,12 @@ class EventNotifierServiceTest {
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentTime: ZonedDateTime = currentTime.atZone(ZoneId.systemDefault())
   private val testClock: Clock = Clock.fixed(zonedCurrentTime.toInstant(), zonedCurrentTime.zone)
-  private val dateTimeService = DateTimeService(testClock)
 
   @BeforeEach
   fun setUp() {
     Mockito.reset(eventRepository)
 
-    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository, telemetryService, dateTimeService)
+    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository, telemetryService, testClock)
   }
 
   @Test
