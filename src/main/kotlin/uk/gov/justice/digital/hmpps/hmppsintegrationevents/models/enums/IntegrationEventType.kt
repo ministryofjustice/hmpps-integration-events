@@ -569,7 +569,5 @@ enum class IntegrationEventType(
     fun from(eventType: IntegrationEventType): IntegrationEventType? = IntegrationEventType.entries.firstOrNull {
       it.ordinal == eventType.ordinal
     }
-
-    fun matchesUrlToEvents(urlPattern: String) = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
   }
 }

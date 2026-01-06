@@ -184,13 +184,13 @@ class IntegrationEventTypeTest {
     urlPattern: String,
     expectedEvents: Set<IntegrationEventType>,
   ) {
-    val actualEvents = IntegrationEventType.matchesUrlToEvents(urlPattern).toSet()
+    val actualEvents = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }.toSet()
     assertThat(actualEvents).hasSameElementsAs(expectedEvents)
   }
 
   // matches URL pattern to no event type
   private fun assertMatchesUrlToNoEvent(urlPattern: String) {
-    val actualEvents = IntegrationEventType.matchesUrlToEvents(urlPattern)
+    val actualEvents = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
     assertThat(actualEvents).isEmpty()
   }
 }

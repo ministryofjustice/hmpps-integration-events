@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
@@ -15,11 +16,17 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.Integrat
 import kotlin.math.min
 
 @Service
-class SubscriberService(private val integrationApiGateway: IntegrationApiGateway, private val subscriberProperties: HmppsSecretManagerProperties, private val secretsManagerService: SecretsManagerService, private val integrationEventTopicService: IntegrationEventTopicService, private val objectMapper: ObjectMapper) {
-  private val defaultEventTypeList by lazy { listOf("DEFAULT") }
-
+class SubscriberService(
+  private val integrationApiGateway: IntegrationApiGateway,
+  private val subscriberProperties: HmppsSecretManagerProperties,
+  private val secretsManagerService: SecretsManagerService,
+  private val integrationEventTopicService: IntegrationEventTopicService,
+  private val objectMapper: ObjectMapper,
+  private val integrationEventTypeMatcher: IntegrationEventTypeMatcher,
+) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val defaultEventTypeList = listOf("default")
   }
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
@@ -81,10 +88,10 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
    * - The resolved events are distinct (deduplicated when needed).
    *
    * Caching at `endpointToEventCache` for repeating endpoints; (transactional per refresh)
-   * - return cached result when found, or call [IntegrationEventType.matchesUrlToEvents] to resolve (and cache)
+   * - return cached result when found, or call [IntegrationEventType.matchesUrl] to resolve (and cache)
    */
   private fun matchesUrlToEvents(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> = endpoints.map { urlPattern ->
-    endpointToEventCache[urlPattern] ?: IntegrationEventType.matchesUrlToEvents(urlPattern).map { it.name }
+    endpointToEventCache[urlPattern] ?: integrationEventTypeMatcher.matchesUrl(urlPattern).map { it.name }
       .also { endpointToEventCache[urlPattern] = it }
   }.asSequence().distinct().flatten().toList()
     .ifEmpty { defaultEventTypeList }
@@ -103,6 +110,16 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     log.error(message, e.message)
     Sentry.captureException(RuntimeException(message, e))
   }
+}
+
+/**
+ * Matcher of IntegrationEventType to endpoint URL
+ *
+ * This is extracted for test verification with spying
+ */
+@Component
+class IntegrationEventTypeMatcher {
+  fun matchesUrl(urlPattern: String) = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
 }
 
 /**

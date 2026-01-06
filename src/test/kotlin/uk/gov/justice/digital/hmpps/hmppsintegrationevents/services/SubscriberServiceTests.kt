@@ -3,9 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
@@ -20,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -35,7 +34,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import io.mockk.verify as verifyK
 
 class SubscriberServiceTests {
@@ -43,7 +41,6 @@ class SubscriberServiceTests {
     @BeforeAll
     @JvmStatic
     internal fun setUpAll() {
-      mockkObject(IntegrationEventType.Companion)
       // for spying Sentry.captureException(exception) , a static java method
       mockkStatic(Sentry::class)
     }
@@ -51,7 +48,6 @@ class SubscriberServiceTests {
     @AfterAll
     @JvmStatic
     internal fun tearDownAll() {
-      unmockkObject(IntegrationEventType.Companion)
       unmockkStatic(Sentry::class)
     }
   }
@@ -59,11 +55,12 @@ class SubscriberServiceTests {
   val integrationApiGateway: IntegrationApiGateway = mock()
   val secretsManagerService: SecretsManagerService = mock()
   val integrationEventTopicService: IntegrationEventTopicService = mock()
+  private val integrationEventTypeMatcher: IntegrationEventTypeMatcher = spy()
   private lateinit var hmppsSecretManagerProperties: HmppsSecretManagerProperties
   private val objectMapper = ObjectMapper()
   private lateinit var subscriberService: SubscriberService
 
-  private val defaultEventFilter = """{"eventType":["DEFAULT"]}"""
+  private val defaultEventFilter = """{"eventType":["default"]}"""
 
   @BeforeEach
   fun setUp() {
@@ -95,9 +92,8 @@ class SubscriberServiceTests {
       secretsManagerService,
       integrationEventTopicService,
       objectMapper,
+      integrationEventTypeMatcher,
     )
-
-    every { IntegrationEventType.matchesUrlToEvents(any()) } answers { callOriginal() }
   }
 
   @AfterEach
@@ -402,11 +398,11 @@ class SubscriberServiceTests {
       verify(integrationEventTopicService, times(2)).updateSubscriptionAttributes(argThat { this in queueNames }, eq("FilterPolicy"), any())
       // 3) Repeating URL patterns will be matched only once (as cached)
       repeatingUrls.forEach {
-        verifyK(exactly = 1) { IntegrationEventType.matchesUrlToEvents(eq(it)) }
+        verifyK(exactly = 1) { integrationEventTypeMatcher.matchesUrl(eq(it)) }
       }
       // 4) Matching call count shall be same as number of URL patterns
       verifyK(exactly = urlsToMatch.size) {
-        IntegrationEventType.matchesUrlToEvents(match { urlsToMatch.contains(it) })
+        integrationEventTypeMatcher.matchesUrl(match { urlsToMatch.contains(it) })
       }
     }
   }
