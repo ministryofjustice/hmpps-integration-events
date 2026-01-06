@@ -5,12 +5,13 @@ import org.jetbrains.annotations.NotNull
 import org.springframework.stereotype.Service
 
 @Service
-open class TelemetryService {
+class TelemetryService {
 
-  open fun captureException(@NotNull throwable: Throwable) {
+  fun captureException(@NotNull throwable: Throwable) {
     Sentry.captureException(throwable)
   }
-  open fun captureMessage(message: String) {
+
+  fun captureMessage(message: String) {
     Sentry.captureMessage(message)
   }
 }
