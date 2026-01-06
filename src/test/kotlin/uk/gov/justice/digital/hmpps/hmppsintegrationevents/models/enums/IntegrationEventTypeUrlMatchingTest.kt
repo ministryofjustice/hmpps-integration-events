@@ -1,14 +1,12 @@
-package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enum
+package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-class IntegrationEventTypeTest {
+class IntegrationEventTypeUrlMatchingTest {
   companion object {
     /**
      * Testing URL patterns, matchable to External event type.
@@ -100,15 +98,6 @@ class IntegrationEventTypeTest {
 
     @JvmStatic
     private fun matchUrlToNoEventTestSource() = urlMappingToNoEvent
-  }
-
-  @Test
-  @Disabled("Enable to verify any untested new event type(s)")
-  fun `should have all event types in test class`() {
-    val expectedEvents = urlToMostEventTypeMap.values.flatten().toSet()
-    val allEvents = IntegrationEventType.entries.sortedBy { it.name }.toSet()
-
-    assertThat(allEvents).hasSameElementsAs(expectedEvents)
   }
 
   @Test
