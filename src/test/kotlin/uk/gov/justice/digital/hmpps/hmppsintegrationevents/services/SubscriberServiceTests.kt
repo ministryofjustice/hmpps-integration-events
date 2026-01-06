@@ -398,12 +398,10 @@ class SubscriberServiceTests {
       verify(integrationEventTopicService, times(2)).updateSubscriptionAttributes(argThat { this in queueNames }, eq("FilterPolicy"), any())
       // 3) Repeating URL patterns will be matched only once (as cached)
       repeatingUrls.forEach {
-        verifyK(exactly = 1) { integrationEventTypeMatcher.matchesUrl(eq(it)) }
+        verify(integrationEventTypeMatcher, times(1)).matchesUrl(eq(it))
       }
       // 4) Matching call count shall be same as number of URL patterns
-      verifyK(exactly = urlsToMatch.size) {
-        integrationEventTypeMatcher.matchesUrl(match { urlsToMatch.contains(it) })
-      }
+      verify(integrationEventTypeMatcher, times(urlsToMatch.size)).matchesUrl(argThat { urlsToMatch.contains(this) })
     }
   }
 
