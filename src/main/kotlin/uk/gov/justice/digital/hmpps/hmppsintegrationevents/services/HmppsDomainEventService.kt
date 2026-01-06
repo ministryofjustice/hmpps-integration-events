@@ -20,6 +20,7 @@ class HmppsDomainEventService(
   @Autowired val deadLetterQueueService: DeadLetterQueueService,
   @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
   @Value("\${services.integration-api.url}") val baseUrl: String,
+  private val dateTimeService: DateTimeService,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -35,7 +36,7 @@ class HmppsDomainEventService(
 
     for (integrationEventType in integrationEventTypes) {
       try {
-        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation)
+        val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, hmppsEvent.additionalInformation, dateTimeService.now())
 
         eventNotificationRepository.insertOrUpdate(eventNotification)
       } catch (ume: UnmappableUrlException) {

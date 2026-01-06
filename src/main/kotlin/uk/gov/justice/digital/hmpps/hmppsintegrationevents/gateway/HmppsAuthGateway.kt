@@ -8,9 +8,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.AuthenticationFailedException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DateTimeService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.nio.charset.StandardCharsets
-import java.time.Instant
 import java.util.*
 
 @Component
@@ -18,6 +18,7 @@ import java.util.*
 class HmppsAuthGateway(
   @Value("\${services.hmpps-auth.base-url}") hmppsAuthUrl: String,
   private val telemetryService: TelemetryService,
+  private val dateTimeService: DateTimeService,
 ) {
   private val webClient: WebClient = WebClient.builder().baseUrl(hmppsAuthUrl).build()
 
@@ -72,7 +73,7 @@ class HmppsAuthGateway(
   private fun checkTokenValid(token: String): Boolean = try {
     val encodedPayload = token.split(".")[1]
     val decodedToken = String(Base64.getDecoder().decode(encodedPayload), StandardCharsets.UTF_8)
-    val now = Instant.now().epochSecond
+    val now = dateTimeService.instantNow().epochSecond
     val expiration = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
     (now < (expiration - 5))
   } catch (e: Exception) {

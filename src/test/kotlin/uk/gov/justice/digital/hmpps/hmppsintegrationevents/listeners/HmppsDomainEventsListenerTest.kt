@@ -9,12 +9,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -26,10 +22,12 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DateTimeService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
+import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -244,22 +242,11 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
 abstract class HmppsDomainEventsListenerTestCase {
   companion object {
     protected val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
-
-    @BeforeAll
-    @JvmStatic
-    internal fun setupAll() {
-      mockkStatic(LocalDateTime::class)
-    }
-
-    @AfterAll
-    @JvmStatic
-    internal fun tearDownAll() {
-      unmockkStatic(LocalDateTime::class)
-    }
   }
 
   protected val currentTime: LocalDateTime = LocalDateTime.now()
   protected val zonedCurrentTime: ZonedDateTime = currentTime.atZone(ZoneId.systemDefault())
+  protected val testClock: Clock = Clock.fixed(zonedCurrentTime.toInstant(), zonedCurrentTime.zone)
   protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(timestamp = zonedCurrentTime) }
 
   protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
@@ -267,12 +254,12 @@ abstract class HmppsDomainEventsListenerTestCase {
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
   protected val telemetryService = mockk<TelemetryService>()
 
-  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl)
+  protected val dateTimeService = DateTimeService(testClock)
+  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, dateTimeService)
   protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService, telemetryService)
 
   @BeforeEach
   open fun setupEventTest() {
-    every { LocalDateTime.now() } returns currentTime
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0

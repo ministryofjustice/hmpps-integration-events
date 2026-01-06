@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
-import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -14,6 +13,7 @@ class StateEventNotifierService(
   private val integrationEventTopicService: IntegrationEventTopicService,
   val eventRepository: EventNotificationRepository,
   private val telemetryService: TelemetryService,
+  private val dateTimeService: DateTimeService,
 ) {
 
   companion object {
@@ -24,7 +24,7 @@ class StateEventNotifierService(
   fun sentNotifications() {
     alertForAnyStuckMessages()
 
-    val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
+    val fiveMinutesAgo = dateTimeService.now().minusMinutes(5)
 
     val claimId = UUID.randomUUID().toString()
 
@@ -55,7 +55,7 @@ class StateEventNotifierService(
   }
 
   private fun alertForAnyStuckMessages() {
-    val stuck = eventRepository.getStuckEvents(LocalDateTime.now().minusMinutes(10))
+    val stuck = eventRepository.getStuckEvents(dateTimeService.now().minusMinutes(10))
     if (stuck.isNotEmpty()) {
       val messages = stuck.map {
         "${it.eventCount} stuck events with status ${it.status}. Earliest event has date ${it.earliestDatetime}"
