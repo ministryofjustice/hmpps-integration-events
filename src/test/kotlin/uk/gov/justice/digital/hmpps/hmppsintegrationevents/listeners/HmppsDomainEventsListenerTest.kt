@@ -213,7 +213,7 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
       unwrappedError: Throwable = error,
     ) {
       // Arrange
-      every { domainEventIdentitiesResolver.getHmppsId(hmppsDomainEvent.domainEvent()) } throws wrappedError
+      every { domainEventIdentitiesResolver.getHmppsId(hmppsDomainEvent) } throws wrappedError
 
       // Act, Assert (error)
       assertThrows<T> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
