@@ -38,6 +38,8 @@ object DomainEvents {
     {\"eventType\":\"assessment.summary.produced\",\"version\": 1,\"description\":\"Assessment Summary has been produced\",\"detailUrl\":\"https://oasys.service.justice.gov.uk/eor/oasys/ass/asssumm/R007565/ALLOW/2513077240/COMPLETE\",\"occurredAt\": \"2024-08-14T12:33:34+01:00\",\"personReference\":{\"identifiers\":[{\"type\": \"CRN\", \"value\": \"$crn\"}]}}
   """.trimIndent()
 
+  private val sqsNotificationGeneratingHelper = SqsNotificationGeneratingHelper()
+
   fun generateDomainEvent(eventType: String, message: String) = """
     {
       "Type" : "Notification",
@@ -63,5 +65,5 @@ object DomainEvents {
     message = message,
     messageId = "d4419bdd-2079-598c-b608-c4f2ddb1bcd1",
     messageAttributes = SQSMessageAttributes(EventType(eventType)),
-  )
+  ).let { sqsNotificationGeneratingHelper.extractDomainEventFrom(it) }
 }

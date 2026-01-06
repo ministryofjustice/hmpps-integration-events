@@ -22,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_PRISON_IDENTIFIER_ADDED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
@@ -212,33 +212,29 @@ abstract class HmppsDomainEventServiceTestCase {
   }
 
   protected fun executeShouldSaveEventNotification(
-    hmppsDomainEvent: SQSMessage,
+    hmppsDomainEvent: HmppsDomainEvent,
     integrationEventType: IntegrationEventType,
     url: String,
     hmppsId: String,
   ) = executeShouldSaveEventNotification(
     hmppsDomainEvent = hmppsDomainEvent,
-    integrationEventType = integrationEventType,
     expectedEventNotification = generateEventNotification(eventType = integrationEventType, url = url, hmppsId = hmppsId),
   )
 
   protected fun executeShouldSaveEventNotification(
-    hmppsDomainEvent: SQSMessage,
-    integrationEventType: IntegrationEventType,
+    hmppsDomainEvent: HmppsDomainEvent,
     expectedEventNotification: EventNotification,
   ) = executeShouldSaveEventNotifications(
     hmppsDomainEvent = hmppsDomainEvent,
-    integrationEventTypes = listOf(integrationEventType),
     expectedEventNotifications = listOf(expectedEventNotification),
   )
 
   protected fun executeShouldSaveEventNotifications(
-    hmppsDomainEvent: SQSMessage,
-    integrationEventTypes: List<IntegrationEventType>,
+    hmppsDomainEvent: HmppsDomainEvent,
     expectedEventNotifications: List<EventNotification>,
   ) {
     // Act
-    hmppsDomainEventService.execute(hmppsDomainEvent, integrationEventTypes)
+    hmppsDomainEventService.execute(hmppsDomainEvent)
 
     // Assert
     expectedEventNotifications.forEach { expectedNotification ->
@@ -248,12 +244,11 @@ abstract class HmppsDomainEventServiceTestCase {
   }
 
   protected inline fun <reified T : Throwable> executeEventShouldThrowError(
-    hmppsDomainEvent: SQSMessage,
-    integrationEventTypes: List<IntegrationEventType>,
+    hmppsDomainEvent: HmppsDomainEvent,
     error: T? = null,
   ) {
     // Act, Assert (error)
-    val errorThrown = assertThrows<T> { hmppsDomainEventService.execute(hmppsDomainEvent, integrationEventTypes) }
+    val errorThrown = assertThrows<T> { hmppsDomainEventService.execute(hmppsDomainEvent) }
 
     // Assert (verify)
     error?.let { assertEquals(it.message, errorThrown.message) }
