@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -12,14 +10,12 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundEx
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonExists
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.PersonIdentifier
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 class DomainEventIdentitiesResolverTest {
-  private val objectMapper = ObjectMapper()
   private val currentTime: LocalDateTime = LocalDateTime.now()
   private val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
@@ -36,12 +32,12 @@ class DomainEventIdentitiesResolverTest {
   @Test
   fun `should throw exception for a domain registration event message where CRN does not exist in delius`() {
     val crn = "X123456"
-    val domainEvent: SQSMessage =
+    val domainEvent =
       SqsNotificationGeneratingHelper(zonedCurrentDateTime).createHmppsDomainEventWithReason(identifiers = "[{\"type\":\"CRN\",\"value\":\"$crn\"}]")
     every { probationIntegrationApiGateway.getPersonExists(crn) } returns PersonExists(crn, false)
 
     val exception = assertThrows<NotFoundException> {
-      resolver.getHmppsId(objectMapper.readValue(domainEvent.message))
+      resolver.getHmppsId(domainEvent)
     }
 
     assertThat(exception.message).isEqualTo("Person with crn $crn not found")
@@ -57,7 +53,7 @@ class DomainEventIdentitiesResolverTest {
     val domainEvent = generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", hmppsMessage)
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns PersonIdentifier(crn, mockNomisId)
 
-    val hmppsId = resolver.getHmppsId(objectMapper.readValue(domainEvent.message))
+    val hmppsId = resolver.getHmppsId(domainEvent)
 
     assertThat(hmppsId).isEqualTo(crn)
   }
@@ -72,7 +68,7 @@ class DomainEventIdentitiesResolverTest {
 
     every { probationIntegrationApiGateway.getPersonIdentifier(mockNomisId) } returns null
 
-    val hmppsId = resolver.getHmppsId(objectMapper.readValue(domainEvent.message))
+    val hmppsId = resolver.getHmppsId(domainEvent)
 
     assertThat(hmppsId).isEqualTo(mockNomisId)
   }

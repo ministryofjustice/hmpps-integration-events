@@ -20,7 +20,7 @@ class HmppsDomainEventServiceROSHTest : HmppsDomainEventServiceTestCase() {
     val message = ASSESSMENT_SUMMARY_PRODUCED
 
     val hmppsMessage = message.replace("\\", "")
-    val event = generateHmppsDomainEvent("assessment.summary.produced", hmppsMessage).domainEvent()
+    val event = generateHmppsDomainEvent("assessment.summary.produced", hmppsMessage)
 
     // Act, Assert
     executeShouldSaveEventNotification(

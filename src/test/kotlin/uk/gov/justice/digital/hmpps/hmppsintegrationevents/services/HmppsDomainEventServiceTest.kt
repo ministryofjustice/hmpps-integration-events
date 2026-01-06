@@ -22,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.D
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_PRISON_IDENTIFIER_ADDED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.generateHmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.listeners.SQSMessage
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -49,7 +48,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
     integrationEvent: String,
     path: String,
   ) = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType, registerTypeCode).domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType, registerTypeCode),
     integrationEventType = IntegrationEventType.valueOf(integrationEvent),
     url = "$baseUrl/v1/persons/$hmppsId/$path",
     hmppsId = hmppsId,
@@ -57,7 +56,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
 
   @Test
   fun `process and save dynamic risks changed event`() = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent("probation-case.registration.added", "RCCO").domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent("probation-case.registration.added", "RCCO"),
     integrationEventType = IntegrationEventType.DYNAMIC_RISKS_CHANGED,
     url = "$baseUrl/v1/persons/$hmppsId/risks/dynamic",
     hmppsId = hmppsId,
@@ -65,7 +64,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
 
   @Test
   fun `process and save mappa detail changed event`() = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent().domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(),
     integrationEventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
     hmppsId = hmppsId,
     url = "$baseUrl/v1/persons/$hmppsId/risks/mappadetail",
@@ -73,7 +72,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
 
   @Test
   fun `process and save risk assessment scores rsr determined event`() = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "risk-assessment.scores.rsr.determined").domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "risk-assessment.scores.rsr.determined"),
     integrationEventType = IntegrationEventType.RISK_SCORE_CHANGED,
     hmppsId = hmppsId,
     url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
@@ -81,7 +80,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
 
   @Test
   fun `process and save probation case risk scores ogrs manual calculation event`() = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "probation-case.risk-scores.ogrs.manual-calculation").domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "probation-case.risk-scores.ogrs.manual-calculation"),
     integrationEventType = IntegrationEventType.RISK_SCORE_CHANGED,
     hmppsId = hmppsId,
     url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
@@ -89,7 +88,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
 
   @Test
   fun `process and save risk assessment scores ogrs determined event`() = executeShouldSaveEventNotification(
-    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "risk-assessment.scores.ogrs.determined").domainEvent(),
+    hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent(eventType = "risk-assessment.scores.ogrs.determined"),
     integrationEventType = IntegrationEventType.RISK_SCORE_CHANGED,
     hmppsId = hmppsId,
     url = "$baseUrl/v1/persons/$hmppsId/risks/scores",
@@ -99,7 +98,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
   fun `process and save prisoner released domain event message for event with message event type of CALCULATED_RELEASE_DATES_PRISONER_CHANGED`() = executeShouldSaveEventNotification(
     hmppsDomainEvent = """
       {"eventType":"calculate-release-dates.prisoner.changed","description":"Prisoners release dates have been re-calculated","additionalInformation":{"prisonerId":"mockNomisId","bookingId":1219387},"version":1,"occurredAt":"2024-08-13T14:15:16.460942253+01:00"}
-    """.trimIndent().let { generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", it) }.domainEvent(),
+    """.trimIndent().let { generateHmppsDomainEvent("calculate-release-dates.prisoner.changed", it) },
     integrationEventType = IntegrationEventType.KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE,
     hmppsId = hmppsId,
     url = "$baseUrl/v1/persons/$hmppsId/sentences/latest-key-dates-and-adjustments",
@@ -124,7 +123,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
     }
 
     val hmppsMessage = message.replace("\\", "")
-    val event = generateHmppsDomainEvent(eventType, hmppsMessage).domainEvent()
+    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     executeShouldSaveEventNotification(
       hmppsDomainEvent = event,
@@ -147,7 +146,7 @@ class HmppsDomainEventServiceTest : HmppsDomainEventServiceTestCase() {
     val message = """
       {"eventType":"$eventType","additionalInformation":{"alertUuid":"8339dd96-4a02-4d5b-bc78-4eda22f678fa","alertCode":"BECTER","source":"NOMIS"},"version":1,"description":"An alert has been created in the alerts service","occurredAt":"2024-08-12T19:48:12.771347283+01:00","detailUrl":"https://alerts-api.hmpps.service.justice.gov.uk/alerts/8339dd96-4a02-4d5b-bc78-4eda22f678fa","personReference":{"identifiers":[{"type":"NOMS","value":"A1234BC"}]}}
     """.trimIndent()
-    val event = generateHmppsDomainEvent(eventType, message).domainEvent()
+    val event = generateHmppsDomainEvent(eventType, message)
 
     executeShouldSaveEventNotification(
       hmppsDomainEvent = event,
@@ -254,6 +253,4 @@ abstract class HmppsDomainEventServiceTestCase {
     // Assert (verify)
     error?.let { assertEquals(it.message, errorThrown.message) }
   }
-
-  protected fun SQSMessage.domainEvent(): HmppsDomainEvent = sqsNotificationHelper.extractDomainEventFrom(this)
 }

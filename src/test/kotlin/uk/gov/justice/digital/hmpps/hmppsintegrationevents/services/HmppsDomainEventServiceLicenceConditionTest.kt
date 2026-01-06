@@ -28,7 +28,7 @@ class HmppsDomainEventServiceLicenceConditionTest : HmppsDomainEventServiceTestC
     """.trimIndent()
 
     val hmppsMessage = message.replace("\\", "")
-    val event = generateHmppsDomainEvent(eventType, hmppsMessage).domainEvent()
+    val event = generateHmppsDomainEvent(eventType, hmppsMessage)
 
     // Act, Assert
     executeShouldSaveEventNotification(

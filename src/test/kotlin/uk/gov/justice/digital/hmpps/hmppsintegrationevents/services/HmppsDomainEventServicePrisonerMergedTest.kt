@@ -18,7 +18,7 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCas
     val removedNomisNumber = "AA0001A"
     val updatedNomisNumber = "AA0002A"
 
-    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
     val expectedEventNotifications = listOf(
       generateEventNotification(IntegrationEventType.PERSON_STATUS_CHANGED, "$baseUrl/v1/persons/$hmppsId", hmppsId),
       generateEventNotification(IntegrationEventType.PRISONER_MERGED, "$baseUrl/v1/persons/$removedNomisNumber", removedNomisNumber),
@@ -34,7 +34,7 @@ class HmppsDomainEventServicePrisonerMergedTest : HmppsDomainEventServiceTestCas
     val removedNomisNumber = null
     val updatedNomisNumber = "AA0002A"
 
-    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber).domainEvent()
+    val hmppsDomainEvent = sqsNotificationHelper.createHmppsMergedDomainEvent(nomisNumber = updatedNomisNumber, removedNomisNumber = removedNomisNumber)
     val error = IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
     // Act, Assert
