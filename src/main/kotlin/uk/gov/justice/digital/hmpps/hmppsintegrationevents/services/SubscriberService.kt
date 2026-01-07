@@ -12,7 +12,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationAp
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
-import kotlin.math.min
 
 @Service
 class SubscriberService(
@@ -22,7 +21,7 @@ class SubscriberService(
   private val integrationEventTopicService: IntegrationEventTopicService,
   private val objectMapper: ObjectMapper,
   private val telemetryService: TelemetryService,
-  private val integrationEventTypeMatcher: IntegrationEventTypeMatcher,
+  private val integrationEventTypeUrlMatcher: IntegrationEventTypeUrlMatcher,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -91,7 +90,7 @@ class SubscriberService(
    * - return cached result when found, or call [IntegrationEventType.matchesUrl] to resolve (and cache)
    */
   private fun matchesUrlToEvents(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> = endpoints.map { urlPattern ->
-    endpointToEventCache[urlPattern] ?: integrationEventTypeMatcher.matchesUrl(urlPattern).map { it.name }
+    endpointToEventCache[urlPattern] ?: integrationEventTypeUrlMatcher.matchesUrl(urlPattern).map { it.name }
       .also { endpointToEventCache[urlPattern] = it }
   }.asSequence().distinct().flatten().toList()
     .ifEmpty { defaultEventTypeList }
@@ -113,13 +112,14 @@ class SubscriberService(
 }
 
 /**
- * Matcher of IntegrationEventType to endpoint URL
+ * Matcher of IntegrationEventType from endpoint URL
  *
- * This is extracted for test verification with spying
+ * - Matches endpoint URL to [IntegrationEventType].
+ * - This is extracted for test verification with spying.
  */
 @Component
-class IntegrationEventTypeMatcher {
-  fun matchesUrl(urlPattern: String) = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
+class IntegrationEventTypeUrlMatcher {
+  fun matchesUrl(urlPattern: String): List<IntegrationEventType> = IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }
 }
 
 /**
@@ -130,12 +130,11 @@ typealias EndpointToEventCache = MutableMap<String, List<String>>
 private class MappingCache private constructor() {
   companion object {
     private object MappingCacheConfiguration {
-      const val CAPACITY = 100
       const val LOAD_FACTOR = 0.75f
+      val defaultCapacity = IntegrationEventType.entries.count()
     }
-    private val defaultCapacity by lazy { min(IntegrationEventType.entries.count(), MappingCacheConfiguration.CAPACITY) }
 
-    fun create(): EndpointToEventCache = lruCache(capacity = defaultCapacity)
+    fun create(capacity: Int = MappingCacheConfiguration.defaultCapacity): EndpointToEventCache = lruCache(capacity = capacity)
 
     // Least-Recently-Used cache using LinkedHashMap with accessOrder
     private fun <K, V> lruCache(
