@@ -134,11 +134,11 @@ private class MappingCache private constructor() {
       val defaultCapacity = IntegrationEventType.entries.count()
     }
 
-    fun create(capacity: Int = MappingCacheConfiguration.defaultCapacity): EndpointToEventCache = lruCache(capacity = capacity)
+    fun create(): EndpointToEventCache = lruCache()
 
     // Least-Recently-Used cache using LinkedHashMap with accessOrder
     private fun <K, V> lruCache(
-      capacity: Int,
+      capacity: Int = MappingCacheConfiguration.defaultCapacity,
       loadFactor: Float = MappingCacheConfiguration.LOAD_FACTOR,
     ): MutableMap<K, V> = object : LinkedHashMap<K, V>(capacity, loadFactor, true) {
       override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>) = size > capacity
