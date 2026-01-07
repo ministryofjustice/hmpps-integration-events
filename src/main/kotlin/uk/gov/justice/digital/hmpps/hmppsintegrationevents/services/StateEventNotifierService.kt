@@ -1,11 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
+import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
@@ -14,6 +14,8 @@ import java.util.*
 class StateEventNotifierService(
   private val integrationEventTopicService: IntegrationEventTopicService,
   val eventRepository: EventNotificationRepository,
+  private val telemetryService: TelemetryService,
+  private val clock: Clock,
 ) {
 
   companion object {
@@ -24,7 +26,7 @@ class StateEventNotifierService(
   fun sentNotifications() {
     alertForAnyStuckMessages()
 
-    val fiveMinutesAgo = LocalDateTime.now().minusMinutes(5)
+    val fiveMinutesAgo = LocalDateTime.now(clock).minusMinutes(5)
 
     val claimId = UUID.randomUUID().toString()
 
@@ -45,7 +47,7 @@ class StateEventNotifierService(
         sentEvents++
       } catch (e: Exception) {
         log.error("Error caught with msg ${e.message} for claim id $claimId", e)
-        Sentry.captureException(e)
+        telemetryService.captureException(e)
         // If we encounter any exceptions then reset the event record to pending so it can be retried by another claim
         log.info("Reset failed event back to PENDING with claim id ${it.claimId}")
         eventRepository.setPending(it.eventId!!)
@@ -55,12 +57,12 @@ class StateEventNotifierService(
   }
 
   private fun alertForAnyStuckMessages() {
-    val stuck = eventRepository.getStuckEvents(LocalDateTime.now().minusMinutes(10))
+    val stuck = eventRepository.getStuckEvents(LocalDateTime.now(clock).minusMinutes(10))
     if (stuck.isNotEmpty()) {
       val messages = stuck.map {
         "${it.eventCount} stuck events with status ${it.status}. Earliest event has date ${it.earliestDatetime}"
       }
-      Sentry.captureMessage(messages.joinToString("\n"))
+      telemetryService.captureMessage(messages.joinToString("\n"))
     }
   }
 }

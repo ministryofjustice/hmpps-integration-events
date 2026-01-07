@@ -54,6 +54,7 @@ class SubscriberServiceTests {
   val integrationApiGateway: IntegrationApiGateway = mock()
   val secretsManagerService: SecretsManagerService = mock()
   val integrationEventTopicService: IntegrationEventTopicService = mock()
+  private val telemetryService: TelemetryService = mock()
   private lateinit var hmppsSecretManagerProperties: HmppsSecretManagerProperties
   private val objectMapper = ObjectMapper()
   private lateinit var subscriberService: SubscriberService
@@ -86,6 +87,7 @@ class SubscriberServiceTests {
       secretsManagerService,
       integrationEventTopicService,
       objectMapper,
+      telemetryService,
     )
   }
 

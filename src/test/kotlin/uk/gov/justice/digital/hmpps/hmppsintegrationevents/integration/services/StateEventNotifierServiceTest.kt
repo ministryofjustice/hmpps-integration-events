@@ -1,11 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.services
 
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,6 +9,9 @@ import org.mockito.AdditionalAnswers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -26,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeleteProces
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.IntegrationEventTopicService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.StateEventNotifierService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.SubscriberService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
@@ -39,6 +39,9 @@ class StateEventNotifierServiceTest {
   @MockitoBean
   private lateinit var subscriberService: SubscriberService
 
+  @MockitoBean
+  private lateinit var telemetryService: TelemetryService
+
   @Autowired
   private lateinit var eventNotifierService: StateEventNotifierService
 
@@ -50,7 +53,6 @@ class StateEventNotifierServiceTest {
 
   @BeforeEach
   fun setup() {
-    mockkStatic(Sentry::class)
     whenever(integrationEventTopicService.sendEvent(any())).thenAnswer(
       AdditionalAnswers.answersWithDelay(
         300,
@@ -66,10 +68,6 @@ class StateEventNotifierServiceTest {
     eventNotificationRepository.save(makeEvent("MockUrl5"))
   }
 
-  @AfterEach
-  fun teardown() {
-    unmockkStatic(Sentry::class)
-  }
   fun makeEvent(url: String): EventNotification = EventNotification(
     eventType = IntegrationEventType.MAPPA_DETAIL_CHANGED,
     hmppsId = "MockId",
@@ -96,7 +94,7 @@ class StateEventNotifierServiceTest {
     deleteThread2.start()
     // Await until all are processed
     Awaitility.await().until { eventNotificationRepository.findAll().map { it.status?.name }.toSet() == setOf("PROCESSED") }
-    io.mockk.verify(exactly = 0) { Sentry.captureException(any()) }
+    verify(telemetryService, never()).captureException(any())
   }
 
   @Test
@@ -117,6 +115,6 @@ class StateEventNotifierServiceTest {
     eventNotifierService.sentNotifications()
     // Check all are processed
     assertThat(eventNotificationRepository.findAll().map { it.status?.name }.toSet()).isEqualTo(setOf("PROCESSED"))
-    io.mockk.verify(exactly = 2) { Sentry.captureException(any()) }
+    verify(telemetryService, times(2)).captureException(any())
   }
 }

@@ -4,78 +4,50 @@ import com.fasterxml.jackson.core.JsonParseException
 import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
 import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.runs
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import io.sentry.Sentry
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.springframework.boot.test.autoconfigure.json.JsonTest
 import org.springframework.messaging.support.GenericMessage
-import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
+import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.CompletionException
 
-@ActiveProfiles("test")
-@JsonTest
-class HmppsDomainEventsListenerTest {
-  private val hmppsDomainEventService = mockk<HmppsDomainEventService>()
-  private val deadLetterQueueService = mockk<DeadLetterQueueService>()
-  private val hmppsDomainEventsListener: HmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService)
-  private val currentTime: ZonedDateTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
-
-  companion object {
-    @BeforeAll
-    @JvmStatic
-    internal fun setUpAll() {
-      mockkStatic(Sentry::class)
-    }
-
-    @AfterAll
-    @JvmStatic
-    internal fun tearDownAll() {
-      unmockkStatic(Sentry::class)
-    }
-  }
-
-  @BeforeEach
-  fun setup() {
-    every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
-  }
-
-  @AfterEach
-  internal fun tearDown() {
-    clearAllMocks()
-  }
+/**
+ * Sociable unit tests for [HmppsDomainEventsListener]
+ */
+class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
+  private val crn = "X777776"
 
   @Test
-  fun `when risk-assessment scores determined event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEventWithoutRegisterType("risk-assessment.scores.determined", messageEventType = "risk-assessment.scores.ogrs.determined")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEventWithoutRegisterType("risk-assessment.scores.ogrs.determined", attributeEventTypes = "risk-assessment.scores.determined")
+  fun `when risk-assessment scores determined event is received, it should create event notification RISK_SCORE_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithoutRegisterType(
+      eventType = "risk-assessment.scores.determined",
+      messageEventType = "risk-assessment.scores.ogrs.determined",
+    )
+    val expectedNotificationType = IntegrationEventType.RISK_SCORE_CHANGED
+    assumeIdentities(hmppsId = crn)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.RISK_SCORE_CHANGED)) }
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
   }
 
   @ParameterizedTest
@@ -135,109 +107,76 @@ class HmppsDomainEventsListenerTest {
     "probation-case.registration.deregistered, RHRH, DYNAMIC_RISKS_CHANGED",
     "probation-case.registration.updated, RHRH, DYNAMIC_RISKS_CHANGED",
   )
-  fun `will process and save a person status event`(eventType: String, registerTypeCode: String, integrationEvent: String) {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+  fun `will process and save a person status event`(
+    eventType: String,
+    registerTypeCode: String,
+    integrationEvent: String,
+  ) {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType, registerTypeCode = registerTypeCode)
+    val expectedNotificationType = IntegrationEventType.valueOf(integrationEvent)
+    assumeIdentities(hmppsId = crn)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.valueOf(integrationEvent))) }
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
   }
 
   @Test
-  fun `when a valid registration added sqs event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent()
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
+  fun `when a valid registration added sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
+    val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
   }
 
   @Test
-  fun `when a valid registration updated sqs event is received it should call the hmppsDomainEventService`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent("probation-case.registration.updated")
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent("probation-case.registration.updated")
+  fun `when a valid registration updated sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent("probation-case.registration.updated")
+    val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
 
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) { hmppsDomainEventService.execute(hmppsDomainEvent, listOf(IntegrationEventType.MAPPA_DETAIL_CHANGED)) }
+    onDomainEventShouldCreateEventNotification(hmppsEventRawMessage, expectedNotificationType)
   }
 
   @Test
-  fun `when an invalid message is received it should be sent to the dead letter queue`() {
+  fun `when an invalid SQS message (domain event) is received it should not create notification`() {
     val rawMessage = "Invalid JSON message"
 
     assertThrows<JsonParseException> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
 
-    verify { hmppsDomainEventService wasNot Called }
+    verify { eventNotificationRepository wasNot Called }
   }
 
   @Test
-  fun `when an unexpected event type is received it should be sent to the dead letter queue`() {
+  fun `when an unexpected event type is received, it should not create event notification`() {
     val unexpectedEventType = "unexpected.event.type"
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(eventType = unexpectedEventType)
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType = unexpectedEventType)
+    assumeIdentities(hmppsId = crn)
 
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify { hmppsDomainEventService wasNot Called }
-    verify { deadLetterQueueService wasNot Called }
+    onDomainEventShouldNotCreateEventNotification(hmppsEventRawMessage)
   }
 
   @Test
-  fun `will not process and save a domain registration event message of none MAPP type`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP")
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify { hmppsDomainEventService wasNot Called }
-    verify { deadLetterQueueService wasNot Called }
-  }
+  fun `will not process and save a domain registration event message of none MAPP type`() = onDomainEventShouldNotCreateEventNotification(
+    hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(registerTypeCode = "NOTMAPP"),
+  )
 
   @Test
   fun `when alert event matches multiple filters using generator, both services should be called`() {
-    val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime)
-      .generateRawHmppsDomainEventWithAlertCode(
-        eventType = "person.alert.created",
-        alertCode = "HA",
-      )
+    val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithAlertCode(eventType = "person.alert.created", alertCode = "HA")
+    val expectedNotificationTypes = arrayOf(
+      IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
+      IntegrationEventType.PERSON_ALERTS_CHANGED,
+    )
+    assumeIdentities(hmppsId = crn)
 
-    val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime)
-      .createHmppsDomainEventWithAlertCode(
-        eventType = "person.alert.created",
-        alertCode = "HA",
-      )
-
-    every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } just runs
-
-    hmppsDomainEventsListener.onDomainEvent(rawMessage)
-
-    verify(exactly = 1) {
-      hmppsDomainEventService.execute(
-        hmppsDomainEvent,
-        match {
-          it.containsAll(
-            listOf(
-              IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
-              IntegrationEventType.PERSON_ALERTS_CHANGED,
-            ),
-          )
-        },
-      )
-    }
+    onDomainEventShouldCreateEventNotifications(hmppsEventRawMessage, *expectedNotificationTypes)
   }
 
   @Nested
   inner class GivenErrorOfEventExecution {
     private val error = IllegalStateException("Something went wrong")
-    private val rawMessage = SqsNotificationGeneratingHelper(timestamp = currentTime).generateRawHmppsDomainEvent()
-    private val hmppsDomainEvent = SqsNotificationGeneratingHelper(currentTime).createHmppsDomainEvent()
+    private val rawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
+    private val hmppsDomainEvent = sqsNotificationHelper.createHmppsDomainEvent()
     private val wrappedErrorMessage = "Error executing HmppsDomainEvent"
 
     @AfterEach
@@ -246,32 +185,131 @@ class HmppsDomainEventsListenerTest {
     }
 
     @Test
-    fun `when there is CompletionException, the error cause shall be extracted and logged`() = executeEventWithError(
+    fun `when there is CompletionException, the error cause shall be extracted and logged`() = onDomainEventShouldThrowError(
       wrappedError = CompletionException(wrappedErrorMessage, error),
     )
 
     @Test
-    fun `when there is AsyncAdapterBlockingExecutionFailedException, the error cause shall be extracted and logged`() = executeEventWithError(
+    fun `when there is AsyncAdapterBlockingExecutionFailedException, the error cause shall be extracted and logged`() = onDomainEventShouldThrowError(
       wrappedError = AsyncAdapterBlockingExecutionFailedException(wrappedErrorMessage, error),
     )
 
     @Test
-    fun `when there is ListenerExecutionFailedException, the error cause shall be extracted and logged`() = executeEventWithError(
+    fun `when there is ListenerExecutionFailedException, the error cause shall be extracted and logged`() = onDomainEventShouldThrowError(
       wrappedError = ListenerExecutionFailedException(wrappedErrorMessage, error, GenericMessage(rawMessage)),
     )
 
-    private inline fun <reified T : Throwable> executeEventWithError(
+    @Test
+    fun `when there is CompletionException without cause, the error shall be logged without extracting message from cause `() {
+      val errorWithoutCause = CompletionException("Something went wrong", null)
+      onDomainEventShouldThrowError(
+        wrappedError = errorWithoutCause,
+        unwrappedError = errorWithoutCause,
+      )
+    }
+
+    private inline fun <reified T : Throwable> onDomainEventShouldThrowError(
       wrappedError: T,
       unwrappedError: Throwable = error,
     ) {
       // Arrange
-      every { hmppsDomainEventService.execute(hmppsDomainEvent, any()) } throws wrappedError
+      every { domainEventIdentitiesResolver.getHmppsId(hmppsDomainEvent) } throws wrappedError
 
       // Act, Assert (error)
       assertThrows<T> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
 
       // Assert (verify)
-      verify(exactly = 1) { Sentry.captureException(match { it.message == unwrappedError.message }) }
+      verify(exactly = 1) { telemetryService.captureException(match { it.message == unwrappedError.message }) }
     }
   }
+
+  @Test
+  fun `when a valid SQS message (domain event) is received it should create notification`() {
+    val rawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
+    val expectedEvent = IntegrationEventType.MAPPA_DETAIL_CHANGED
+    assumeIdentities(hmppsId = crn)
+
+    hmppsDomainEventsListener.onDomainEvent(rawMessage)
+
+    verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(match { it.eventType == expectedEvent }) }
+  }
+}
+
+/**
+ * Base class for Sociable unit tests of [HmppsDomainEventsListener]
+ */
+abstract class HmppsDomainEventsListenerTestCase {
+  companion object {
+    protected val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
+  }
+
+  protected val currentTime: LocalDateTime = LocalDateTime.now()
+  protected val zonedCurrentTime: ZonedDateTime = currentTime.atZone(ZoneId.systemDefault())
+  protected val testClock: Clock = Clock.fixed(zonedCurrentTime.toInstant(), zonedCurrentTime.zone)
+  protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(timestamp = zonedCurrentTime) }
+
+  protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
+  protected val eventNotificationRepository = mockk<EventNotificationRepository>()
+  protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
+  protected val telemetryService = mockk<TelemetryService>()
+
+  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, testClock)
+  protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService, telemetryService)
+
+  @BeforeEach
+  open fun setupEventTest() {
+    every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
+
+    every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+    every { telemetryService.captureException(any()) } just Runs
+    every { telemetryService.captureMessage(any()) } just Runs
+  }
+
+  @AfterEach
+  fun cleanupEventTest() {
+    clearAllMocks()
+  }
+
+  protected fun onDomainEventShouldCreateEventNotification(
+    hmppsEventRawMessage: String,
+    hmppsId: String,
+    expectedNotificationType: IntegrationEventType,
+  ) {
+    assumeIdentities(hmppsId = hmppsId)
+    onDomainEventShouldCreateEventNotifications(hmppsEventRawMessage, expectedNotificationType)
+  }
+
+  protected fun onDomainEventShouldCreateEventNotification(
+    hmppsEventRawMessage: String,
+    expectedNotificationType: IntegrationEventType,
+  ) = onDomainEventShouldCreateEventNotifications(hmppsEventRawMessage, expectedNotificationType)
+
+  protected fun onDomainEventShouldCreateEventNotifications(
+    hmppsEventRawMessage: String,
+    vararg expectedNotificationType: IntegrationEventType,
+  ) {
+    // Act
+    hmppsDomainEventsListener.onDomainEvent(hmppsEventRawMessage)
+
+    // Assert
+    expectedNotificationType.forEach { expectedEventType ->
+      verify(exactly = 1) { eventNotificationRepository.insertOrUpdate(match { it.eventType == expectedEventType }) }
+    }
+  }
+
+  protected fun onDomainEventShouldNotCreateEventNotification(hmppsEventRawMessage: String) {
+    // Act
+    hmppsDomainEventsListener.onDomainEvent(hmppsEventRawMessage)
+
+    // Assert
+    verify { eventNotificationRepository wasNot Called }
+    verify { deadLetterQueueService wasNot Called }
+  }
+
+  protected fun assumeIdentities(hmppsId: String? = null, prisonId: String? = null) {
+    every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
+    every { domainEventIdentitiesResolver.getPrisonId(any()) } returns prisonId
+  }
+
+  protected fun SQSMessage.domainEvent(): HmppsDomainEvent = sqsNotificationHelper.extractDomainEventFrom(this)
 }
