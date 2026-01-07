@@ -1,15 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.sentry.Sentry
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -33,23 +25,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretMan
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties.SecretConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
-import io.mockk.verify as verifyK
 
 class SubscriberServiceTests {
-  companion object {
-    @BeforeAll
-    @JvmStatic
-    internal fun setUpAll() {
-      // for spying Sentry.captureException(exception) , a static java method
-      mockkStatic(Sentry::class)
-    }
-
-    @AfterAll
-    @JvmStatic
-    internal fun tearDownAll() {
-      unmockkStatic(Sentry::class)
-    }
-  }
 
   val integrationApiGateway: IntegrationApiGateway = mock()
   val secretsManagerService: SecretsManagerService = mock()
@@ -89,11 +66,6 @@ class SubscriberServiceTests {
       objectMapper,
       telemetryService,
     )
-  }
-
-  @AfterEach
-  internal fun tearDown() {
-    clearAllMocks()
   }
 
   @Test
@@ -329,10 +301,6 @@ class SubscriberServiceTests {
   @Nested
   @DisplayName("Given error, while checking subscriber filter list")
   inner class GivenErrorCheckingSubscriberFilter {
-    @BeforeEach
-    internal fun setUp() {
-      every { Sentry.captureException(any<RuntimeException>()) }.answers { callOriginal() }
-    }
 
     @Test
     fun `log exception to Sentry, when fail to obtain authorization configuration`() {
@@ -344,7 +312,7 @@ class SubscriberServiceTests {
       subscriberService.checkSubscriberFilterList()
 
       // Assert
-      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+      verify(telemetryService, times(1)).captureException(argThat { message == errorMessage })
     }
 
     @Test
@@ -362,7 +330,7 @@ class SubscriberServiceTests {
       subscriberService.checkSubscriberFilterList()
 
       // Assert
-      verifyK(exactly = 1) { Sentry.captureException(match { it.message == errorMessage }) }
+      verify(telemetryService, times(1)).captureException(argThat { message == errorMessage })
     }
   }
 
