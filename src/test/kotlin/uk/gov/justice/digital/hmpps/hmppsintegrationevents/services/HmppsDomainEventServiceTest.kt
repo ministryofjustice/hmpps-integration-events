@@ -1,15 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -27,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -162,19 +157,11 @@ abstract class HmppsDomainEventServiceTestCase {
   companion object {
     @JvmStatic
     protected val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
-
-    @BeforeAll
-    @JvmStatic
-    internal fun setupAll() {
-      mockkStatic(LocalDateTime::class)
-    }
-
-    @AfterAll
-    @JvmStatic
-    internal fun tearDownAll() {
-      unmockkStatic(LocalDateTime::class)
-    }
   }
+
+  protected val currentTime: LocalDateTime = LocalDateTime.now()
+  protected val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
+  protected val testClock: Clock = Clock.fixed(zonedCurrentDateTime.toInstant(), zonedCurrentDateTime.zone)
 
   protected open val featureFlagConfig get() = FeatureFlagConfig()
 
@@ -187,23 +174,16 @@ abstract class HmppsDomainEventServiceTestCase {
       deadLetterQueueService,
       domainEventIdentitiesResolver,
       baseUrl,
+      testClock,
       featureFlagConfig,
     )
   }
-  protected val currentTime: LocalDateTime = LocalDateTime.now()
-  protected val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
 
   protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(zonedCurrentDateTime) }
 
   @BeforeEach
   internal fun setupBase() {
-    every { LocalDateTime.now() } returns currentTime
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
-  }
-
-  @AfterEach
-  internal fun teardownBase() {
-    clearAllMocks()
   }
 
   protected fun generateEventNotification(

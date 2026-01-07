@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway
 
-import io.sentry.Sentry
 import org.apache.tomcat.util.json.JSONParser
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Scope
@@ -9,14 +8,17 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.AuthenticationFailedException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.nio.charset.StandardCharsets
-import java.time.Instant
+import java.time.Clock
 import java.util.*
 
 @Component
 @Scope("singleton")
 class HmppsAuthGateway(
   @Value("\${services.hmpps-auth.base-url}") hmppsAuthUrl: String,
+  private val telemetryService: TelemetryService,
+  private val clock: Clock,
 ) {
   private val webClient: WebClient = WebClient.builder().baseUrl(hmppsAuthUrl).build()
 
@@ -71,11 +73,11 @@ class HmppsAuthGateway(
   private fun checkTokenValid(token: String): Boolean = try {
     val encodedPayload = token.split(".")[1]
     val decodedToken = String(Base64.getDecoder().decode(encodedPayload), StandardCharsets.UTF_8)
-    val now = Instant.now().epochSecond
+    val now = clock.instant().epochSecond
     val expiration = JSONParser(decodedToken).parseObject()["exp"].toString().toLong()
     (now < (expiration - 5))
   } catch (e: Exception) {
-    Sentry.captureException(e)
+    telemetryService.captureException(e)
     false
   }
 }

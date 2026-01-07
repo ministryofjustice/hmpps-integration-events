@@ -4,16 +4,13 @@ import com.fasterxml.jackson.core.JsonParseException
 import io.awspring.cloud.sqs.listener.AsyncAdapterBlockingExecutionFailedException
 import io.awspring.cloud.sqs.listener.ListenerExecutionFailedException
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import io.sentry.Sentry
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -29,6 +26,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQu
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.FeatureFlagTestConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
+import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -201,6 +200,15 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
       wrappedError = ListenerExecutionFailedException(wrappedErrorMessage, error, GenericMessage(rawMessage)),
     )
 
+    @Test
+    fun `when there is CompletionException without cause, the error shall be logged without extracting message from cause `() {
+      val errorWithoutCause = CompletionException("Something went wrong", null)
+      onDomainEventShouldThrowError(
+        wrappedError = errorWithoutCause,
+        unwrappedError = errorWithoutCause,
+      )
+    }
+
     private inline fun <reified T : Throwable> onDomainEventShouldThrowError(
       wrappedError: T,
       unwrappedError: Throwable = error,
@@ -212,7 +220,7 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
       assertThrows<T> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
 
       // Assert (verify)
-      verify(exactly = 1) { Sentry.captureException(match { it.message == unwrappedError.message }) }
+      verify(exactly = 1) { telemetryService.captureException(match { it.message == unwrappedError.message }) }
     }
   }
 
@@ -234,33 +242,21 @@ class HmppsDomainEventsListenerTest : HmppsDomainEventsListenerTestCase() {
 abstract class HmppsDomainEventsListenerTestCase {
   companion object {
     protected val baseUrl = "https://dev.integration-api.hmpps.service.justice.gov.uk"
-
-    @BeforeAll
-    @JvmStatic
-    internal fun setupAll() {
-      mockkStatic(LocalDateTime::class)
-      mockkStatic(Sentry::class)
-    }
-
-    @AfterAll
-    @JvmStatic
-    internal fun tearDownAll() {
-      unmockkStatic(LocalDateTime::class)
-      unmockkStatic(Sentry::class)
-    }
   }
 
   protected val currentTime: LocalDateTime = LocalDateTime.now()
   protected val zonedCurrentTime: ZonedDateTime = currentTime.atZone(ZoneId.systemDefault())
+  protected val testClock: Clock = Clock.fixed(zonedCurrentTime.toInstant(), zonedCurrentTime.zone)
   protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(timestamp = zonedCurrentTime) }
 
   protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
   protected val eventNotificationRepository = mockk<EventNotificationRepository>()
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
+  protected val telemetryService = mockk<TelemetryService>()
 
   protected val featureFlagTestConfig = FeatureFlagTestConfig()
-  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, featureFlagTestConfig.featureFlagConfig)
-  protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService)
+  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, testClock, featureFlagTestConfig.featureFlagConfig)
+  protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService, telemetryService)
 
   @BeforeEach
   open fun setupEventTest() {
@@ -272,10 +268,11 @@ abstract class HmppsDomainEventsListenerTestCase {
     )
     enabledFeatureFlags.forEach { featureFlagTestConfig.assumeFeatureFlag(it, true) }
 
-    every { LocalDateTime.now() } returns currentTime
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 
     every { deadLetterQueueService.sendEvent(any(), any()) } returnsArgument 0
+    every { telemetryService.captureException(any()) } just Runs
+    every { telemetryService.captureMessage(any()) } just Runs
   }
 
   @AfterEach

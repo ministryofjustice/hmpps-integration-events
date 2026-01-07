@@ -526,20 +526,20 @@ enum class IntegrationEventType(
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
     featureFlag = FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED,
   ) {
-    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification {
+    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification {
       val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
-      return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation)
+      return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation, currentTime)
     }
   },
   ;
 
-  open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): EventNotification = EventNotification(
+  open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification = EventNotification(
     eventType = this,
     hmppsId = hmppsId,
     prisonId = prisonId,
     url = "$baseUrl/${path(hmppsId, prisonId, additionalInformation)}",
-    lastModifiedDateTime = LocalDateTime.now(),
+    lastModifiedDateTime = currentTime,
   )
 
   protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
