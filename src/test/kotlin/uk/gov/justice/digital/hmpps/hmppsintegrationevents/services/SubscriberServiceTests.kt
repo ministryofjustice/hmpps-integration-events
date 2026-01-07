@@ -303,7 +303,7 @@ class SubscriberServiceTests {
   inner class GivenErrorCheckingSubscriberFilter {
 
     @Test
-    fun `log exception to Sentry, when fail to obtain authorization configuration`() {
+    fun `log exception to telemetry, when fail to obtain authorization configuration`() {
       // Arrange
       val errorMessage = "Error checking filter list"
       whenever(integrationApiGateway.getApiAuthorizationConfig()).thenThrow(RuntimeException::class.java)
@@ -316,7 +316,7 @@ class SubscriberServiceTests {
     }
 
     @Test
-    fun `log exception to Sentry, when fail to refreshing a client filter`() {
+    fun `log exception to telemetry, when fail to refreshing a client filter`() {
       // Arrange
       val client = "client1"
       val apiResponse: Map<String, ConfigAuthorisation> = mapOf(client to ConfigAuthorisation(emptyList(), null))
