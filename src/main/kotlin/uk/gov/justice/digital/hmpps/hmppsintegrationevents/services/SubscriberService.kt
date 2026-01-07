@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -22,6 +21,7 @@ class SubscriberService(
   private val secretsManagerService: SecretsManagerService,
   private val integrationEventTopicService: IntegrationEventTopicService,
   private val objectMapper: ObjectMapper,
+  private val telemetryService: TelemetryService,
   private val integrationEventTypeMatcher: IntegrationEventTypeMatcher,
 ) {
   companion object {
@@ -108,7 +108,7 @@ class SubscriberService(
     e: Exception,
   ) {
     log.error(message, e.message)
-    Sentry.captureException(RuntimeException(message, e))
+    telemetryService.captureException(RuntimeException(message, e))
   }
 }
 
