@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
@@ -40,7 +39,7 @@ class StateEventNotifierServiceTest {
   @MockitoBean
   private lateinit var subscriberService: SubscriberService
 
-  @MockitoSpyBean
+  @MockitoBean
   private lateinit var telemetryService: TelemetryService
 
   @Autowired

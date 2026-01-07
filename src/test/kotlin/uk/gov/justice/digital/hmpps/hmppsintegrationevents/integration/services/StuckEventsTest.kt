@@ -47,7 +47,7 @@ class StuckEventsTest {
   @MockitoSpyBean
   private lateinit var eventNotificationRepository: EventNotificationRepository
 
-  @MockitoSpyBean
+  @MockitoBean
   private lateinit var telemetryService: TelemetryService
 
   @BeforeEach
