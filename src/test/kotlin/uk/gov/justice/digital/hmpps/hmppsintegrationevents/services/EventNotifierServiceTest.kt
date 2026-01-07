@@ -16,7 +16,10 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import java.time.Clock
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @ActiveProfiles("test")
 @JsonTest
@@ -26,13 +29,16 @@ class EventNotifierServiceTest {
 
   private val integrationEventTopicService: IntegrationEventTopicService = mock()
   private val eventRepository: EventNotificationRepository = mock()
+  private val telemetryService: TelemetryService = mock()
   private val currentTime: LocalDateTime = LocalDateTime.now()
+  private val zonedCurrentTime: ZonedDateTime = currentTime.atZone(ZoneId.systemDefault())
+  private val testClock: Clock = Clock.fixed(zonedCurrentTime.toInstant(), zonedCurrentTime.zone)
 
   @BeforeEach
   fun setUp() {
     Mockito.reset(eventRepository)
 
-    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository)
+    eventNotifierService = StateEventNotifierService(integrationEventTopicService, eventRepository, telemetryService, testClock)
   }
 
   @Test
