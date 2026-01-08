@@ -222,7 +222,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
     // IntegrationEventTypes associated with a feature flag set to “false” are not enabled; e.g. person-languages-changed
     // IntegrationEventTypes that are not enabled are not written to the database
     @Test
-    fun `should process and save event with feature flag enabled, and skip event with feature flag disabled`() {
+    fun `should process and save enabled events, and skip event with feature flag disabled`() {
       // Arrange
       val hmppsDomainEvent = hmppsDomainEvent("prisoner-offender-search.prisoner.created", "MDI")
       val unexpectedNotificationTypes = arrayOf(
