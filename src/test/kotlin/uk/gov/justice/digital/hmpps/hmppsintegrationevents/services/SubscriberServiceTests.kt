@@ -222,7 +222,7 @@ class SubscriberServiceTests {
   @ParameterizedTest
   @CsvSource(
     "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED,",
-    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED,",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED, PRISONER_MERGED",
   )
   fun `grant access to risk score events if client has access to risk score endpoint`(
     clientConsumerPath: String,
@@ -272,7 +272,7 @@ class SubscriberServiceTests {
   @Test
   fun `set filter list if current filter is empty`() = testSubscriptionFilter(
     endpoints = listOf("/v1/persons/[^/]*$"),
-    expectedEventTypes = listOf("PERSON_STATUS_CHANGED"),
+    expectedEventTypes = listOf("PERSON_STATUS_CHANGED", "PRISONER_MERGED"),
     currentFilter = "",
   )
 
@@ -289,7 +289,7 @@ class SubscriberServiceTests {
     val endpoints = listOf("/v1/persons/[^/]*$")
     val expectedEventTypes = listOf(
       "PERSON_STATUS_CHANGED",
-      // "PRISONER_MERGED",
+      "PRISONER_MERGED",
     )
 
     `when`(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(mapOf(consumer to ConfigAuthorisation(endpoints, null)))
