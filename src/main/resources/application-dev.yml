@@ -63,3 +63,9 @@ notifier:
 subscriber-checker:
   schedule:
     rate: 600000
+
+feature-flag:
+  # At least one IntegrationEventType is explicitly flagged off in dev
+  person-languages-changed-notifications-enabled: false
+  prisoner-base-location-changed-notifications-enabled: true
+  prisoner-merge-notifications-enabled: true

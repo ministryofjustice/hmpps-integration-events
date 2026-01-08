@@ -10,6 +10,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_CREATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PRISONER_OFFENDER_SEARCH_PRISONER_UPDATED
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.DomainEvents.PROBATION_CASE_ENGAGEMENT_CREATED_MESSAGE
@@ -162,16 +163,13 @@ abstract class HmppsDomainEventServiceTestCase {
   protected val zonedCurrentDateTime = currentTime.atZone(ZoneId.systemDefault())
   protected val testClock: Clock = Clock.fixed(zonedCurrentDateTime.toInstant(), zonedCurrentDateTime.zone)
 
+  protected open val featureFlagConfig get() = FeatureFlagConfig()
+
   protected val eventNotificationRepository = mockk<EventNotificationRepository>()
   protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
-  protected val hmppsDomainEventService: HmppsDomainEventService = HmppsDomainEventService(
-    eventNotificationRepository,
-    deadLetterQueueService,
-    domainEventIdentitiesResolver,
-    baseUrl,
-    testClock,
-  )
+
+  protected val hmppsDomainEventService by lazy { createHmppsDomainEventService() }
 
   protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(zonedCurrentDateTime) }
 
@@ -179,6 +177,15 @@ abstract class HmppsDomainEventServiceTestCase {
   internal fun setupBase() {
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
   }
+
+  protected open fun createHmppsDomainEventService() = HmppsDomainEventService(
+    eventNotificationRepository,
+    deadLetterQueueService,
+    domainEventIdentitiesResolver,
+    baseUrl,
+    testClock,
+    featureFlagConfig,
+  )
 
   protected fun generateEventNotification(
     eventType: IntegrationEventType,
@@ -233,4 +240,23 @@ abstract class HmppsDomainEventServiceTestCase {
     // Assert (verify)
     error?.let { assertEquals(it.message, errorThrown.message) }
   }
+}
+
+data class FeatureFlagTestConfig(
+  private val featureFlags: MutableMap<String, Boolean> = mutableMapOf(),
+  val featureFlagConfig: FeatureFlagConfig = FeatureFlagConfig(featureFlags),
+) {
+  fun assumeFeatureFlag(feature: String, enabled: Boolean? = null) {
+    if (enabled != null) {
+      featureFlags[feature] = enabled
+    } else {
+      resetFeatureFlag(feature)
+    }
+  }
+
+  fun resetFeatureFlag(feature: String) {
+    featureFlags.remove(feature)
+  }
+
+  fun resetAllFlags() = featureFlags.clear()
 }

@@ -58,3 +58,8 @@ hmpps.s3:
   buckets:
     certificate-backup:
       bucketName: certificate-backup
+
+feature-flag:
+  person-languages-changed-notifications-enabled: true
+  prisoner-base-location-changed-notifications-enabled: true
+  prisoner-merge-notifications-enabled: true

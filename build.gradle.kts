@@ -48,6 +48,7 @@ dependencies {
   testImplementation("io.kotest:kotest-assertions-json-jvm:6.0.7")
   testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.7")
   testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.7")
+  testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")

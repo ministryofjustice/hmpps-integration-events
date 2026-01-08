@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.AdditionalInformation
@@ -246,6 +247,7 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
 enum class IntegrationEventType(
   private val pathTemplate: String,
   val predicate: (HmppsDomainEvent) -> Boolean,
+  val featureFlag: String? = null,
 ) {
   DYNAMIC_RISKS_CHANGED(
     "v1/persons/{hmppsId}/risks/dynamic",
@@ -280,6 +282,7 @@ enum class IntegrationEventType(
         }
       }
     },
+    featureFlag = FeatureFlagConfig.PRISONER_BASE_LOCATION_CHANGED_NOTIFICATIONS_ENABLED,
   ),
   KEY_DATES_AND_ADJUSTMENTS_PRISONER_RELEASE(
     "v1/persons/{hmppsId}/sentences/latest-key-dates-and-adjustments",
@@ -516,10 +519,12 @@ enum class IntegrationEventType(
   PERSON_LANGUAGES_CHANGED(
     "v1/persons/{hmppsId}/languages",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
+    featureFlag = FeatureFlagConfig.PERSON_LANGUAGES_CHANGED_NOTIFICATIONS_ENABLED,
   ),
   PRISONER_MERGED(
     "v1/persons/{hmppsId}",
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
+    featureFlag = FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED,
   ) {
     override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification {
       val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
