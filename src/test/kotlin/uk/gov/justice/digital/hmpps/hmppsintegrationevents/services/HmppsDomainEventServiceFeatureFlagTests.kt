@@ -124,7 +124,6 @@ class IntegrationEventTypeFilterTest {
     .also { log.debug("hmppsEvent: {}, actualEventTypes: {}", hmppsEvent, it) }.toSet()
 
   private fun filterEventTypeShouldContainEventTypes(hmppsEvent: HmppsDomainEvent, vararg expectedEventTypes: IntegrationEventType) {
-    val expectedEventTypeNames = expectedEventTypes.map { it.name }
     val actualEventTypes = filterEventType(hmppsEvent).toSet()
 
     actualEventTypes shouldContainAll expectedEventTypes.toSet()
@@ -136,7 +135,6 @@ class IntegrationEventTypeFilterTest {
   }
 
   private fun filterEventTypeShouldNotContainEventTypes(hmppsEvent: HmppsDomainEvent, vararg unexpectedEventTypes: IntegrationEventType) {
-    val unexpectedEventTypeNames = unexpectedEventTypes.map { it.name }.toSet()
     val actualEventTypes = filterEventType(hmppsEvent).toSet()
 
     actualEventTypes shouldNotContain unexpectedEventTypes
