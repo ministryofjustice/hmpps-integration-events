@@ -73,22 +73,15 @@ class IntegrationEventTypeFilter(
   /**
    * Matching domain event to integration event type(s), respecting feature flags
    */
-  fun filterEventTypes(hmppsEvent: HmppsDomainEvent) = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }.let { matchingTypes ->
+  fun filterEventTypes(hmppsEvent: HmppsDomainEvent) = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }.filter { eventType ->
     // Filter event types per feature flag, if associated with
-    val eventTypes = matchingTypes.filter { eventType ->
-      eventType.featureFlag?.let { feature ->
-        // i) enabled or disabled according to the defined feature flag;
-        // ii) otherwise disabled, when feature flag is associated but undefined
-        featureFlagConfig.getConfigFlagValue(feature) ?: run {
-          log.error("Missing feature flag \"{}\" of event type \"{}\"", feature, eventType.name)
-          false
-        }
-      } ?: true // default true (enabled), if no feature-flag has been associated
-    }
-    if (eventTypes.size < matchingTypes.size) {
-      val droppedTypes = (matchingTypes.toSet() - eventTypes.toSet()).sortedBy { it.name }
-      log.info("These event type(s) have been discarded: {}", droppedTypes.map { it.name })
-    }
-    eventTypes
+    eventType.featureFlag?.let { feature ->
+      // i) enabled or disabled according to the defined feature flag;
+      // ii) otherwise disabled, when feature flag is associated but undefined
+      featureFlagConfig.getConfigFlagValue(feature) ?: run {
+        log.error("Missing feature flag \"{}\" of event type \"{}\"", feature, eventType.name)
+        false
+      }
+    } ?: true // default true (enabled), if no feature-flag has been associated
   }
 }

@@ -128,8 +128,6 @@ class IntegrationEventTypeFilterTest {
     val actualEventTypes = filterEventType(hmppsEvent).toSet()
 
     actualEventTypes shouldContainAll expectedEventTypes.toSet()
-    // No expected event type discarded, no logging
-    verifyLoggingOfDiscardedEvents(exactly = 0, eventTypeNames = expectedEventTypeNames)
   }
 
   private fun filterEventTypeShouldContainExactEventTypes(hmppsEvent: HmppsDomainEvent, vararg expectedEventTypes: IntegrationEventType) {
@@ -142,26 +140,9 @@ class IntegrationEventTypeFilterTest {
     val actualEventTypes = filterEventType(hmppsEvent).toSet()
 
     actualEventTypes shouldNotContain unexpectedEventTypes
-    // Event type(s) has/have been discarded with logging
-    verifyLoggingOfDiscardedEvents(exactly = 1, eventTypeNames = unexpectedEventTypeNames)
   }
 
   private fun createHmppsDomainEvent(eventType: String) = sqsNotificationHelper.createHmppsDomainEvent(eventType)
-
-  /**
-   * Verify logging (info) of discarded events
-   *
-   * @param exactly verifies logging happened exactly `exactly` times.
-   * @param eventTypeNames names of event type to verify with
-   */
-  private fun verifyLoggingOfDiscardedEvents(exactly: Int, eventTypeNames: Collection<String>) {
-    verify(exactly = exactly) {
-      filterLog.info(
-        match<String> { it.startsWith("These event type(s) have been discarded") },
-        match<List<String>> { it.toSet().containsAll(eventTypeNames) },
-      )
-    }
-  }
 }
 
 /**
