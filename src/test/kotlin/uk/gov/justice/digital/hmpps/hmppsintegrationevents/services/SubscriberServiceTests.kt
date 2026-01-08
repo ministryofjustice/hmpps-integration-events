@@ -285,14 +285,12 @@ class SubscriberServiceTests {
   @Test
   fun `should grant access to person events, if client has access to person endpoint`() {
     // Arrange
-    val consumer = "client1" // with role "curious"
+    val consumer = "client1"
     val endpoints = listOf("/v1/persons/[^/]*$")
     val expectedEventTypes = listOf(
       "PERSON_STATUS_CHANGED",
       "PRISONER_MERGED",
     )
-
-    `when`(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(mapOf(consumer to ConfigAuthorisation(endpoints, null)))
 
     // Act, Assert
     testSubscriptionFilter(endpoints, expectedEventTypes, consumer)
