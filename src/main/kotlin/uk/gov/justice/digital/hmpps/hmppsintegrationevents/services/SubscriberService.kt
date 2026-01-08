@@ -23,6 +23,7 @@ class SubscriberService(
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val defaultEventTypeList = listOf("default")
   }
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
@@ -45,7 +46,7 @@ class SubscriberService(
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { listOf("DEFAULT") }
+      val events = clientConfig.value.endpoints.mapNotNull { endpointMap[it]?.name }.ifEmpty { defaultEventTypeList }
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -73,7 +74,7 @@ class SubscriberService(
 
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
-      return SubscriberFilterList(eventType = listOf("default"), prisonId = null)
+      return SubscriberFilterList(eventType = defaultEventTypeList, prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
   }
