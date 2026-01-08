@@ -1,12 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
-import io.mockk.spyk
+import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
@@ -26,6 +28,10 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data
  *      * and an error is logged with the name of the event and the name of the flag
  */
 class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase() {
+  companion object {
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
   /**
    *  Feature flags:
    * - `person-languages-changed-notifications-enabled` : false
@@ -39,7 +45,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
   private val featureFlagTestConfig: FeatureFlagTestConfig = FeatureFlagTestConfig()
   private val hmppsId = "AA1234A"
 
-  private val spiedLogger = spyk<Logger>()
+  private val serviceLog = mockk<Logger>()
 
   override val featureFlagConfig get() = featureFlagTestConfig.featureFlagConfig
 
@@ -51,7 +57,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
     testClock,
     featureFlagConfig,
   ) {
-    override val log get() = spiedLogger
+    override val log get() = serviceLog
   }
 
   @BeforeEach
@@ -59,6 +65,10 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
     assumeIdentities(hmppsId = hmppsId, prisonId = null)
     // Assuming defined feature flags
     featureFlags.forEach { featureFlagTestConfig.assumeFeatureFlag(it.key, it.value) }
+
+    // service logging
+    every { serviceLog.warn(any()) } answers { log.warn(firstArg()) }
+    every { serviceLog.error(any<String>(), any(), any()) } answers { log.error(firstArg() as String, secondArg(), thirdArg()) }
   }
 
   @AfterEach
@@ -145,7 +155,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
 
       // Assert (verify error logging of missing feature flag)
       verify(exactly = 1) {
-        spiedLogger.error(
+        serviceLog.error(
           match<String> { it.startsWith("Missing feature flag") },
           eq(unexpectedEventType.featureFlag!!),
           eq(unexpectedEventType.name),
