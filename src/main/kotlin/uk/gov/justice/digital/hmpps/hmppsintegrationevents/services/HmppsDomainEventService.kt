@@ -73,9 +73,13 @@ class IntegrationEventTypeFilter(
   /**
    * Matching domain event to integration event type(s), respecting feature flags
    */
-  fun filterEventTypes(hmppsEvent: HmppsDomainEvent) = IntegrationEventType.entries.filter { it.predicate.invoke(hmppsEvent) }.filter { eventType ->
+  fun filterEventTypes(hmppsEvent: HmppsDomainEvent) = IntegrationEventType.entries
+    .filter { isNotDisabled(it) }
+    .filter { it.predicate.invoke(hmppsEvent) }
+
+  private fun isNotDisabled(eventType: IntegrationEventType): Boolean {
     // Filter event types per feature flag, if associated with
-    eventType.featureFlag?.let { feature ->
+    return eventType.featureFlag?.let { feature ->
       // i) enabled or disabled according to the defined feature flag;
       // ii) otherwise disabled, when feature flag is associated but undefined
       featureFlagConfig.getConfigFlagValue(feature) ?: run {
