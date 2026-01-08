@@ -168,16 +168,8 @@ abstract class HmppsDomainEventServiceTestCase {
   protected val eventNotificationRepository = mockk<EventNotificationRepository>()
   protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
-  protected val hmppsDomainEventService by lazy {
-    HmppsDomainEventService(
-      eventNotificationRepository,
-      deadLetterQueueService,
-      domainEventIdentitiesResolver,
-      baseUrl,
-      testClock,
-      featureFlagConfig,
-    )
-  }
+
+  protected val hmppsDomainEventService by lazy { createHmppsDomainEventService() }
 
   protected val sqsNotificationHelper by lazy { SqsNotificationGeneratingHelper(zonedCurrentDateTime) }
 
@@ -185,6 +177,15 @@ abstract class HmppsDomainEventServiceTestCase {
   internal fun setupBase() {
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
   }
+
+  protected open fun createHmppsDomainEventService() = HmppsDomainEventService(
+    eventNotificationRepository,
+    deadLetterQueueService,
+    domainEventIdentitiesResolver,
+    baseUrl,
+    testClock,
+    featureFlagConfig,
+  )
 
   protected fun generateEventNotification(
     eventType: IntegrationEventType,

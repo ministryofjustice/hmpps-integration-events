@@ -22,17 +22,17 @@ class HmppsDomainEventService(
   @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
   @Value("\${services.integration-api.url}") val baseUrl: String,
   private val clock: Clock,
-  featureFlagConfig: FeatureFlagConfig,
+  private val featureFlagConfig: FeatureFlagConfig,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  private val integrationEventTypeFilter = IntegrationEventTypeFilter(featureFlagConfig)
+  protected val log: Logger get() = Companion.log
 
   fun execute(hmppsDomainEvent: HmppsDomainEvent) {
     // Matching domain event to integration event type(s)
-    val integrationEventTypes = integrationEventTypeFilter.filterEventTypes(hmppsDomainEvent)
+    val integrationEventTypes = filterEventTypes(hmppsDomainEvent)
 
     if (integrationEventTypes.isNotEmpty()) {
       val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsDomainEvent)
@@ -51,27 +51,16 @@ class HmppsDomainEventService(
       }
     }
   }
-}
-
-/**
- * Event filter of [IntegrationEventType] from domain event [HmppsDomainEvent], configurable with feature-flag.
- *
- * - IntegrationEventTypes with no feature flag associated are enabled
- * - IntegrationEventTypes associated with a feature flag set to “true” are enabled
- * - IntegrationEventTypes associated with a feature flag set to “false” are not enabled
- * - IntegrationEventTypes that reference a feature flag that does not exist are disabled,
- *      * and an error is logged with the name of the event and the name of the flag
- */
-class IntegrationEventTypeFilter(
-  private val featureFlagConfig: FeatureFlagConfig,
-  private val log: Logger = defaultLogger,
-) {
-  companion object {
-    private val defaultLogger = LoggerFactory.getLogger(this::class.java)
-  }
 
   /**
+   * Filter event [IntegrationEventType] from domain event [HmppsDomainEvent], configurable with feature-flag.
+   * 
    * Matching domain event to integration event type(s), respecting feature flags
+   * - IntegrationEventTypes with no feature flag associated are enabled
+   * - IntegrationEventTypes associated with a feature flag set to “true” are enabled
+   * - IntegrationEventTypes associated with a feature flag set to “false” are not enabled
+   * - IntegrationEventTypes that reference a feature flag that does not exist are disabled,
+   *      * and an error is logged with the name of the event and the name of the flag
    */
   fun filterEventTypes(hmppsEvent: HmppsDomainEvent) = IntegrationEventType.entries
     .filter { isNotDisabled(it) }
