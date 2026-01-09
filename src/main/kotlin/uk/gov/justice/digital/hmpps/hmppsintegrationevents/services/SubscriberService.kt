@@ -53,7 +53,7 @@ class SubscriberService(
   ) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = matchesUrlToEvents(clientConfig.value.endpoints, endpointToEventCache)
+      val events = getEventsForEndpoints(clientConfig.value.endpoints, endpointToEventCache)
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -87,7 +87,7 @@ class SubscriberService(
    * Caching at `endpointToEventCache` for repeating endpoints; (transactional per refresh)
    * - return cached result when found, or call [IntegrationEventType.matchesUrl] to resolve (and cache)
    */
-  private fun matchesUrlToEvents(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> {
+  private fun getEventsForEndpoints(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> {
     val matchingEvents = endpoints.map { urlPattern ->
       // Get cached matching result, or else match it and cache result
       endpointToEventCache[urlPattern] ?: IntegrationEventType.entries
