@@ -1,8 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions
 
-const val URL_PARAM_ALLOWLIST = "[a-zA-Z0-9_-]"
-const val URL_PARAM_QUANTIFIER = "+"
-const val URL_PARAM = URL_PARAM_ALLOWLIST + URL_PARAM_QUANTIFIER
+const val DEFAULT_PATH_PLACEHOLDER = "[a-zA-Z0-9_-]+"
+
+/*
+ * URL/Path Matching
+ * - The underlying problem is that we use different formats for path expressions in different areas of the code and config, across the 2 repos, which makes it very hard to compare them.
+ * - Specifically it makes it hard to match URL patterns in integration event types with role permissions, but there are other scenarios where it makes things tricky.
+ *
+ * The solution has two components to it...
+ * - in the long term, use a "canonical" URL pattern everywhere (code and config, both repos) so you can easily see that two patterns are the same with the mark 1 eyeball
+ * - in the short term, normalise all URL path regular expressions into a common format, so that we can match them even when they use different formats for placeholders
+ *
+ * "Canonical" refers to the format that should be used for URL patterns in our code & config (changing to canonical format could be a task with later PR)
+ * "Normalised" refers to the regular expressions that the code ends up comparing and matching against
+ */
 
 /**
  * Match URL with given URL pattern
@@ -14,109 +25,50 @@ const val URL_PARAM = URL_PARAM_ALLOWLIST + URL_PARAM_QUANTIFIER
  * - wildcard paths in regex like these are not supported: /.*
  *
  * @param input An actual url, not pattern
- * @param urlPattern A URL pattern can be normalised by [normaliseUrl]
+ * @param pathPattern A URL pattern can be normalised by [normalisePath]
  */
-fun matchesUrl(input: String, urlPattern: String): Boolean = normaliseUrl(urlPattern).toRegex().matches(input)
+fun matchesUrl(input: String, pathPattern: String): Boolean = normalisePath(pathPattern).toRegex().matches(input.substringBefore('?'))
 
 /**
- * Normalise URL pattern to RegEx pattern
- * e.g.
- * Regex URL:
- *    /v1/persons/.*
- * Canonical URL: with named parameter(s
- *    /v1/persons/{hmppsId}
- * Normalised URL: Regex with parameter allowlist
- *    /v1/persons/[a-zA-Z0-9_\-]+
+ * Normalise path pattern
  *
- * @param urlPattern The URL pattern to be normalised
- * @return A normalised Regex pattern
- * @throws IllegalArgumentException when urlPattern is invalid (e.g. mixture of regex and named parameter)
- */
-fun normaliseUrl(urlPattern: String) = when (determinePatternType(urlPattern)) {
-  "Regex" -> urlPattern.normalisedFromRegex()
-  "PathTemplate" -> urlPattern.normalisedFromCanonicalUrl()
-  "Mixed" -> throw IllegalArgumentException("Invalid URL pattern: $urlPattern")
-  else -> urlPattern
-}.addPrefixIfMissing("/").cleansedFromNormalisedUrl()
-
-private val regexWildcards by lazy {
-  listOf(
-    "\\.", // Wildcard .
-    "\\[\\^\\/\\]", // Wildcard [^/]
-  ).joinToString(separator = "|").let { Regex(it) }
-}
-private val regexQuantifiers by lazy { Regex("\\*") }
-private val pathTemplatePattern by lazy { Regex("\\{[^}]+}") }
-
-/**
- * Determine type of URL pattern.
+ * - Examples:
+ *    - Regex URL: `/v1/persons/.*`
+ *    - Canonical URL: with named parameter: `/v1/persons/{hmppsId}`
+ * - Normalised URL: Regex with parameter allowlist: `/v1/persons/[a-zA-Z0-9_\-]+`
  *
- * @return string of either one: `Regex`, `PathTemplate`, `Mixed` or `Otherwise`
+ * @param pathPattern The path pattern to be normalised
+ * @return A normalised pattern
  */
-private fun determinePatternType(input: String): String {
-  // Heuristic for Regex: contains regex-specific symbols
-  val regexIndicators = listOf("^", "$", ".*", ".+", "\\d", "\\w", "[", "]", "(", ")")
-  val isRegex = regexIndicators.any { input.contains(it) }
-
-  // Heuristic for Spring Flux path template: contains {variable} placeholders
-  val isPathTemplate = pathTemplatePattern.containsMatchIn(input)
-
-  return when {
-    isRegex && !isPathTemplate -> "Regex"
-    isPathTemplate && !isRegex -> "PathTemplate"
-    isRegex && isPathTemplate -> "Mixed"
-    else -> "Otherwise"
-  }
+fun normalisePath(pathPattern: String): String {
+  val placeholders = arrayOf(
+    "{hmppsId}",
+    "{prisonId}",
+    "{contactId}",
+    "{visitReference}",
+    "{scheduleId}",
+    "{key}",
+    "{locationKey}",
+    "{id}",
+    "{imageId}",
+    "{accountCode}",
+    "{clientReference}",
+    "{clientVisitReference}",
+    "[^/]*",
+    "[^/]+",
+    ".*",
+  )
+  return pathPattern
+    .normalisePathPlaceholders(*placeholders)
+    .removePrefix("^")
+    .removeSuffix("$")
+    .ensurePrefix("/")
 }
 
-/**
- * Normalise a regex pattern:
- * - remove prefix ^ and suffix $
- * - replace Regex wildcards with allowlist
- * - enforce quantifier + (replacing all *)
- *
- * - supporting wildcard:
- *    - `.`
- *    - `[^/]`
- * - enforcing quantifier `+`, by replacing:
- *    - `*`
- * @receiver A string of Regex URL pattern
- */
-private fun String.normalisedFromRegex() = this.removePrefix("^").removeSuffix("$")
-  .removeWildcardSuffix("\\[\\^/]\\*", "[^/]*")
-  .replace(regexWildcards, URL_PARAM_ALLOWLIST)
-  .replace(regexQuantifiers, URL_PARAM_QUANTIFIER)
+private fun String.ensurePrefix(prefix: String) = if (startsWith(prefix)) this else "$prefix$this"
 
-/**
- * Normalise canonical path to regex,
- * e.g. /v1/persons/{hmppsId} to /v1/persons/[a-zA-Z0-9-]*
- *
- * @receiver A string of canonical URL pattern
- */
-private fun String.normalisedFromCanonicalUrl() = replace(Regex("""\{[^}]+}"""), URL_PARAM)
-
-/**
- * Cleanse an already-normalised URL
- * query parameters (anything from the first ? onwards) will be ignored.
- * @receiver A string of normalised URL pattern
- */
-private fun String.cleansedFromNormalisedUrl(): String = this.substringBefore('?')
-  .substringBefore('#')
-  .trimEnd('/')
-
-/**
- * This is for compatibility: A leading slash `/` is expected, but it may be absent.
- *
- * @receiver A string of URL pattern
- */
-private fun String.addPrefixIfMissing(prefix: String) = if (startsWith(prefix)) this else "/$this"
-
-/**
- * This is for compatibility: remove undesired wildcard suffix that is not mappable to named parameter
- *  e.g. /v1/prison/.+/visit/search[^/]*$  ===> /v1/prison/.+/visit/search
- */
-private fun String.removeWildcardSuffix(pattern: String, suffix: String) = if (endsWith(suffix)) {
-  this.replace(Regex("[^/]$pattern$")) { it.value.removeSuffix(suffix) }
-} else {
-  this
+private fun String.normalisePathPlaceholders(vararg placeholders: String) = placeholders.fold(this) { path, placeholder ->
+  path.normalisePathPlaceholder(placeholder)
 }
+
+private fun String.normalisePathPlaceholder(placeholder: String) = replace(placeholder, DEFAULT_PATH_PLACEHOLDER)

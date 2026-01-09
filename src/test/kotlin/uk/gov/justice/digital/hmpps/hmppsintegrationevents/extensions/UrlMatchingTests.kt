@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions
 
+import io.kotest.matchers.shouldBe
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.util.*
@@ -39,6 +39,14 @@ class UrlMatchingTests {
         input = "/v1/persons/A1234BC/def",
         urlPattern = "/v1/persons/[^/]*",
       )
+
+      @ParameterizedTest
+      @CsvSource(
+        textBlock = """
+        /v1/persons/A1234BC/contacts?page=1&perPage=10                                  , /v1/persons/.*/contacts
+        /v1/prison/MDI/visit/search?hmppsId=A1234BC&visitStatus=BOOKED&page=1&size=10   , /v1/prison/.*/visit/search""",
+      )
+      fun `should match actual url with query parameter`(input: String, urlPattern: String) = assertMatchesUrlPatternDoesMatch(input, urlPattern)
     }
 
     @Nested
@@ -116,13 +124,6 @@ class UrlMatchingTests {
         urlPattern = "/my/url/{id}",
       )
 
-      @Test
-      fun `should not match invalid url to canonical pattern`() = assertMatchesUrlPatternNotMatch(
-        // { and } are not in allowlist of named parameter value
-        input = "/some/id1/more/{id2}",
-        urlPattern = "/some/{id1}/more/{id2}",
-      )
-
       /**
        * Tests for these known named parameters
        * - common: hmppsId, prisonId
@@ -171,64 +172,44 @@ class UrlMatchingTests {
   @Nested
   @DisplayName("Given URL pattern to be normalised")
   inner class GivenUrlPatternToBeNormalised {
-    private val param = URL_PARAM
-
     @Nested
     @DisplayName("And URL pattern is Regex")
     inner class AndRegexPattern {
       @Test
       fun `should normalise wildcard #1 except-forward-slash`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "/v1/persons/[^/]*",
       )
 
       @Test
       fun `should normalise wildcard #2 dot-asterisk`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param/name",
+        expectedUrlPattern = "/v1/persons/$PARAM/name",
         urlPattern = "/v1/persons/.*/name",
       )
 
       @Test
       fun `should normalise wildcard #3 except-forward-slash plus`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "/v1/persons/[^/]+",
       )
 
       @Test
       fun `should normalise wildcard #4 dot-plus`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param/addresses",
+        expectedUrlPattern = "/v1/persons/$PARAM/addresses",
         urlPattern = "/v1/persons/.*/addresses",
       )
 
       @Test
       fun `should normalise, ignoring prefix ^`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "^/v1/persons/.*",
       )
 
       @Test
       fun `should normalise, ignoring suffix $`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "/v1/persons/[^/]*$",
       )
-
-      @Test
-      fun `should normalise, ignoring wildcard suffix`() {
-        val pattern = "[^/]*$"
-        assertNormaliseUrlEquals(
-          expectedUrlPattern = "/v1/prison/$PARAM/visit/search",
-          urlPattern = "/v1/prison/.*/visit/search$pattern",
-        )
-      }
-
-      @Test
-      fun `should normalise, with a wildcard in middle`() {
-        val pattern = "[^/]*"
-        assertNormaliseUrlEquals(
-          expectedUrlPattern = "/v1/prison/$PARAM/visit$PARAM/search",
-          urlPattern = "/v1/prison/.*/visit$pattern/search$pattern",
-        )
-      }
 
       @ParameterizedTest
       @CsvSource(
@@ -237,9 +218,9 @@ class UrlMatchingTests {
           /v1/persons/[^/]+/prisoner-base-location              , /v1/persons/$PARAM/prisoner-base-location
           /v1/persons/.*/education/assessments                  , /v1/persons/$PARAM/education/assessments
           /v1/persons/.*/images/.*                              , /v1/persons/$PARAM/images/$PARAM
-          /v1/persons/.*/contacts[^/]*$                         , /v1/persons/$PARAM/contacts
+          /v1/persons/.*/contacts                               , /v1/persons/$PARAM/contacts
           /v1/prison/prisoners/[^/]*$                           , /v1/prison/prisoners/$PARAM
-          /v1/prison/.*/visit/search[^/]*$                      , /v1/prison/$PARAM/visit/search
+          /v1/prison/.*/visit/search                            , /v1/prison/$PARAM/visit/search
           /v1/prison/.*/prisoners/[^/]*/balances$               , /v1/prison/$PARAM/prisoners/$PARAM/balances
           /v1/prison/.*/prisoners/.*/accounts/.*/balances       , /v1/prison/$PARAM/prisoners/$PARAM/accounts/$PARAM/balances
           /v1/prison/.*/location/[^/]*$                         , /v1/prison/$PARAM/location/$PARAM
@@ -255,13 +236,13 @@ class UrlMatchingTests {
     inner class AndCanonicalPattern {
       @Test
       fun `should normalise canonical pattern`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "/v1/persons/{hmppsId}",
       )
 
       @Test
       fun `should normalise canonical pattern, with leading slash missing`() = assertNormaliseUrlEquals(
-        expectedUrlPattern = "/v1/persons/$param",
+        expectedUrlPattern = "/v1/persons/$PARAM",
         urlPattern = "v1/persons/{hmppsId}",
       )
 
@@ -276,32 +257,47 @@ class UrlMatchingTests {
           /v1/prison/{prisonId}/visit/search                                            , /v1/prison/$PARAM/visit/search
           /v1/prison/{prisonId}/prisoners/{hmppsId}/balances                            , /v1/prison/$PARAM/prisoners/$PARAM/balances
           /v1/prison/{prisonId}/prisoners/{hmppsId}/accounts/{accountCode}/transactions , /v1/prison/$PARAM/prisoners/$PARAM/accounts/$PARAM/transactions
+          /v1/prison/{prisonId}/location/{locationKey}                                  , /v1/prison/$PARAM/location/$PARAM
           /v1/prison/{prisonId}/location/{key}                                          , /v1/prison/$PARAM/location/$PARAM
           /v1/contacts/{contactId}                                                      , /v1/contacts/$PARAM
           /v1/visit/id/by-client-ref/{clientReference}                                  , /v1/visit/id/by-client-ref/$PARAM
+          /v1/visit/id/by-client-ref/{clientVisitReference}                             , /v1/visit/id/by-client-ref/$PARAM
           /v1/visit/{visitReference}                                                    , /v1/visit/$PARAM""",
       )
       fun `should normalise URL patterns of Regex`(urlPattern: String, expectedUrlPattern: String) = assertNormaliseUrlEquals(expectedUrlPattern, urlPattern)
-    }
-
-    @Test
-    fun `should return error, with invalid URL pattern`() {
-      // URL pattern is mixture of canonical and regex
-      val urlPattern = "/v1/persons/{hmppsId}/images/.*"
-      val ex = assertThrows<IllegalArgumentException> {
-        normaliseUrl(urlPattern)
-      }
-      assertThat(ex).hasMessageStartingWith("Invalid URL pattern:")
     }
 
     private fun assertNormaliseUrlEquals(
       expectedUrlPattern: String,
       urlPattern: String,
     ) {
-      val actualUrlPattern = normaliseUrl(urlPattern)
-      assertThat(actualUrlPattern).isEqualTo(expectedUrlPattern)
+      val expectedNormalisedPattern = normalisePath(expectedUrlPattern)
+      val actualUrlPattern = normalisePath(urlPattern)
+      assertThat(actualUrlPattern).isEqualTo(expectedNormalisedPattern)
     }
   }
 }
 
-private const val PARAM = "$URL_PARAM_ALLOWLIST$URL_PARAM_QUANTIFIER"
+class PathMatchingTest {
+  private fun assertAllEqual(vararg strings: String) {
+    strings.forEachIndexed { index, s ->
+      strings.forEachIndexed { i, ss ->
+        if (i != index) ss shouldBe s
+      }
+    }
+  }
+
+  @Test
+  fun `all normalised get-person paths should be equal`() {
+    assertAllEqual(
+      "/v1/persons/$DEFAULT_PATH_PLACEHOLDER",
+      normalisePath("/v1/persons/{hmppsId}"),
+      normalisePath("/v1/persons/{id}"),
+      normalisePath("/v1/persons/.*$"),
+      normalisePath("v1/persons/.*$"),
+      normalisePath("/v1/persons/[^/]*\$"),
+    )
+  }
+}
+
+private const val PARAM = DEFAULT_PATH_PLACEHOLDER
