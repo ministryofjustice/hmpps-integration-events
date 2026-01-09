@@ -296,6 +296,29 @@ class SubscriberServiceTests {
     testSubscriptionFilter(endpoints, expectedEventTypes, consumer)
   }
 
+  @ParameterizedTest
+  @CsvSource(
+    textBlock = """
+      /v1/persons/.*/plp-induction-schedule/history       , PLP_INDUCTION_SCHEDULE_CHANGED
+      /v1/persons/.*/prisoner-base-location               , PRISONER_BASE_LOCATION_CHANGED,
+      /v1/persons/[^/]+/prisoner-base-location            , PRISONER_BASE_LOCATION_CHANGED
+      /v1/persons/.*/education/assessments                , PERSON_EDUCATION_ASSESSMENTS_CHANGED""",
+  )
+  fun `should grant access to event, if client has access to relevant endpoint`(endpoint: String, eventType: String) = testSubscriptionFilter(
+    endpoints = listOf(endpoint),
+    expectedEventTypes = listOf(eventType),
+  )
+
+  @Test
+  fun `should NOT grant access to event, if client has access to endpoints without relevant event`() = testSubscriptionFilterHasNoUpdate(
+    // should not update default filter
+    endpoints = listOf(
+      "/v1/status",
+      "/v1/persons/.*/plp-induction-schedule",
+      "/v1/persons/[^/]+/expression-of-interest/jobs/[^/]+$",
+    ),
+  )
+
   @Nested
   @DisplayName("Given error, while checking subscriber filter list")
   inner class GivenErrorCheckingSubscriberFilter {
