@@ -156,6 +156,14 @@ class UrlMatchingTests {
         /v1/visits/ab-cd-ef-gh                                        , /v1/visit/{visitReference}""",
       )
       fun `should not match mismatching urls to canonical pattern`(input: String, pathTemplate: String) = assertMatchesUrlPatternNotMatch(input, pathTemplate)
+
+      @ParameterizedTest
+      @CsvSource(
+        textBlock = """
+        /v1/persons/A1234BC/contacts?page=1&perPage=10                                  , /v1/persons/{hmppsId}/contacts
+        /v1/prison/MDI/visit/search?hmppsId=A1234BC&visitStatus=BOOKED&page=1&size=10   , /v1/prison/{prisonId}/visit/search""",
+      )
+      fun `should match actual url with query parameter`(input: String, urlPattern: String) = assertMatchesUrlPatternDoesMatch(input, urlPattern)
     }
 
     private fun assertMatchesUrlPatternDoesMatch(input: String, urlPattern: String) {
