@@ -34,11 +34,8 @@ class SubscriberService(
       val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
       val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
-      // Mappings' Cache (endpoints to events)
-      val endpointToEventCache: EndpointToEventCache = MappingCache.create()
-
       apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
-        .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!, endpointToEventCache) }
+        .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
 
       log.info("Subscriber filter list checked")
     } catch (e: Exception) {
@@ -46,14 +43,10 @@ class SubscriberService(
     }
   }
 
-  private fun refreshClientFilter(
-    clientConfig: Map.Entry<String, ConfigAuthorisation>,
-    subscriber: HmppsSecretManagerProperties.SecretConfig,
-    endpointToEventCache: EndpointToEventCache,
-  ) {
+  private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = getEventsForEndpoints(clientConfig.value.endpoints, endpointToEventCache)
+      val events = getEventsForEndpoints(clientConfig.value.endpoints)
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -83,17 +76,10 @@ class SubscriberService(
    * Match endpoints' URL to event types
    * - The sequence of resolved events is consistent according to inputs (endpoint URLs).
    * - The resolved events are distinct (deduplicated when needed).
-   *
-   * Caching at `endpointToEventCache` for repeating endpoints; (transactional per refresh)
-   * - return cached result when found, or call [IntegrationEventType.matchesUrl] to resolve (and cache)
    */
-  private fun getEventsForEndpoints(endpoints: List<String>, endpointToEventCache: EndpointToEventCache): List<String> {
+  private fun getEventsForEndpoints(endpoints: List<String>): List<String> {
     val matchingEvents = endpoints.map { urlPattern ->
-      // Get cached matching result, or else match it and cache result
-      endpointToEventCache[urlPattern] ?: IntegrationEventType.entries
-        .filter { it.matchesUrl(urlPattern) }
-        .map { it.name }
-        .also { endpointToEventCache[urlPattern] = it }
+      IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }.map { it.name }
     }.asSequence().distinct().flatten().toList()
 
     return matchingEvents.ifEmpty { defaultEventTypeList }
@@ -112,29 +98,5 @@ class SubscriberService(
   ) {
     log.error(message, e.message)
     telemetryService.captureException(RuntimeException(message, e))
-  }
-}
-
-/**
- * EndpointToEventCache: Mapping Endpoint URL to a list of Event types
- */
-typealias EndpointToEventCache = MutableMap<String, List<String>>
-
-private class MappingCache private constructor() {
-  companion object {
-    private object MappingCacheConfiguration {
-      const val LOAD_FACTOR = 0.75f
-      val defaultCapacity = IntegrationEventType.entries.count()
-    }
-
-    fun create(): EndpointToEventCache = lruCache()
-
-    // Least-Recently-Used cache using LinkedHashMap with accessOrder
-    private fun <K, V> lruCache(
-      capacity: Int = MappingCacheConfiguration.defaultCapacity,
-      loadFactor: Float = MappingCacheConfiguration.LOAD_FACTOR,
-    ): MutableMap<K, V> = object : LinkedHashMap<K, V>(capacity, loadFactor, true) {
-      override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>) = size > capacity
-    }
   }
 }
