@@ -31,6 +31,10 @@ hmpps.sqs:
       queueName: ${KILCO_QUEUE_NAME}
       queueArn: ${KILCO_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    catssubscriberqueue:
+      queueName: ${CATS_QUEUE_NAME}
+      queueArn: ${CATS_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
@@ -56,6 +60,9 @@ hmpps.secret:
     KILCO:
       secretId: ${KILCO_FILTER_POLICY_SECRET_ID}
       queueId: kilcosubscriberqueue
+    CATS:
+      secretId: live-hmpps-integration-api-dev-88d1b457a0f861ec
+      queueId: catssubscriberqueue
 notifier:
   schedule:
     rate: 10000
