@@ -16,12 +16,6 @@ generic-service:
     SENTRY_ENVIRONMENT: preprod
     SPRING_PROFILES_ACTIVE: preprod
 
-  namespace_secrets:
-    event-cats-queue:
-      CATS_QUEUE_NAME: "sqs_name"
-      CATS_QUEUE_ARN: "sqs_arn"
-      CATS_FILTER_POLICY_SECRET_ID: "cats_filter_policy_secret_id"
-
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
