@@ -2,6 +2,31 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions
 
 const val DEFAULT_PATH_PLACEHOLDER = "[a-zA-Z0-9_-]+"
 
+private val pathPlaceholders =
+  arrayOf(
+    "{hmppsId}",
+    "{prisonId}",
+    "{contactId}",
+    "{visitReference}",
+    "{scheduleId}",
+    "{key}",
+    "{locationKey}",
+    "{id}",
+    "{imageId}",
+    "{accountCode}",
+    "{clientReference}",
+    "{clientVisitReference}",
+    "{activityId}",
+    "{clientUniqueRef}",
+    "{eventNumber}",
+    "{contactEventId}",
+    "{jobid}",
+    "{nomisNumber}",
+    "[^/]*",
+    "[^/]+",
+    ".*",
+  )
+
 /*
  * URL/Path Matching
  * - The underlying problem is that we use different formats for path expressions in different areas of the code and config, across the 2 repos, which makes it very hard to compare them.
@@ -40,34 +65,14 @@ fun matchesUrl(input: String, pathPattern: String): Boolean = normalisePath(path
  * @param pathPattern The path pattern to be normalised
  * @return A normalised pattern
  */
-fun normalisePath(pathPattern: String): String {
-  val placeholders = arrayOf(
-    "{hmppsId}",
-    "{prisonId}",
-    "{contactId}",
-    "{visitReference}",
-    "{scheduleId}",
-    "{key}",
-    "{locationKey}",
-    "{id}",
-    "{imageId}",
-    "{accountCode}",
-    "{clientReference}",
-    "{clientVisitReference}",
-    "[^/]*",
-    "[^/]+",
-    ".*",
-  )
-  return pathPattern
-    .normalisePathPlaceholders(*placeholders)
-    .removePrefix("^")
-    .removeSuffix("$")
-    .ensurePrefix("/")
+fun normalisePath(pathPattern: String): String = when (pathPattern) {
+  "/.*" -> pathPattern // Wildcard at start of path is not a parameter placeholder
+  else -> pathPattern.normalisePathPlaceholders().removePrefix("^").removeSuffix("$").ensurePrefix("/")
 }
 
 private fun String.ensurePrefix(prefix: String) = if (startsWith(prefix)) this else "$prefix$this"
 
-private fun String.normalisePathPlaceholders(vararg placeholders: String) = placeholders.fold(this) { path, placeholder ->
+private fun String.normalisePathPlaceholders() = pathPlaceholders.fold(this) { path, placeholder ->
   path.normalisePathPlaceholder(placeholder)
 }
 
