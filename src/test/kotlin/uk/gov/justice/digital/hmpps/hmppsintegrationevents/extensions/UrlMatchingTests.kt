@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import java.util.*
 
 class UrlMatchingTests {
@@ -304,6 +305,7 @@ class PathMatchingTest {
       normalisePath("/v1/persons/.*$"),
       normalisePath("v1/persons/.*$"),
       normalisePath("/v1/persons/[^/]*\$"),
+      normalisePath(IntegrationEventType.PERSON_STATUS_CHANGED.pathTemplate),
     )
   }
 }

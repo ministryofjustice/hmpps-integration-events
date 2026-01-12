@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.normalisePath
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.IntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthorisation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
@@ -46,7 +47,10 @@ class SubscriberService(
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
     log.info("Checking filter list for ${clientConfig.key}...")
     try {
-      val events = getEventsForEndpoints(clientConfig.value.endpoints)
+      val events = clientConfig.value.endpoints
+        .map { normalisePath(it) }
+        .mapNotNull { endpointMap[it]?.map { eventType -> eventType.name } }.flatten()
+        .ifEmpty { defaultEventTypeList }
       val prisonIds = clientConfig.value.filters?.prisons
 
       val secretValue = secretsManagerService.getSecretValue(subscriber.secretId)
@@ -72,24 +76,15 @@ class SubscriberService(
     }
   }
 
-  /**
-   * Match endpoints' URL to event types
-   * - The sequence of resolved events is consistent according to inputs (endpoint URLs).
-   * - The resolved events are distinct (deduplicated when needed).
-   */
-  private fun getEventsForEndpoints(endpoints: List<String>): List<String> {
-    val matchingEvents = endpoints.map { urlPattern ->
-      IntegrationEventType.entries.filter { it.matchesUrl(urlPattern) }.map { it.name }
-    }.asSequence().distinct().flatten().toList()
-
-    return matchingEvents.ifEmpty { defaultEventTypeList }
-  }
-
   private fun unmarshalFilterList(secretValue: String): SubscriberFilterList {
     if (secretValue == "") {
       return SubscriberFilterList(eventType = defaultEventTypeList, prisonId = null)
     }
     return objectMapper.readValue<SubscriberFilterList>(secretValue)
+  }
+
+  private val endpointMap: Map<String, List<IntegrationEventType>> by lazy {
+    IntegrationEventType.entries.groupBy { normalisePath(it.pathTemplate) }
   }
 
   private fun logAndCapture(
