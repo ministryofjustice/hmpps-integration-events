@@ -15,6 +15,10 @@ hmpps.sqs:
       queueName: ${PND_QUEUE_NAME}
       queueArn: ${PND_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    catssubscriberqueue:
+      queueName: ${CATS_QUEUE_NAME}
+      queueArn: ${CATS_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
@@ -27,6 +31,9 @@ hmpps.secret:
     PND:
       secretId: live-hmpps-integration-api-preprod-afea65e8d033b24c
       queueId: pndsubscriberqueue
+    CATS:
+      secretId: live-hmpps-integration-api-preprod-87569c2f1e5db329
+      queueId: catssubscriberqueue
 
 notifier:
   schedule:
