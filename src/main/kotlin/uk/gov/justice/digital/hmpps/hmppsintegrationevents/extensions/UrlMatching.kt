@@ -67,7 +67,12 @@ fun matchesUrl(input: String, pathPattern: String): Boolean = normalisePath(path
  */
 fun normalisePath(pathPattern: String): String = when (pathPattern) {
   "/.*" -> pathPattern // Wildcard at start of path is not a parameter placeholder
-  else -> pathPattern.normalisePathPlaceholders().removePrefix("^").removeSuffix("$").ensurePrefix("/")
+  else ->
+    pathPattern
+      .normalisePathPlaceholders()
+      .removePrefix("^")
+      .removeSuffix("$")
+      .ensurePrefix("/")
 }
 
 private fun String.ensurePrefix(prefix: String) = if (startsWith(prefix)) this else "$prefix$this"
