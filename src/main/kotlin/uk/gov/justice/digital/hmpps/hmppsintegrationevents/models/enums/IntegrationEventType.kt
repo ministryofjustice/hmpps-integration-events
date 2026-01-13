@@ -245,7 +245,7 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
 )
 
 enum class IntegrationEventType(
-  private val pathTemplate: String,
+  val pathTemplate: String,
   val predicate: (HmppsDomainEvent) -> Boolean,
   val featureFlag: String? = null,
 ) {

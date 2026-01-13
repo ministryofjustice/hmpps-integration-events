@@ -222,7 +222,7 @@ class SubscriberServiceTests {
   @ParameterizedTest
   @CsvSource(
     "/v1/persons/.*/risks/scores, RISK_SCORE_CHANGED,",
-    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED,",
+    "/v1/persons/[^/]*$, PERSON_STATUS_CHANGED, PRISONER_MERGED",
   )
   fun `grant access to risk score events if client has access to risk score endpoint`(
     clientConsumerPath: String,
@@ -272,7 +272,7 @@ class SubscriberServiceTests {
   @Test
   fun `set filter list if current filter is empty`() = testSubscriptionFilter(
     endpoints = listOf("/v1/persons/[^/]*$"),
-    expectedEventTypes = listOf("PERSON_STATUS_CHANGED"),
+    expectedEventTypes = listOf("PERSON_STATUS_CHANGED", "PRISONER_MERGED"),
     currentFilter = "",
   )
 
@@ -285,18 +285,39 @@ class SubscriberServiceTests {
   @Test
   fun `should grant access to person events, if client has access to person endpoint`() {
     // Arrange
-    val consumer = "client1" // with role "curious"
+    val consumer = "client1"
     val endpoints = listOf("/v1/persons/[^/]*$")
     val expectedEventTypes = listOf(
       "PERSON_STATUS_CHANGED",
-      // "PRISONER_MERGED",
+      "PRISONER_MERGED",
     )
-
-    `when`(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(mapOf(consumer to ConfigAuthorisation(endpoints, null)))
 
     // Act, Assert
     testSubscriptionFilter(endpoints, expectedEventTypes, consumer)
   }
+
+  @ParameterizedTest
+  @CsvSource(
+    textBlock = """
+      /v1/persons/.*/plp-induction-schedule/history       , PLP_INDUCTION_SCHEDULE_CHANGED
+      /v1/persons/.*/prisoner-base-location               , PRISONER_BASE_LOCATION_CHANGED,
+      /v1/persons/[^/]+/prisoner-base-location            , PRISONER_BASE_LOCATION_CHANGED
+      /v1/persons/.*/education/assessments                , PERSON_EDUCATION_ASSESSMENTS_CHANGED""",
+  )
+  fun `should grant access to event, if client has access to relevant endpoint`(endpoint: String, eventType: String) = testSubscriptionFilter(
+    endpoints = listOf(endpoint),
+    expectedEventTypes = listOf(eventType),
+  )
+
+  @Test
+  fun `should NOT grant access to event, if client has access to endpoints without relevant event`() = testSubscriptionFilterHasNoUpdate(
+    // should not update default filter
+    endpoints = listOf(
+      "/v1/status",
+      "/v1/persons/.*/plp-induction-schedule",
+      "/v1/persons/[^/]+/expression-of-interest/jobs/[^/]+$",
+    ),
+  )
 
   @Nested
   @DisplayName("Given error, while checking subscriber filter list")
