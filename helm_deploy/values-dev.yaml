@@ -28,6 +28,10 @@ generic-service:
       KILCO_QUEUE_NAME: "sqs_name"
       KILCO_QUEUE_ARN: "sqs_arn"
       KILCO_FILTER_POLICY_SECRET_ID: "kilco_filter_policy_secret_id"
+    event-moj-esw-queue:
+      MOJ_ESW_QUEUE_NAME: "sqs_name"
+      MOJ_ESW_QUEUE_ARN: "sqs_arn"
+      MOJ_ESW_FILTER_POLICY_SECRET_ID: "moj_esw_filter_policy_secret_id"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts

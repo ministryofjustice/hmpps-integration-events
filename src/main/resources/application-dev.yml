@@ -35,6 +35,10 @@ hmpps.sqs:
       queueName: ${CATS_QUEUE_NAME}
       queueArn: ${CATS_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    mojeswsubscriberqueue:
+      queueName: ${MOJ_ESW_QUEUE_NAME}
+      queueArn: ${MOJ_ESW_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
@@ -63,6 +67,9 @@ hmpps.secret:
     CATS:
       secretId: live-hmpps-integration-api-dev-88d1b457a0f861ec
       queueId: catssubscriberqueue
+    MOJ-ESW:
+      secretId: ${MOJ_ESW_FILTER_POLICY_SECRET_ID}
+      queueId: mojeswsubscriberqueue
 notifier:
   schedule:
     rate: 10000
