@@ -68,7 +68,7 @@ hmpps.secret:
       secretId: live-hmpps-integration-api-dev-88d1b457a0f861ec
       queueId: catssubscriberqueue
     MOJ-ESW:
-      secretId: ${MOJ_ESW_FILTER_POLICY_SECRET_ID}
+      secretId: live-hmpps-integration-api-dev-412962aea4333ad8
       queueId: mojeswsubscriberqueue
 notifier:
   schedule:
