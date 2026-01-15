@@ -29,6 +29,7 @@ data class FeatureFlagConfig(
     const val PERSON_LANGUAGES_CHANGED_NOTIFICATIONS_ENABLED = "person-languages-changed-notifications-enabled"
     const val PRISONER_MERGED_NOTIFICATIONS_ENABLED = "prisoner-merge-notifications-enabled"
     const val PRISONER_BASE_LOCATION_CHANGED_NOTIFICATIONS_ENABLED = "prisoner-base-location-changed-notifications-enabled"
+    const val CONTACT_EVENTS_NOTIFICATIONS_ENABLED = "contact-events-notifications-enabled"
   }
 
   /**

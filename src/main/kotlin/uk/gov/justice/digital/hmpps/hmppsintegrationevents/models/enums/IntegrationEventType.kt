@@ -76,6 +76,21 @@ val NEW_PRISONER_EVENTS = listOf(
   HmppsDomainEventName.PrisonerOffenderSearch.Prisoner.RECEIVED,
 )
 
+val CONTACT_EVENT_CREATED_EVENTS = listOf(
+  HmppsDomainEventName.ProbabtionCase.MappaExport.CREATED,
+  HmppsDomainEventName.ProbabtionCase.MappaInformation.CREATED,
+  HmppsDomainEventName.ProbabtionCase.AssessmentSummary.CREATED,
+  HmppsDomainEventName.ProbabtionCase.Cas3Booking.CREATED,
+  HmppsDomainEventName.ProbabtionCase.SupervisionAppointment.CREATED,
+  HmppsDomainEventName.ProbabtionCase.Supervision.CREATED,
+)
+
+val CONTACT_EVENT_CHANGED_EVENTS = listOf(
+  HmppsDomainEventName.ProbabtionCase.MappaInformation.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.MappaExport.TERMINATED,
+  HmppsDomainEventName.ProbabtionCase.MappaInformation.DELETED,
+)
+
 enum class PrisonerChangedCategory {
   IDENTIFIERS,
   PERSONAL_DETAILS,
@@ -508,6 +523,16 @@ enum class IntegrationEventType(
     "v1/contacts/{contactId}",
     { false }, // No specific event found
   ),
+  CONTACT_EVENT_CREATED(
+    "v1/persons/{hmppsId}/contact-events/{contactEventId}",
+    { CONTACT_EVENT_CREATED_EVENTS.contains(it.eventType) },
+    featureFlag = FeatureFlagConfig.CONTACT_EVENTS_NOTIFICATIONS_ENABLED,
+  ),
+  CONTACT_EVENT_CHANGED(
+    "v1/persons/{hmppsId}/contact-events/{contactEventId}",
+    { CONTACT_EVENT_CHANGED_EVENTS.contains(it.eventType) },
+    featureFlag = FeatureFlagConfig.CONTACT_EVENTS_NOTIFICATIONS_ENABLED,
+  ),
   PERSON_HEALTH_AND_DIET_CHANGED(
     "v1/persons/{hmppsId}/health-and-diet",
     { NEW_PERSON_EVENTS.contains(it.eventType) }, // No specific event found
@@ -560,6 +585,7 @@ enum class IntegrationEventType(
       if (it.contactPersonId != null) replacedPath = replacedPath.replace("{contactId}", it.contactPersonId)
       if (it.reference != null) replacedPath = replacedPath.replace("{visitReference}", it.reference)
       if (it.key != null) replacedPath = replacedPath.replace("{locationKey}", it.key)
+      if (it.contactEventId != null) replacedPath = replacedPath.replace("{contactEventId}", it.contactEventId)
     }
     return replacedPath
   }
