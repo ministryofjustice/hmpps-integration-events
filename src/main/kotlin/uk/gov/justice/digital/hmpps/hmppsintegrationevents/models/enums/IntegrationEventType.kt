@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.PrisonNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.extensions.isValidContactEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.AdditionalInformation
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEventName
@@ -525,12 +526,12 @@ enum class IntegrationEventType(
   ),
   CONTACT_EVENT_CREATED(
     "v1/persons/{hmppsId}/contact-events/{contactEventId}",
-    { CONTACT_EVENT_CREATED_EVENTS.contains(it.eventType) },
+    { CONTACT_EVENT_CREATED_EVENTS.contains(it.eventType) && it.isValidContactEvent() },
     featureFlag = FeatureFlagConfig.CONTACT_EVENTS_NOTIFICATIONS_ENABLED,
   ),
   CONTACT_EVENT_CHANGED(
     "v1/persons/{hmppsId}/contact-events/{contactEventId}",
-    { CONTACT_EVENT_CHANGED_EVENTS.contains(it.eventType) },
+    { CONTACT_EVENT_CHANGED_EVENTS.contains(it.eventType) && it.isValidContactEvent() },
     featureFlag = FeatureFlagConfig.CONTACT_EVENTS_NOTIFICATIONS_ENABLED,
   ),
   PERSON_HEALTH_AND_DIET_CHANGED(
