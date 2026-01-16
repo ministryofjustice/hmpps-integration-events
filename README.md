@@ -107,6 +107,34 @@ The [runbook](https://github.com/ministryofjustice/hmpps-integration-events/tree
 
 - [localstack](https://www.localstack.cloud/) a cloud software development framework to emulate AWS services.
 - [docker](https://www.docker.com/) used to manage virtual application containers on a common OS to ease development.
+- [awscli](https://aws.amazon.com/cli/) used to get config of region settings for emulation of AWS services
+
+### AWS CLI configuation
+
+Before we can run the code we need to make sure AWS CLI is installed and configured with a region. 
+
+1. Check if AWS CLI is installed.
+
+```bash
+  aws --version
+```
+
+If you see `command not found: aws` then run this to install.
+
+```bash
+brew install awscli
+````
+2. Check if region is set.
+
+```bash
+aws configure get region
+```
+
+if you see nothing print to the command line, then run.
+
+```bash
+brew aws configure set region eu-west-2
+````
 
 ### Using IntelliJ IDEA
 
@@ -124,8 +152,7 @@ using IntelliJ but other IDEs will prove similar.
    minutes.
 3. Run `make create-env-file` to generate a `.env` file containing random values that will be set on the local dependencies and in the application config. Ensure that this file **does not** get commited.
 
-4. Obtain an API key for [hmpps-integration-api](https://github.com/ministryofjustice/hmpps-integration-api/tree/main) and set in [application-localstack.yml](src%2Fmain%2Fresources%2Fapplication-localstack.yml)
-5. Ensuring that docker is running within the root folder of the codebase, run the following command.
+4. Ensuring that docker is running within the root folder of the codebase, run the following command. `Note`: Make sure all docker services are stopped before running this command. 
 
     ```bash
     make serve
