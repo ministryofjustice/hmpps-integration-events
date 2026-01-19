@@ -24,6 +24,27 @@ object HmppsDomainEventName {
         const val MANUAL_CALCULATION = "probation-case.risk-scores.ogrs.manual-calculation"
       }
     }
+    object MappaInformation {
+      const val CREATED = "probation-case.mappa-information.created"
+      const val UPDATED = "probation-case.mappa-information.updated"
+      const val DELETED = "probation-case.mappa-information.deleted"
+    }
+    object MappaExport {
+      const val CREATED = "probation-case.mappa-export.created"
+      const val TERMINATED = "probation-case.mappa-export.terminated"
+    }
+    object AssessmentSummary {
+      const val CREATED = "probation-case.assessment-summary.created"
+    }
+    object SupervisionAppointment {
+      const val CREATED = "probation-case.supervision-appointment.created"
+    }
+    object Supervision {
+      const val CREATED = "probation-case.supervision.created"
+    }
+    object Cas3Booking {
+      const val CREATED = "probation-case.cas3-booking.created"
+    }
   }
 
   object Probation {

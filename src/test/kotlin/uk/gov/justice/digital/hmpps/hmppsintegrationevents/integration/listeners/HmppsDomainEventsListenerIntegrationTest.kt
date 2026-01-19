@@ -1003,6 +1003,100 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     }
   }
 
+  @Nested
+  @DisplayName("Contact Event domain events")
+  inner class GivenContactEventDomainEvent {
+
+    @ParameterizedTest
+    @ValueSource(
+      strings = [
+        HmppsDomainEventName.ProbabtionCase.MappaExport.CREATED,
+        HmppsDomainEventName.ProbabtionCase.MappaInformation.CREATED,
+        HmppsDomainEventName.ProbabtionCase.AssessmentSummary.CREATED,
+        HmppsDomainEventName.ProbabtionCase.Cas3Booking.CREATED,
+        HmppsDomainEventName.ProbabtionCase.SupervisionAppointment.CREATED,
+        HmppsDomainEventName.ProbabtionCase.Supervision.CREATED,
+      ],
+    )
+    fun `will process the domain event and create a CONTACT_EVENT_CREATED integration event for `(eventType: String) {
+      ProbationIntegrationApiExtension.server.stubGetIfPersonExists(crn)
+      val contactEventId = "1234"
+      val message = """
+      {
+        "eventType": "$eventType",
+        "version": 1,
+        "description": "A contact event",
+        "occurredAt": "2026-01-15T12:33:34+01:00",
+        "additionalInformation": {
+          "contactEventId": $contactEventId,
+          "visorContact": true,
+          "mappaCategoryNumber": 1
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "CRN", 
+              "value": "$crn"
+             }
+          ]
+        }
+      }
+      """
+      val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+      sendDomainSqsMessage(rawMessage)
+
+      Awaitility.await().until { repo.findAll().isNotEmpty() }
+      val savedEvent = repo.findAll().firstOrNull()
+      savedEvent.shouldNotBeNull()
+      savedEvent.eventType.shouldBe(IntegrationEventType.CONTACT_EVENT_CREATED)
+      savedEvent.hmppsId.shouldBe(crn)
+      savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/contact-events/$contactEventId")
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+      strings = [
+        HmppsDomainEventName.ProbabtionCase.MappaInformation.UPDATED,
+        HmppsDomainEventName.ProbabtionCase.MappaExport.TERMINATED,
+        HmppsDomainEventName.ProbabtionCase.MappaInformation.DELETED,
+      ],
+    )
+    fun `will process the domain event and create a CONTACT_EVENT_CHANGED integration event for `(eventType: String) {
+      ProbationIntegrationApiExtension.server.stubGetIfPersonExists(crn)
+      val contactEventId = "1234"
+      val message = """
+      {
+        "eventType": "$eventType",
+        "version": 1,
+        "description": "A contact event",
+        "occurredAt": "2026-01-15T12:33:34+01:00",
+        "additionalInformation": {
+          "contactEventId": $contactEventId,
+          "visorContact": true,
+          "mappaCategoryNumber": 1
+        },
+        "personReference": {
+          "identifiers": [
+            {
+              "type": "CRN", 
+              "value": "$crn"
+             }
+          ]
+        }
+      }
+      """
+      val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+      sendDomainSqsMessage(rawMessage)
+
+      Awaitility.await().until { repo.findAll().isNotEmpty() }
+      val savedEvent = repo.findAll().firstOrNull()
+      savedEvent.shouldNotBeNull()
+      savedEvent.eventType.shouldBe(IntegrationEventType.CONTACT_EVENT_CHANGED)
+      savedEvent.hmppsId.shouldBe(crn)
+      savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/contact-events/$contactEventId")
+    }
+  }
+
   companion object {
     @JvmStatic
     fun educationAssessmentCategoryProvider() = EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES.map { Arguments.of(it) }
