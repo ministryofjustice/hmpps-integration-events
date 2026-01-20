@@ -1028,9 +1028,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
         "description": "A contact event",
         "occurredAt": "2026-01-15T12:33:34+01:00",
         "additionalInformation": {
-          "contactEventId": $contactEventId,
-          "visorContact": true,
-          "mappaCategoryNumber": 1
+          "contactId": $contactEventId,
+          "mappa": {
+            "category": 1
+          }
         },
         "personReference": {
           "identifiers": [
@@ -1071,9 +1072,10 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
         "description": "A contact event",
         "occurredAt": "2026-01-15T12:33:34+01:00",
         "additionalInformation": {
-          "contactEventId": $contactEventId,
-          "visorContact": true,
-          "mappaCategoryNumber": 1
+          "contactId": $contactEventId,
+          "mappa": {
+            "category": 1
+          }
         },
         "personReference": {
           "identifiers": [
