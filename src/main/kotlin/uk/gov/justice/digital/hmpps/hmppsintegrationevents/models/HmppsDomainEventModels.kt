@@ -49,7 +49,7 @@ data class AdditionalInformation(
   @JsonProperty("reason") val reason: String? = null,
   @JsonProperty("removedNomsNumber") val removedNomsNumber: String? = null,
   @JsonProperty("contactId") val contactEventId: String? = null,
-  @JsonProperty("mappa") val mappa: Mappa? = null,
+  @JsonProperty("mapps") val mappa: Mappa? = null,
 ) {
   fun hasMatchingRegistrationType(registerTypeCode: List<String>): Boolean = (
     registerTypeCode.contains(this.registerTypeCode)
