@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.SqsNotificationGeneratingHelper
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.AdditionalInformation
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.Mappa
 
 class DomainEventPredicatesTests {
 
@@ -15,26 +16,20 @@ class DomainEventPredicatesTests {
   }
 
   @Test
-  fun `is not a valid contact event - not a visor contact`() {
-    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(visorContact = false))
-    assertFalse(event.isValidContactEvent())
-  }
-
-  @Test
   fun `is not a valid contact event - no mappa category`() {
-    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(visorContact = true))
+    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation())
     assertFalse(event.isValidContactEvent())
   }
 
   @Test
   fun `is not a valid contact event - not valid mappa category`() {
-    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(visorContact = true, mappaCategoryNumber = 999))
+    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(mappa = Mappa(999)))
     assertFalse(event.isValidContactEvent())
   }
 
   @Test
   fun `is a valid contact event`() {
-    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(visorContact = true, mappaCategoryNumber = 1))
+    val event = SqsNotificationGeneratingHelper().createHmppsDomainEvent().copy(additionalInformation = AdditionalInformation(mappa = Mappa(1)))
     assertTrue(event.isValidContactEvent())
   }
 }

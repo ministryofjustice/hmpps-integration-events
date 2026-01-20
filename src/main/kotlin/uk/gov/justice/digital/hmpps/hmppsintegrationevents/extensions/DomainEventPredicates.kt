@@ -4,6 +4,5 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 
 val mappaCategories = intArrayOf(1, 2, 3, 4)
 
-fun HmppsDomainEvent.isValidContactEvent(): Boolean = additionalInformation?.visorContact == true &&
-  additionalInformation.mappaCategoryNumber != null &&
-  mappaCategories.contains(additionalInformation.mappaCategoryNumber)
+fun HmppsDomainEvent.isValidContactEvent(): Boolean = additionalInformation?.mappa?.category != null &&
+  mappaCategories.contains(additionalInformation.mappa.category)
