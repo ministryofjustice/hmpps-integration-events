@@ -39,6 +39,10 @@ hmpps.sqs:
       queueName: ${MOJ_ESW_QUEUE_NAME}
       queueArn: ${MOJ_ESW_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    ctrlosubscriberqueue:
+      queueName: ${CTRLO_QUEUE_NAME}
+      queueArn: ${CTRLO_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
@@ -70,6 +74,10 @@ hmpps.secret:
     MOJ-ESW:
       secretId: live-hmpps-integration-api-dev-412962aea4333ad8
       queueId: mojeswsubscriberqueue
+    CTRLO:
+      secretId: live-hmpps-integration-api-dev-7111f5a05e9715be
+      queueId: ctrlosubscriberqueue
+
 notifier:
   schedule:
     rate: 10000
@@ -84,3 +92,4 @@ feature-flag:
   prisoner-base-location-changed-notifications-enabled: true
   prisoner-merge-notifications-enabled: true
   contact-events-notifications-enabled: true
+  limited-access-notifications-enabled: true

@@ -64,3 +64,4 @@ feature-flag:
   prisoner-base-location-changed-notifications-enabled: true
   prisoner-merge-notifications-enabled: true
   contact-events-notifications-enabled: true
+  limited-access-notifications-enabled: true

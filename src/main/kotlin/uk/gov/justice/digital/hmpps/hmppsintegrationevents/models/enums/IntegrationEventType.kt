@@ -260,6 +260,11 @@ val EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES = setOf(
   PrisonerChangedCategory.LOCATION.name,
 )
 
+val LIMITED_ACCESS_EVENTS = setOf(
+  HmppsDomainEventName.ProbabtionCase.Exclusion.UPDATED,
+  HmppsDomainEventName.ProbabtionCase.Restriction.UPDATED,
+)
+
 enum class IntegrationEventType(
   val pathTemplate: String,
   val predicate: (HmppsDomainEvent) -> Boolean,
@@ -558,6 +563,11 @@ enum class IntegrationEventType(
       return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation, currentTime)
     }
   },
+  PERSON_ACCESS_LIMITATIONS_CHANGED(
+    "v1/persons/{hmppsId}/access-limitations",
+    { it.eventType in LIMITED_ACCESS_EVENTS },
+    featureFlag = FeatureFlagConfig.LIMITED_ACCESS_NOTIFICATIONS_ENABLED,
+  ),
   ;
 
   open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification = EventNotification(

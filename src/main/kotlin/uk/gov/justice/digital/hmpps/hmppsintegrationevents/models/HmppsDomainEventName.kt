@@ -45,6 +45,12 @@ object HmppsDomainEventName {
     object Cas3Booking {
       const val CREATED = "probation-case.cas3-booking.created"
     }
+    object Exclusion {
+      const val UPDATED = "probation-case.exclusion.updated"
+    }
+    object Restriction {
+      const val UPDATED = "probation-case.restriction.updated"
+    }
   }
 
   object Probation {

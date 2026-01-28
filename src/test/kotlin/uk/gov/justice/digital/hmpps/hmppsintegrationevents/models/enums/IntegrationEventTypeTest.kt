@@ -19,7 +19,7 @@ class IntegrationEventTypeTest {
    */
   @Test
   fun `should have all event types expected`() {
-    val expectedEventTypesHashCode = 1191624591
+    val expectedEventTypesHashCode = -591363030
 
     val actualEventTypesHashCode = IntegrationEventType.entries.map { it.name }.sorted().joinToString(",") { "\"$it\"" }.hashCode()
 
