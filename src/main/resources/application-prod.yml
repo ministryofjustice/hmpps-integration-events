@@ -19,6 +19,10 @@ hmpps.sqs:
       queueName: ${CATS_QUEUE_NAME}
       queueArn: ${CATS_QUEUE_ARN}
       subscribeTopicId: integrationeventtopic
+    ctrlosubscriberqueue:
+      queueName: ${CTRLO_QUEUE_NAME}
+      queueArn: ${CTRLO_QUEUE_ARN}
+      subscribeTopicId: integrationeventtopic
   topics:
     integrationeventtopic:
       arn: ${INTEGRATION_EVENT_TOPIC_ARN}
@@ -34,6 +38,9 @@ hmpps.secret:
     CATS:
       secretId: live-hmpps-integration-api-prod-9ab7539aa5477cdb
       queueId: catssubscriberqueue
+    CTRLO:
+      secretId: live-hmpps-integration-api-prod-285c226974a6e441
+      queueId: ctrlosubscriberqueue
 
 notifier:
   schedule:
@@ -48,3 +55,4 @@ feature-flag:
   prisoner-base-location-changed-notifications-enabled: true
   prisoner-merge-notifications-enabled: false
   contact-events-notifications-enabled: false
+  limited-access-notifications-enabled: false

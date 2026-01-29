@@ -1099,6 +1099,47 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
     }
   }
 
+  @Nested
+  @DisplayName("Restriction and exclusion domain events")
+  inner class GivenRestrictionAndExclusionDomainEvents {
+    @ParameterizedTest
+    @ValueSource(
+      strings = [
+        HmppsDomainEventName.ProbabtionCase.Exclusion.UPDATED,
+        HmppsDomainEventName.ProbabtionCase.Restriction.UPDATED,
+      ],
+    )
+    fun `will process the domain event and create a PERSON_ACCESS_LIMITATIONS_CHANGED integration event for `(eventType: String) {
+      ProbationIntegrationApiExtension.server.stubGetIfPersonExists(crn)
+      val message = """
+      {
+          "eventType": "$eventType",
+          "version": 1,
+          "occurredAt": "2026-01-28T16:55:03.801935166Z",
+          "description": "An exclusion or restriction has been updated in Delius",
+          "additionalInformation": {},
+          "personReference": {
+              "identifiers": [
+                  {
+                      "type": "CRN",
+                      "value": "$crn"
+                  }
+              ]
+          }
+      }
+      """ // language=json
+      val rawMessage = SqsNotificationGeneratingHelper().generateRawDomainEvent(eventType, message)
+      sendDomainSqsMessage(rawMessage)
+
+      Awaitility.await().until { repo.findAll().isNotEmpty() }
+      val savedEvent = repo.findAll().firstOrNull()
+      savedEvent.shouldNotBeNull()
+      savedEvent.eventType.shouldBe(IntegrationEventType.PERSON_ACCESS_LIMITATIONS_CHANGED)
+      savedEvent.hmppsId.shouldBe(crn)
+      savedEvent.url.shouldBe("https://localhost:8443/v1/persons/$crn/access-limitations")
+    }
+  }
+
   companion object {
     @JvmStatic
     fun educationAssessmentCategoryProvider() = EDUCATION_ASSESSMENTS_PRISONER_CHANGED_CATEGORIES.map { Arguments.of(it) }

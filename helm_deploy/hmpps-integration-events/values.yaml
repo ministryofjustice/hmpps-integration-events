@@ -68,6 +68,10 @@ generic-service:
       CATS_QUEUE_NAME: "sqs_name"
       CATS_QUEUE_ARN: "sqs_arn"
       CATS_FILTER_POLICY_SECRET_ID: "cats_filter_policy_secret_id"
+    event-ctrlo-queue:
+      CTRLO_QUEUE_NAME: "sqs_name"
+      CTRLO_QUEUE_ARN: "sqs_arn"
+      CTRLO_FILTER_POLICY_SECRET_ID: "ctrlo_filter_policy_secret_id"
     rds-postgresql-instance-output:
       DB_SERVER: "rds_instance_endpoint"
       DB_NAME: "database_name"
