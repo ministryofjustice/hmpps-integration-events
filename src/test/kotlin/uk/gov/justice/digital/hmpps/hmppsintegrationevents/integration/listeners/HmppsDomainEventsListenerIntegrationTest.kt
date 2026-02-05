@@ -1029,7 +1029,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
         "occurredAt": "2026-01-15T12:33:34+01:00",
         "additionalInformation": {
           "contactId": $contactEventId,
-          "mappa": {
+          "mapps": {
             "category": 1
           }
         },
@@ -1073,7 +1073,7 @@ class HmppsDomainEventsListenerIntegrationTest : SqsIntegrationTestBase() {
         "occurredAt": "2026-01-15T12:33:34+01:00",
         "additionalInformation": {
           "contactId": $contactEventId,
-          "mappa": {
+          "mapps": {
             "category": 1
           }
         },
