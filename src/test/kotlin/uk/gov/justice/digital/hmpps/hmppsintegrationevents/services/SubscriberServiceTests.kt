@@ -327,7 +327,7 @@ class SubscriberServiceTests {
     fun `log exception to telemetry, when fail to obtain authorization configuration`() {
       // Arrange
       val errorMessage = "Error checking filter list"
-      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenThrow(RuntimeException::class.java)
+      whenever(integrationApiGateway.getApiAuthorizationConfig()).thenThrow(RuntimeException("Unauthorised"))
 
       // Act
       subscriberService.checkSubscriberFilterList()
@@ -345,7 +345,7 @@ class SubscriberServiceTests {
       val errorMessage = "Error checking filter list for $client"
       whenever(integrationApiGateway.getApiAuthorizationConfig()).thenReturn(apiResponse)
       // error when getting secret
-      whenever(secretsManagerService.getSecretValue(secretId)).thenThrow(RuntimeException::class.java)
+      whenever(secretsManagerService.getSecretValue(secretId)).thenThrow(RuntimeException("Secret '$secretId' not found."))
 
       // Act
       subscriberService.checkSubscriberFilterList()
