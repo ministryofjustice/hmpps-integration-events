@@ -4,11 +4,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
-  kotlin("plugin.spring") version "2.3.0"
-  kotlin("plugin.jpa") version "2.3.0"
-  kotlin("plugin.lombok") version "2.3.0"
+  kotlin("plugin.spring") version "2.3.10"
+  kotlin("plugin.jpa") version "2.3.10"
+  kotlin("plugin.lombok") version "2.3.10"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlinx.kover") version "0.9.5"
+  id("org.jetbrains.kotlinx.kover") version "0.9.6"
 }
 
 configurations {
@@ -40,14 +40,14 @@ dependencies {
     exclude("org.springframework.security", "spring-security-web")
     exclude("org.apache.common", "commons-compress")
   }
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.31.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.32.0")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
   testImplementation("org.testcontainers:localstack:1.21.4")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.apache.commons:commons-compress:1.28.0")
-  testImplementation("io.kotest:kotest-assertions-json-jvm:6.1.2")
-  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.1.2")
-  testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.2")
+  testImplementation("io.kotest:kotest-assertions-json-jvm:6.1.3")
+  testImplementation("io.kotest:kotest-runner-junit5-jvm:6.1.3")
+  testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.3")
   testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
   testImplementation("com.h2database:h2:2.4.240")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
