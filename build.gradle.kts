@@ -46,7 +46,7 @@ dependencies {
   // Pinning to version 3.4.0 in the meantime
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.2")
   implementation("software.amazon.awssdk:secretsmanager")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3") {
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.0.0") {
     exclude("org.springframework.security", "spring-security-config")
     exclude("org.springframework.security", "spring-security-core")
     exclude("org.springframework.security", "spring-security-crypto")
