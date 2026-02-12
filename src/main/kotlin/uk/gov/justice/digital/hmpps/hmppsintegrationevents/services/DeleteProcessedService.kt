@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -9,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotif
 import java.time.Clock
 import java.time.LocalDateTime
 
+@ConditionalOnProperty("feature-flag.enable-delete-processed-events", havingValue = "true")
 @Service
 @Configuration
 class DeleteProcessedService(
