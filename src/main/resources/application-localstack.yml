@@ -67,3 +67,4 @@ feature-flag:
   limited-access-notifications-enabled: true
   enable-delete-processed-events: true
   enable-publish-pending-events: true
+  enable-domain-events-queue-listener: true

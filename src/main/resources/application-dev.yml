@@ -95,3 +95,4 @@ feature-flag:
   limited-access-notifications-enabled: true
   enable-delete-processed-events: false
   enable-publish-pending-events: true
+  enable-domain-events-queue-listener: true
