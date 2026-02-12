@@ -15,6 +15,19 @@ configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
+configurations.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.apache.logging.log4j") {
+      useVersion("2.25.3")
+      because("Fix CVE-2025-68161")
+    }
+    if (requested.group == "ch.qos.logback") {
+      useVersion("1.5.25")
+      because("Fix CVE-2026-1225")
+    }
+  }
+}
+
 dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.9")
