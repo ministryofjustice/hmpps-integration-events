@@ -66,3 +66,4 @@ feature-flag:
   contact-events-notifications-enabled: true
   limited-access-notifications-enabled: true
   enable-delete-processed-events: true
+  enable-publish-pending-events: true
