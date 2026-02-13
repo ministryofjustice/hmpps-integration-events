@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
@@ -17,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainE
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.util.concurrent.CompletionException
 
+@ConditionalOnProperty("feature-flag.enable-domain-events-queue-listener", havingValue = "true")
 @Service
 @Transactional
 class HmppsDomainEventsListener(
@@ -45,7 +47,7 @@ class HmppsDomainEventsListener(
     }
   }
 
-  fun unwrapSqsExceptions(e: Throwable): Throwable {
+  private fun unwrapSqsExceptions(e: Throwable): Throwable {
     fun unwrap(e: Throwable) = e.cause ?: e
     var cause = e
     if (cause is CompletionException) {
