@@ -91,7 +91,7 @@ class SubscriberService(
     message: String,
     e: Exception,
   ) {
-    log.error(message, e.message)
+    log.error(message, e)
     telemetryService.captureException(RuntimeException(message, e))
   }
 }
