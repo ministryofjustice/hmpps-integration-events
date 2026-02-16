@@ -8,7 +8,7 @@ plugins {
   kotlin("plugin.jpa") version "2.3.10"
   kotlin("plugin.lombok") version "2.3.10"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlinx.kover") version "0.9.6"
+  id("org.jetbrains.kotlinx.kover") version "0.9.7"
 }
 
 configurations {
@@ -30,7 +30,7 @@ configurations.all {
 
 dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.9")
+  runtimeOnly("org.postgresql:postgresql:42.7.10")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
   runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
