@@ -284,8 +284,9 @@ abstract class HmppsDomainEventsListenerTestCase {
     hmppsEventRawMessage: String,
     hmppsId: String,
     expectedNotificationType: IntegrationEventType,
+    nomisNumber: String? = null,
   ) {
-    assumeIdentities(hmppsId = hmppsId)
+    assumeIdentities(hmppsId = hmppsId, nomisNumber = nomisNumber)
     onDomainEventShouldCreateEventNotifications(hmppsEventRawMessage, expectedNotificationType)
   }
 
@@ -316,8 +317,9 @@ abstract class HmppsDomainEventsListenerTestCase {
     verify { deadLetterQueueService wasNot Called }
   }
 
-  protected fun assumeIdentities(hmppsId: String? = null, prisonId: String? = null) {
+  protected fun assumeIdentities(hmppsId: String? = null, prisonId: String? = null, nomisNumber: String? = null) {
     every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
     every { domainEventIdentitiesResolver.getPrisonId(any()) } returns prisonId
+    every { domainEventIdentitiesResolver.getNomisNumber(any()) } returns nomisNumber
   }
 }

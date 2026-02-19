@@ -37,12 +37,14 @@ class HmppsDomainEventService(
     if (integrationEventTypes.isNotEmpty()) {
       val hmppsId = domainEventIdentitiesResolver.getHmppsId(hmppsDomainEvent)
       val prisonId = domainEventIdentitiesResolver.getPrisonId(hmppsDomainEvent)
+      val nomisNumber = domainEventIdentitiesResolver.getNomisNumber(hmppsDomainEvent)
+
       val additionalInformation = hmppsDomainEvent.additionalInformation
 
       for (integrationEventType in integrationEventTypes) {
         try {
           val currentTime = LocalDateTime.now(clock)
-          val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, additionalInformation, currentTime)
+          val eventNotification = integrationEventType.getNotification(baseUrl, hmppsId, prisonId, nomisNumber, additionalInformation, currentTime)
 
           eventNotificationRepository.insertOrUpdate(eventNotification)
         } catch (ume: UnmappableUrlException) {
