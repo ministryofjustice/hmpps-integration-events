@@ -193,9 +193,10 @@ abstract class HmppsDomainEventServiceTestCase {
     hmppsId: String,
   ) = EventNotification(eventType = eventType, hmppsId = hmppsId, url = url, lastModifiedDateTime = currentTime)
 
-  protected fun assumeIdentities(hmppsId: String? = null, prisonId: String? = null) {
+  protected fun assumeIdentities(hmppsId: String? = null, prisonId: String? = null, nomisNumber: String? = null) {
     every { domainEventIdentitiesResolver.getHmppsId(any()) } returns hmppsId
     every { domainEventIdentitiesResolver.getPrisonId(any()) } returns prisonId
+    every { domainEventIdentitiesResolver.getNomisNumber(any()) } returns nomisNumber
   }
 
   protected fun executeShouldSaveEventNotification(

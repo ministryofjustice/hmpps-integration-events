@@ -60,7 +60,7 @@ class DomainEventIdentitiesResolver(
     return null
   }
 
-  private fun getNomisNumber(hmppsEvent: HmppsDomainEvent): String? {
+  fun getNomisNumber(hmppsEvent: HmppsDomainEvent): String? {
     val nomsNumber = hmppsEvent.personReference?.findNomsIdentifier()
       ?: hmppsEvent.additionalInformation?.nomsNumber
       ?: hmppsEvent.additionalInformation?.prisonerId

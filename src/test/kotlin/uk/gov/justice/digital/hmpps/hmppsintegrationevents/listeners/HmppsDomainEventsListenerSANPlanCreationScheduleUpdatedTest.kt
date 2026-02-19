@@ -23,6 +23,7 @@ class HmppsDomainEventsListenerSANPlanCreationScheduleUpdatedTest : HmppsDomainE
       hmppsEventRawMessage = payload,
       hmppsId = nomsNumber,
       expectedNotificationType = IntegrationEventType.SAN_PLAN_CREATION_SCHEDULE_CHANGED,
+      nomisNumber = nomsNumber,
     )
   }
 }

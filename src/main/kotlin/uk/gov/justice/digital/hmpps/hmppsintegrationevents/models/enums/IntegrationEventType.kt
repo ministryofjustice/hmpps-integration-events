@@ -318,19 +318,19 @@ enum class IntegrationEventType(
     { ROSH_TYPES.contains(it.eventType) },
   ),
   PLP_INDUCTION_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/plp-induction-schedule/history",
+    "v1/persons/{nomisNumber}/plp-induction-schedule/history",
     { PLP_INDUCTION_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PLP_REVIEW_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/plp-review-schedule",
+    "v1/persons/{nomisNumber}/plp-review-schedule",
     { PLP_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   SAN_PLAN_CREATION_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/education/san/plan-creation-schedule",
+    "v1/persons/{nomisNumber}/education/san/plan-creation-schedule",
     { SAN_PLAN_CREATION_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   SAN_REVIEW_SCHEDULE_CHANGED(
-    "v1/persons/{hmppsId}/education/san/review-schedule",
+    "v1/persons/{nomisNumber}/education/san/review-schedule",
     { SAN_REVIEW_SCHEDULE_EVENTS.contains(it.eventType) },
   ),
   PERSON_STATUS_CHANGED(
@@ -557,10 +557,10 @@ enum class IntegrationEventType(
     { it.eventType == PrisonOffenderEvents.Prisoner.MERGED },
     featureFlag = FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED,
   ) {
-    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification {
+    override fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, nomisNumber: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification {
       val removedNomisNumber = additionalInformation?.removedNomsNumber ?: throw IllegalStateException("removedNomsNumber is required for PRISONER_MERGED event")
 
-      return super.getNotification(baseUrl, removedNomisNumber, prisonId, additionalInformation, currentTime)
+      return super.getNotification(baseUrl, removedNomisNumber, prisonId, nomisNumber, additionalInformation, currentTime)
     }
   },
   PERSON_ACCESS_LIMITATIONS_CHANGED(
@@ -570,16 +570,24 @@ enum class IntegrationEventType(
   ),
   ;
 
-  open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification = EventNotification(
+  open fun getNotification(baseUrl: String, hmppsId: String?, prisonId: String?, nomisNumber: String?, additionalInformation: AdditionalInformation?, currentTime: LocalDateTime): EventNotification = EventNotification(
     eventType = this,
     hmppsId = hmppsId,
     prisonId = prisonId,
-    url = "$baseUrl/${path(hmppsId, prisonId, additionalInformation)}",
+    url = "$baseUrl/${path(hmppsId, prisonId, nomisNumber, additionalInformation)}",
     lastModifiedDateTime = currentTime,
   )
 
-  protected fun path(hmppsId: String?, prisonId: String?, additionalInformation: AdditionalInformation?): String {
+  protected fun path(hmppsId: String?, prisonId: String?, nomisNumber: String?, additionalInformation: AdditionalInformation?): String {
     var replacedPath = pathTemplate
+
+    if (replacedPath.contains("{nomisNumber}")) {
+      if (nomisNumber == null) {
+        throw NotFoundException("nomisNumber could not be found in domain event message for path $pathTemplate")
+      }
+      replacedPath = replacedPath.replace("{nomisNumber}", nomisNumber)
+    }
+
     if (replacedPath.contains("{hmppsId}")) {
       if (hmppsId == null) {
         throw NotFoundException("Identifier could not be found in domain event message for path $pathTemplate")

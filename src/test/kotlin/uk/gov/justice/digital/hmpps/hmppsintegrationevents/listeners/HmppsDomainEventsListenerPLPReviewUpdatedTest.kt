@@ -23,6 +23,7 @@ class HmppsDomainEventsListenerPLPReviewUpdatedTest : HmppsDomainEventsListenerT
       hmppsEventRawMessage = payload,
       hmppsId = nomsNumber,
       expectedNotificationType = IntegrationEventType.PLP_REVIEW_SCHEDULE_CHANGED,
+      nomisNumber = nomsNumber,
     )
   }
 }
