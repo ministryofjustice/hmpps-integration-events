@@ -82,7 +82,7 @@ hmpps.secret:
       secretId: live-hmpps-integration-api-dev-7111f5a05e9715be
       queueId: ctrlosubscriberqueue
     DASO:
-      secretId: live-hmpps-integration-api-dev-11e1a9d06fbf9df7"
+      secretId: live-hmpps-integration-api-dev-11e1a9d06fbf9df7
       queueId: dasosubscriberqueue
 
 notifier:
