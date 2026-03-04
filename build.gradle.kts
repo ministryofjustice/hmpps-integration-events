@@ -7,12 +7,15 @@ plugins {
   kotlin("plugin.spring") version "2.3.10"
   kotlin("plugin.jpa") version "2.3.10"
   kotlin("plugin.lombok") version "2.3.10"
-  id("io.gitlab.arturbosch.detekt") version "1.23.8"
+  id("dev.detekt") version "2.0.0-alpha.2"
   id("org.jetbrains.kotlinx.kover") version "0.9.7"
 }
 
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
+  all {
+    exclude(group = "dev.detekt", module = "detekt-report-checkstyle")
+  }
 }
 
 configurations.all {
@@ -23,6 +26,10 @@ configurations.all {
     }
     if (requested.group == "ch.qos.logback") {
       useVersion("1.5.25")
+      because("Fix CVE-2026-1225")
+    }
+    if (requested.group == "org.apache.tomcat.embed") {
+      useVersion("10.1.52")
       because("Fix CVE-2026-1225")
     }
   }
@@ -98,10 +105,6 @@ tasks {
       freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
   }
-
-  withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    source = source.asFileTree
-  }
 }
 
 detekt {
@@ -114,10 +117,7 @@ detekt {
 configurations.matching { it.name == "detekt" }.all {
   resolutionStrategy.eachDependency {
     if (requested.group == "org.jetbrains.kotlin") {
-      useVersion(
-        io.gitlab.arturbosch.detekt
-          .getSupportedKotlinVersion(),
-      )
+      useVersion("2.3.0")
     }
   }
 }
