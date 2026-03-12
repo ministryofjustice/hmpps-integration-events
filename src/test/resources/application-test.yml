@@ -48,7 +48,33 @@ hmpps.sqs:
       queueName: subcriber_test_queue
       dlqName: subcriber_test_queue_dlq
       subscribeTopicId: integrationeventtopic
+    subscribertestqueue2:hmpps.sqs:
+  provider: localstack
+  localstackUrl: http://localhost:4566
+  useWebToken: false
+  queues:
+    hmppsdomainqueue:
+      queueName: hmpps_integrations_events_queue
+      queueArn: arn:aws:sns:eu-west-2:000000000000:hmpps_integrations_events_queue
+      dlqName: hmpps_integrations_events_queue_dlq
+      subscribeTopicId: domainevents
+    integrationeventtestqueue:
+      queueName: integration_event_test_queue
+      dlqName: integration_event_test_queue_dlq
+      subscribeTopicId: integrationeventtopic
+    subscribertestqueue:
+      queueName: subcriber_test_queue
+      dlqName: subcriber_test_queue_dlq
+      subscribeTopicId: integrationeventtopic
     subscribertestqueue2:
+      queueName: subcriber_test_queue2
+      dlqName: subcriber_test_queue2_dlq
+      subscribeTopicId: integrationeventtopic
+  topics:
+    domainevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:hmpps_domain_events
+    integrationeventtopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:integration_event_topic
       queueName: subcriber_test_queue2
       dlqName: subcriber_test_queue2_dlq
       subscribeTopicId: integrationeventtopic
