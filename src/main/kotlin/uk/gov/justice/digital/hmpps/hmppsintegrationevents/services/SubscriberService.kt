@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthoris
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
-
 @ConditionalOnProperty("feature-flag.enable-subscription-filter-policy-updater", havingValue = "true")
 @Service
 class SubscriberService(
