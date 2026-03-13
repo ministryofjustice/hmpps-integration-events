@@ -89,3 +89,4 @@ feature-flag:
   enable-delete-processed-events: true
   enable-publish-pending-events: true
   enable-domain-events-queue-listener: true
+  enable-subscription-filter-policy-updater: true
