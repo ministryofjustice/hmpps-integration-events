@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.HmppsSecretManagerProperties
@@ -13,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.ConfigAuthoris
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.SubscriberFilterList
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
+@ConditionalOnProperty("feature-flag.enable-subscription-filter-policy-updater", havingValue = "true")
 @Service
 class SubscriberService(
   private val integrationApiGateway: IntegrationApiGateway,
