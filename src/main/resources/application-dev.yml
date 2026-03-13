@@ -94,6 +94,6 @@ feature-flag:
   contact-events-notifications-enabled: true
   limited-access-notifications-enabled: true
   enable-delete-processed-events: false
-  enable-publish-pending-events: true
+  enable-publish-pending-events: false
   enable-domain-events-queue-listener: false
   enable-subscription-filter-policy-updater: true
