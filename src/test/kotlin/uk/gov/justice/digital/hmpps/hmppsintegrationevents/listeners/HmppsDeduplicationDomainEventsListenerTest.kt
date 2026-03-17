@@ -23,10 +23,10 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DomainEventIdentitiesResolver
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.FeatureFlagTestConfig
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDeduplicationDomainEventService
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -255,7 +255,15 @@ abstract class HmppsDomainEventsListenerTestCase {
   protected val telemetryService = mockk<TelemetryService>()
 
   protected val featureFlagTestConfig = FeatureFlagTestConfig()
-  protected val hmppsDomainEventService = HmppsDomainEventService(eventNotificationRepository, deadLetterQueueService, domainEventIdentitiesResolver, baseUrl, testClock, featureFlagTestConfig.featureFlagConfig)
+
+  protected val hmppsDomainEventService = HmppsDeduplicationDomainEventService(
+    eventNotificationRepository,
+    domainEventIdentitiesResolver,
+    baseUrl,
+    testClock,
+    featureFlagTestConfig.featureFlagConfig
+  )
+
   protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService, telemetryService)
 
   @BeforeEach
@@ -267,6 +275,8 @@ abstract class HmppsDomainEventsListenerTestCase {
       FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED,
     )
     enabledFeatureFlags.forEach { featureFlagTestConfig.assumeFeatureFlag(it, true) }
+
+    featureFlagTestConfig.assumeFeatureFlag(FeatureFlagConfig.DEDUPLICATE_EVENTS, true)
 
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
 

@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.HmppsDomainEventService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDomainEventService
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
 import java.util.concurrent.CompletionException
 

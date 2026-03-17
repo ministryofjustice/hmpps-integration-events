@@ -97,3 +97,4 @@ feature-flag:
   enable-publish-pending-events: false
   enable-domain-events-queue-listener: false
   enable-subscription-filter-policy-updater: true
+  deduplicate-events: false
