@@ -46,7 +46,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   private val crn = "X777776"
 
   @Test
-  fun `when risk-assessment scores determined event is received, it should create event notification RISK_SCORE_CHANGED`() {
+  fun `when risk-assessment scores determined event is received, it should send event notification RISK_SCORE_CHANGED`() {
     val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithoutRegisterType(
       eventType = "risk-assessment.scores.determined",
       messageEventType = "risk-assessment.scores.ogrs.determined",
@@ -127,7 +127,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   }
 
   @Test
-  fun `when a valid registration added sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+  fun `when a valid registration added sqs event is received, it should send event notification MAPPA_DETAIL_CHANGED`() {
     val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
     val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
     assumeIdentities(hmppsId = crn)
@@ -136,7 +136,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   }
 
   @Test
-  fun `when a valid registration updated sqs event is received, it should create event notification MAPPA_DETAIL_CHANGED`() {
+  fun `when a valid registration updated sqs event is received, it should send event notification MAPPA_DETAIL_CHANGED`() {
     val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent("probation-case.registration.updated")
     val expectedNotificationType = IntegrationEventType.MAPPA_DETAIL_CHANGED
     assumeIdentities(hmppsId = crn)
@@ -145,7 +145,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   }
 
   @Test
-  fun `when an invalid SQS message (domain event) is received it should not create notification`() {
+  fun `when an invalid SQS message (domain event) is received it should not send notification`() {
     val rawMessage = "Invalid JSON message"
 
     assertThrows<JsonParseException> { hmppsDomainEventsListener.onDomainEvent(rawMessage) }
@@ -154,7 +154,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   }
 
   @Test
-  fun `when an unexpected event type is received, it should not create event notification`() {
+  fun `when an unexpected event type is received, it should not send event notification`() {
     val unexpectedEventType = "unexpected.event.type"
     val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent(eventType = unexpectedEventType)
     assumeIdentities(hmppsId = crn)
@@ -171,7 +171,6 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   fun `when alert event matches multiple filters using generator, both services should be called`() {
     val hmppsEventRawMessage = sqsNotificationHelper.generateRawHmppsDomainEventWithAlertCode(eventType = "person.alert.created", alertCode = "HA")
     val expectedNotificationTypes = arrayOf(
-      IntegrationEventType.PERSON_PND_ALERTS_CHANGED,
       IntegrationEventType.PERSON_ALERTS_CHANGED,
     )
     assumeIdentities(hmppsId = crn)
@@ -231,7 +230,7 @@ class HmppsDirectDomainEventsListenerTest : HmppsDirectDomainEventsListenerTestC
   }
 
   @Test
-  fun `when a valid SQS message (domain event) is received it should create notification`() {
+  fun `when a valid SQS message (domain event) is received it should send notification`() {
     val rawMessage = sqsNotificationHelper.generateRawHmppsDomainEvent()
     val expectedEvent = IntegrationEventType.MAPPA_DETAIL_CHANGED
     assumeIdentities(hmppsId = crn)
