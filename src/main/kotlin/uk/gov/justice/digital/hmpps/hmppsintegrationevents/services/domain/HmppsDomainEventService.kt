@@ -1,14 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 
 interface HmppsDomainEventService {
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+  val log: Logger
+    get() = LoggerFactory.getLogger(this::class.java)
+
 
   fun execute(hmppsDomainEvent: HmppsDomainEvent)
 

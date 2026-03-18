@@ -42,6 +42,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
   private val featureFlags = mapOf(
     FeatureFlagConfig.PERSON_LANGUAGES_CHANGED_NOTIFICATIONS_ENABLED to false,
     FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED to true,
+    FeatureFlagConfig.DEDUPLICATE_EVENTS to true,
   )
   private val featureFlagTestConfig: FeatureFlagTestConfig = FeatureFlagTestConfig()
   private val hmppsId = "AA1234A"

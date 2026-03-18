@@ -26,7 +26,7 @@ class HmppsDirectDomainEventService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  protected val log: Logger get() = Companion.log
+  override val log: Logger get() = Companion.log
 
   override fun execute(hmppsDomainEvent: HmppsDomainEvent) {
     // Matching domain event to integration event type(s)
