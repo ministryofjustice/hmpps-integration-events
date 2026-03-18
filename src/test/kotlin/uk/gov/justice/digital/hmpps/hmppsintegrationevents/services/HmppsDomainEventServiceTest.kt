@@ -180,11 +180,11 @@ abstract class HmppsDomainEventServiceTestCase {
   }
 
   protected open fun createHmppsDomainEventService() = HmppsDeduplicationDomainEventService(
-      eventNotificationRepository,
-      domainEventIdentitiesResolver,
-      baseUrl,
-      testClock,
-      featureFlagConfig,
+    eventNotificationRepository,
+    domainEventIdentitiesResolver,
+    baseUrl,
+    testClock,
+    featureFlagConfig,
   )
 
   protected fun generateEventNotification(

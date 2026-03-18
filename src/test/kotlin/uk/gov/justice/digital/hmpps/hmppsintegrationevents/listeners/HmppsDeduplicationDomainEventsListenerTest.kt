@@ -23,9 +23,9 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.integration.helpers.S
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.DeadLetterQueueService
-import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.FeatureFlagTestConfig
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.TelemetryService
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.DomainEventIdentitiesResolver
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDeduplicationDomainEventService
 import java.time.Clock
 import java.time.LocalDateTime
@@ -261,7 +261,7 @@ abstract class HmppsDomainEventsListenerTestCase {
     domainEventIdentitiesResolver,
     baseUrl,
     testClock,
-    featureFlagTestConfig.featureFlagConfig
+    featureFlagTestConfig.featureFlagConfig,
   )
 
   protected val hmppsDomainEventsListener = HmppsDomainEventsListener(hmppsDomainEventService, deadLetterQueueService, telemetryService)

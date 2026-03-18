@@ -9,8 +9,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.GetPrisonIdS
 
 @Service
 class DomainEventIdentitiesResolver(
-    @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
-    @Autowired val getPrisonIdService: GetPrisonIdService,
+  @Autowired val probationIntegrationApiGateway: ProbationIntegrationApiGateway,
+  @Autowired val getPrisonIdService: GetPrisonIdService,
 ) {
 
   /**

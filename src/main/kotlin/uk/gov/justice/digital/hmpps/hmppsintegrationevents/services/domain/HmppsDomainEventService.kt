@@ -10,7 +10,6 @@ interface HmppsDomainEventService {
   val log: Logger
     get() = LoggerFactory.getLogger(this::class.java)
 
-
   fun execute(hmppsDomainEvent: HmppsDomainEvent)
 
   /**
@@ -23,11 +22,11 @@ interface HmppsDomainEventService {
    * - IntegrationEventTypes that reference a feature flag that does not exist are disabled,
    *      * and an error is logged with the name of the event and the name of the flag
    */
-  fun filterEventTypes(hmppsEvent: HmppsDomainEvent, featureFlagConfig: FeatureFlagConfig,) = IntegrationEventType.entries
+  fun filterEventTypes(hmppsEvent: HmppsDomainEvent, featureFlagConfig: FeatureFlagConfig) = IntegrationEventType.entries
     .filter { isNotDisabled(it, featureFlagConfig) }
     .filter { it.predicate.invoke(hmppsEvent) }
 
-  private fun isNotDisabled(eventType: IntegrationEventType, featureFlagConfig: FeatureFlagConfig,): Boolean {
+  private fun isNotDisabled(eventType: IntegrationEventType, featureFlagConfig: FeatureFlagConfig): Boolean {
     // Filter event types per feature flag, if associated with
     return eventType.featureFlag?.let { feature ->
       // i) enabled or disabled according to the defined feature flag;

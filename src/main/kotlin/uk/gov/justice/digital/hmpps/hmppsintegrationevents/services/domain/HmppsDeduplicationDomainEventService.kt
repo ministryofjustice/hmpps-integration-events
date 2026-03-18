@@ -16,11 +16,11 @@ import java.time.LocalDateTime
 @ConditionalOnProperty("feature-flag.${FeatureFlagConfig.DEDUPLICATE_EVENTS}", havingValue = "true")
 @Service
 class HmppsDeduplicationDomainEventService(
-    @Autowired val eventNotificationRepository: EventNotificationRepository,
-    @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
-    @Value("\${services.integration-api.url}") val baseUrl: String,
-    private val clock: Clock,
-    private val featureFlagConfig: FeatureFlagConfig,
+  @Autowired val eventNotificationRepository: EventNotificationRepository,
+  @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
+  @Value("\${services.integration-api.url}") val baseUrl: String,
+  private val clock: Clock,
+  private val featureFlagConfig: FeatureFlagConfig,
 ) : HmppsDomainEventService {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

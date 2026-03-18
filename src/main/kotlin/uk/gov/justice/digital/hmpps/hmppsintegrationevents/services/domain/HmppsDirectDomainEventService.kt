@@ -18,11 +18,11 @@ import java.time.LocalDateTime
 @ConditionalOnBean(IntegrationEventTopicService::class)
 @Service
 class HmppsDirectDomainEventService(
-    @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
-    @Value("\${services.integration-api.url}") val baseUrl: String,
-    private val clock: Clock,
-    private val featureFlagConfig: FeatureFlagConfig,
-    private val integrationEventTopicService: IntegrationEventTopicService,
+  @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
+  @Value("\${services.integration-api.url}") val baseUrl: String,
+  private val clock: Clock,
+  private val featureFlagConfig: FeatureFlagConfig,
+  private val integrationEventTopicService: IntegrationEventTopicService,
 ) : HmppsDomainEventService {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
