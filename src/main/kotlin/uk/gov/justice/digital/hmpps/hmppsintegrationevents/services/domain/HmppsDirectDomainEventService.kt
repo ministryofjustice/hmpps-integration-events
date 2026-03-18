@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagConfig
@@ -14,6 +15,7 @@ import java.time.Clock
 import java.time.LocalDateTime
 
 @ConditionalOnProperty("feature-flag.${FeatureFlagConfig.DEDUPLICATE_EVENTS}", havingValue = "false")
+@ConditionalOnBean(IntegrationEventTopicService::class)
 @Service
 class HmppsDirectDomainEventService(
     @Autowired val domainEventIdentitiesResolver: DomainEventIdentitiesResolver,
