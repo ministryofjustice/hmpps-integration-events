@@ -31,6 +31,7 @@ data class FeatureFlagConfig(
     const val PRISONER_BASE_LOCATION_CHANGED_NOTIFICATIONS_ENABLED = "prisoner-base-location-changed-notifications-enabled"
     const val CONTACT_EVENTS_NOTIFICATIONS_ENABLED = "contact-events-notifications-enabled"
     const val LIMITED_ACCESS_NOTIFICATIONS_ENABLED = "limited-access-notifications-enabled"
+    const val DEDUPLICATE_EVENTS = "deduplicate-events"
   }
 
   /**

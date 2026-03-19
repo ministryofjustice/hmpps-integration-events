@@ -1,10 +1,11 @@
-package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
+package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.gateway.ProbationIntegrationApiGateway
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.GetPrisonIdService
 
 @Service
 class DomainEventIdentitiesResolver(

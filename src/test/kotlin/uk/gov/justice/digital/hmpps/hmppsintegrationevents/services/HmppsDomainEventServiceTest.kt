@@ -21,6 +21,8 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEve
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.EventNotificationRepository
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.DomainEventIdentitiesResolver
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDeduplicationDomainEventService
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -166,7 +168,6 @@ abstract class HmppsDomainEventServiceTestCase {
   protected open val featureFlagConfig get() = FeatureFlagConfig()
 
   protected val eventNotificationRepository = mockk<EventNotificationRepository>()
-  protected val deadLetterQueueService = mockk<DeadLetterQueueService>()
   protected val domainEventIdentitiesResolver = mockk<DomainEventIdentitiesResolver>()
 
   protected val hmppsDomainEventService by lazy { createHmppsDomainEventService() }
@@ -178,9 +179,8 @@ abstract class HmppsDomainEventServiceTestCase {
     every { eventNotificationRepository.insertOrUpdate(any()) } returnsArgument 0
   }
 
-  protected open fun createHmppsDomainEventService() = HmppsDomainEventService(
+  protected open fun createHmppsDomainEventService() = HmppsDeduplicationDomainEventService(
     eventNotificationRepository,
-    deadLetterQueueService,
     domainEventIdentitiesResolver,
     baseUrl,
     testClock,

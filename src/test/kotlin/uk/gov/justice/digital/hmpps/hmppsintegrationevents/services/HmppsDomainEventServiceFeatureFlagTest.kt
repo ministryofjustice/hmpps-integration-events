@@ -13,9 +13,10 @@ import uk.gov.justice.digital.hmpps.hmppsintegrationevents.config.FeatureFlagCon
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.models.enums.IntegrationEventType
 import uk.gov.justice.digital.hmpps.hmppsintegrationevents.repository.model.data.EventNotification
+import uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDeduplicationDomainEventService
 
 /**
- * Tests of [HmppsDomainEventService] with feature flags [FeatureFlagTestConfig]
+ * Tests of [uk.gov.justice.digital.hmpps.hmppsintegrationevents.services.domain.HmppsDomainEventService] with feature flags [FeatureFlagTestConfig]
  *
  * To test around:
  * - IntegrationEventTypes can have a feature flag name associated with them
@@ -41,6 +42,7 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
   private val featureFlags = mapOf(
     FeatureFlagConfig.PERSON_LANGUAGES_CHANGED_NOTIFICATIONS_ENABLED to false,
     FeatureFlagConfig.PRISONER_MERGED_NOTIFICATIONS_ENABLED to true,
+    FeatureFlagConfig.DEDUPLICATE_EVENTS to true,
   )
   private val featureFlagTestConfig: FeatureFlagTestConfig = FeatureFlagTestConfig()
   private val hmppsId = "AA1234A"
@@ -49,9 +51,8 @@ class HmppsDomainEventServiceFeatureFlagTest : HmppsDomainEventServiceTestCase()
 
   override val featureFlagConfig get() = featureFlagTestConfig.featureFlagConfig
 
-  override fun createHmppsDomainEventService() = object : HmppsDomainEventService(
+  override fun createHmppsDomainEventService() = object : HmppsDeduplicationDomainEventService(
     eventNotificationRepository,
-    deadLetterQueueService,
     domainEventIdentitiesResolver,
     baseUrl,
     testClock,
