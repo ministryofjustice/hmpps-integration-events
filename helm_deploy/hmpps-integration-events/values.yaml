@@ -3,7 +3,7 @@ generic-service:
   serviceAccountName: hmpps-integration-event
   productId: "DPS071" # productId for the product that this belongs too, i.e. DPS001, see README.md for details
 
-  replicaCount: 4
+  replicaCount: 0
 
   image:
     repository: quay.io/hmpps/hmpps-integration-events
