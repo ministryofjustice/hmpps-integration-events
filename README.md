@@ -1,5 +1,7 @@
 # hmpps-integration-events
 
+>## THIS REPOSITORY IS ARCHIVED AND IS NO LONGER IN USE
+
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/ministryofjustice/hmpps-integration-events/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/ministryofjustice/hmpps-integration-events/tree/main)
 [![repo standards badge](https://img.shields.io/badge/endpoint.svg?&style=flat&logo=github&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fhmpps-integration-events)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-report/hmpps-integration-events "Link to report")
 [![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-integration-events)
