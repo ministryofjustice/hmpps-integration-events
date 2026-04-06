@@ -15,7 +15,7 @@ jobs:
           distribution: 'temurin'
           java-version: 21
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Run ktlintCheck
         run: make lint
   helm_lint:
@@ -39,7 +39,7 @@ jobs:
           distribution: 'temurin'
           java-version: 21
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Run detekt
         run: ./gradlew detekt
       - name: Upload raw test reports on failure
@@ -67,7 +67,7 @@ jobs:
           distribution: 'temurin'
           java-version: 21
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Serve Dependencies
         run: docker compose up --build -d --wait
       - name: Run Unit Tests
